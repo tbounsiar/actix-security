@@ -1,0 +1,12 @@
+[package]
+name = "actix-security-core"
+version = "0.1.0"
+authors = ["tahar.bounsiar <tahar.bounsiar@engie.com>"]
+edition = "2018"
+
+[lib]
+name = "actix_security_core"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]

@@ -1,30 +1,16 @@
-pub trait AuthenticationManager {}
+use crate::http::security::user::User;
 
-pub trait SecurityManager {}
-
-pub trait SecurityConfigurer<A: AuthenticationManager, S: SecurityManager> {
-    fn configure_authentication_manager() -> A;
-
-    fn configure_security() -> S;
+pub trait Authenticator {
+    fn get_user(username: &'static str, password: &'static str) -> Option<User>;
 }
 
-struct SM;
+pub trait Authorizer {
+    fn authorize(user: &User) -> bool;
+}
 
-impl SecurityManager for SM {}
+pub trait SecurityConfigurator<A: Authenticator, S: Authorizer> {
+    fn configure_authenticator() -> A;
 
-struct AM;
-
-impl AuthenticationManager for AM {}
-
-struct SC;
-
-impl SecurityConfigurer<AM, SM> for SC {
-    fn configure_authentication_manager() -> AM {
-        AM {}
-    }
-
-    fn configure_security() -> SM {
-        SM {}
-    }
+    fn configure_authorizer() -> S;
 }
 

@@ -1,12 +1,12 @@
 pub struct User {
-    username: String,
-    password: String,
-    roles: Vec<String>,
-    authorities: Vec<String>,
+    username: &'static str,
+    password: &'static str,
+    roles: Vec<&'static str>,
+    authorities: Vec<&'static str>,
 }
 
 impl User {
-    pub fn new(username: String, password: String) -> User {
+    pub fn new(username: &'static str, password: &'static str) -> User {
         User {
             username,
             password,
@@ -15,11 +15,15 @@ impl User {
         }
     }
 
-    pub fn get_username(self) -> String {
+    pub fn get_username(self) -> &'static str {
         self.username
     }
 
-    pub fn roles(&mut self, roles: Vec<String>) -> User {
+    pub fn get_password(self) -> &'static str {
+        self.password
+    }
+
+    pub fn roles(&mut self, roles: Vec<&'static str>) -> User {
         for role in roles {
             if self.roles.contains(&role) {
                 continue;
@@ -29,7 +33,7 @@ impl User {
         self;
     }
 
-    pub fn authorities(&mut self, authorities: Vec<String>) -> User {
+    pub fn authorities(&mut self, authorities: Vec<&'static str>) -> User {
         for authority in authorities {
             if self.authorities.contains(&authority) {
                 continue;

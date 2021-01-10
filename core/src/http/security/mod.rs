@@ -1,9 +1,7 @@
-pub use authorization::Authorization;
-pub use authorization::Authorize;
-pub use authorize_requests::AuthorizeRequests;
+pub use user::User;
 
-mod authorization;
-mod authorize_requests;
 mod config;
 mod user;
+pub mod middleware;
+pub mod web;
 

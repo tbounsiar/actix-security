@@ -24,23 +24,41 @@ impl User {
         &self.password
     }
 
-    pub fn roles(&mut self, roles: Vec<String>) -> &mut User {
+    pub fn roles(mut self, roles: &[String]) -> User {
         for role in roles {
-            if self.roles.contains(&role) {
+            if self.roles.contains(role) {
                 continue;
             }
-            self.roles.push(role);
+            self.roles.push(String::from(role));
         }
         self
     }
 
-    pub fn authorities(&mut self, authorities: Vec<String>) -> &mut User {
+    pub fn authorities(mut self, authorities: &[String]) -> User {
         for authority in authorities {
-            if self.authorities.contains(&authority) {
+            if self.authorities.contains(authority) {
                 continue;
             }
-            self.authorities.push(authority);
+            self.authorities.push(String::from(authority));
         }
         self
+    }
+
+    pub fn has_roles(self, roles: Vec<String>) -> bool {
+        for role in roles {
+            if self.roles.contains(&role) {
+                return true;
+            }
+        }
+        false
+    }
+
+    pub fn has_authority(self, authorities: Vec<String>) -> bool {
+        for authority in authorities {
+            if self.authorities.contains(&authority) {
+                return true;
+            }
+        }
+        false
     }
 }

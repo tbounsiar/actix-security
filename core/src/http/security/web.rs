@@ -7,23 +7,24 @@ use actix_web::body::Body;
 use actix_web::dev::{ResourcePath, ServiceRequest, ServiceResponse};
 use futures::future::{Either, ok, Ready};
 use futures::Future;
+use regex::Regex;
 
 use crate::http::security::config::{Authenticator, Authorizer};
 use crate::http::security::middleware::{SecurityService, SecurityTransform};
 use crate::http::security::user::User;
 
-pub struct WebAuthenticator {
+pub struct MemoryAuthenticator {
     users: HashMap<String, User>
 }
 
-impl WebAuthenticator {
+impl MemoryAuthenticator {
     pub fn new() -> Self {
-        WebAuthenticator {
+        MemoryAuthenticator {
             users: HashMap::new()
         }
     }
 
-    pub fn with_user(mut self, user: User) -> WebAuthenticator {
+    pub fn with_user(mut self, user: User) -> MemoryAuthenticator {
         let user_name = user.get_username();
         match self.users.get(user_name) {
             Some(us) => {
@@ -37,7 +38,7 @@ impl WebAuthenticator {
     }
 }
 
-impl Authenticator for WebAuthenticator {
+impl Authenticator for MemoryAuthenticator {
     fn get_user(&self, req: &ServiceRequest) -> Option<&User> {
         let mut user: Option<&User> = None;
         match req.headers().get("user_name") {
@@ -59,21 +60,41 @@ impl Authenticator for WebAuthenticator {
     }
 }
 
-
-pub struct WebAuthorizer {
-    login_path: &'static str,
+pub struct RequestMatcherAuthorizer {
+    login_url: &'static str,
+    matchers: HashMap<String, Access>,
 }
 
-impl WebAuthorizer {
+impl RequestMatcherAuthorizer {
     pub fn new() -> Self {
-        WebAuthorizer { login_path: "/login" }
+        RequestMatcherAuthorizer { login_url: "/login", matchers: HashMap::new() }
+    }
+
+    pub fn add_matcher(mut self, url_regex: &'static str, access: Access) -> Self {
+        self.matchers.insert(String::from(url_regex), access);
+        self
+    }
+
+    pub fn login_url(mut self, url: &'static str) -> Self {
+        self.login_url == url;
+        self
+    }
+
+    pub fn matchs(&self, path: &str) -> Option<&Access> {
+        for matcher in &self.matchers {
+            let re = Regex::new(matcher.0.as_str()).unwrap();
+            if re.is_match(path) {
+                return Some(matcher.1);
+            }
+        }
+        None
     }
 }
 
 impl<
     Serv,
     Body
-> Authorizer<Serv> for WebAuthorizer
+> Authorizer<Serv> for RequestMatcherAuthorizer
     where
         Serv: Service<Request=ServiceRequest, Response=ServiceResponse<Body>, Error=Error>,
         Serv::Future: 'static,
@@ -86,7 +107,7 @@ impl<
         let path = req.path();
         match user {
             Some(u) => {
-                if path == self.login_path {
+                if path == self.login_url {
                     return Either::Right(ok(req.into_response(
                         HttpResponse::Found()
                             .header(http::header::LOCATION, "/")
@@ -94,15 +115,28 @@ impl<
                             .into_body(),
                     )));
                 }
-                Either::Left(service.call(req))
+                match self.matchs(path) {
+                    Some(access) => {
+                        if u.has_authority(access.authorities) || u.has_roles(access.roles) {
+                            return Either::Left(service.call(req));
+                        }
+                    }
+                    None => {}
+                }
+                Either::Right(ok(
+                    req.into_response(
+                        HttpResponse::Forbidden()
+                            .finish()
+                            .into_body()
+                    )))
             }
             None => {
-                if path == self.login_path {
+                if path == self.login_url {
                     Either::Left(service.call(req))
                 } else {
                     Either::Right(ok(req.into_response(
                         HttpResponse::Found()
-                            .header(http::header::LOCATION, self.login_path)
+                            .header(http::header::LOCATION, self.login_url)
                             .finish()
                             .into_body(),
                     )))
@@ -112,24 +146,36 @@ impl<
     }
 }
 
-fn authenticator() -> WebAuthenticator {
-    WebAuthenticator::new()
+pub struct Access {
+    roles: Vec<String>,
+    authorities: Vec<String>,
 }
 
-fn authorizer() -> WebAuthorizer {
-    WebAuthorizer::new()
-}
+impl Access {
+    pub fn new() -> Self {
+        Access {
+            roles: Vec::new(),
+            authorities: Vec::new(),
+        }
+    }
 
-// pub fn web_security_transform<S>() -> SecurityTransform<
-//     WebAuthenticator,
-//     WebAuthorizer,
-//     S
-// >
-//     where
-//         S: Service<Request=ServiceRequest, Response=ServiceResponse<Body>, Error=Error>,
-//         S::Future: 'static
-// {
-//     SecurityTransform::new()
-//         .config_authenticator(authenticator)
-//         .config_authorizer(authorizer)
-// }
+    pub fn roles(mut self, roles: Vec<&str>) -> Access {
+        for role in roles {
+            if self.roles.contains(&String::from(role)) {
+                continue;
+            }
+            self.roles.push(String::from(role));
+        }
+        self
+    }
+
+    pub fn authorities(mut self, authorities: Vec<&str>) -> Access {
+        for authority in authorities {
+            if self.authorities.contains(&String::from(authority)) {
+                continue;
+            }
+            self.authorities.push(String::from(authority));
+        }
+        self
+    }
+}

@@ -7,6 +7,8 @@ use actix_web::body::Body;
 use actix_web::dev::{ResourcePath, ServiceRequest, ServiceResponse};
 use futures::future::{Either, ok, Ready};
 use futures::Future;
+use rand::{Rng, thread_rng};
+use rand::distributions::Alphanumeric;
 use regex::Regex;
 
 use crate::http::security::config::{Authenticator, Authorizer};
@@ -14,13 +16,15 @@ use crate::http::security::middleware::{SecurityService, SecurityTransform};
 use crate::http::security::user::User;
 
 pub struct MemoryAuthenticator {
-    users: HashMap<String, User>
+    users: HashMap<String, User>,
+    logged_users: HashMap<String, String>,
 }
 
 impl MemoryAuthenticator {
     pub fn new() -> Self {
         MemoryAuthenticator {
-            users: HashMap::new()
+            users: HashMap::new(),
+            logged_users: HashMap::new(),
         }
     }
 
@@ -35,6 +39,37 @@ impl MemoryAuthenticator {
             }
         }
         self
+    }
+
+    pub fn login(&mut self, user_name: String, password: String) -> Option<String> {
+        match self.users.get(&user_name) {
+            Some(u) => {
+                if String::from(u.get_password()) == password {
+                    let id: String = thread_rng()
+                        .sample_iter(&Alphanumeric)
+                        .take(30)
+                        .map(char::from)
+                        .collect();
+                    self.logged_users.insert(id.clone(), user_name);
+                    return Some(id);
+                }
+                None
+            }
+            None => None
+        }
+    }
+
+    pub fn logout(&mut self, id: String) {
+        self.logged_users.remove(&id);
+    }
+}
+
+impl Clone for MemoryAuthenticator {
+    fn clone(&self) -> MemoryAuthenticator {
+        MemoryAuthenticator {
+            logged_users: self.logged_users.iter().map(|km| (String::from(km.0), String::from(km.1))).collect::<>(),
+            users: self.users.iter().map(|km| (String::from(km.0), km.1)).collect()
+        }
     }
 }
 
@@ -117,7 +152,7 @@ impl<
                 }
                 match self.matchs(path) {
                     Some(access) => {
-                        if u.has_authority(access.authorities) || u.has_roles(access.roles) {
+                        if u.has_authority(&access.authorities) || u.has_roles(&access.roles) {
                             return Either::Left(service.call(req));
                         }
                     }

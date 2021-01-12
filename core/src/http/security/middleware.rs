@@ -8,9 +8,6 @@ use futures::future::{Either, ok, Ready};
 
 use crate::http::security::config::{Authenticator, Authorizer};
 
-// pub type AuthenticatorConfig<A: Authenticator> = fn() -> A;
-// pub type AuthorizerConfig<A: Authorizer> = fn() -> A;
-
 pub struct SecurityTransform<Auth: Authenticator, Autho: Authorizer<Serv>, Serv: Service> {
     authenticator: Option<fn() -> Auth>,
     authorizer: Option<fn() -> Autho>,

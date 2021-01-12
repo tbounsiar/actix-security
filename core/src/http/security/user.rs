@@ -44,18 +44,18 @@ impl User {
         self
     }
 
-    pub fn has_roles(self, roles: Vec<String>) -> bool {
+    pub fn has_roles(&self, roles: &Vec<String>) -> bool {
         for role in roles {
-            if self.roles.contains(&role) {
+            if self.roles.contains(role) {
                 return true;
             }
         }
         false
     }
 
-    pub fn has_authority(self, authorities: Vec<String>) -> bool {
+    pub fn has_authority(&self, authorities: &Vec<String>) -> bool {
         for authority in authorities {
-            if self.authorities.contains(&authority) {
+            if self.authorities.contains(authority) {
                 return true;
             }
         }

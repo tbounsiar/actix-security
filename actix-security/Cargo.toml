@@ -1,0 +1,69 @@
+[package]
+name = "actix-security"
+version = "0.2.0"
+authors = ["tahar.bounsiar <tbounsiar@gmail.com>"]
+edition = "2021"
+rust-version = "1.70"
+description = "Spring Security-like authentication and authorization for Actix Web"
+license = "MIT OR Apache-2.0"
+keywords = ["actix", "security", "authentication", "authorization", "web"]
+categories = ["web-programming", "authentication"]
+readme = "../README.md"
+repository = "https://github.com/tbounsiar/actix-security"
+homepage = "https://github.com/tbounsiar/actix-security"
+documentation = "https://docs.rs/actix-security"
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
+
+[lib]
+name = "actix_security"
+
+# =============================================================================
+# Feature Flags
+# =============================================================================
+# This crate re-exports actix-security-core and actix-security-codegen
+# Use features to enable optional functionality from actix-security-core
+
+[features]
+default = ["argon2", "http-basic", "macros"]
+
+# Include procedural macros (#[secured], #[pre_authorize], etc.)
+macros = ["actix-security-codegen"]
+
+# Password Encoders
+argon2 = ["actix-security-core/argon2"]
+bcrypt = ["actix-security-core/bcrypt"]
+
+# Authentication Methods
+http-basic = ["actix-security-core/http-basic"]
+jwt = ["actix-security-core/jwt"]
+session = ["actix-security-core/session"]
+form-login = ["actix-security-core/form-login"]
+remember-me = ["actix-security-core/remember-me"]
+oauth2 = ["actix-security-core/oauth2"]
+
+# Security Features
+csrf = ["actix-security-core/csrf"]
+rate-limit = ["actix-security-core/rate-limit"]
+audit = ["actix-security-core/audit"]
+account-lock = ["actix-security-core/account-lock"]
+
+# User Details Service
+user-details = ["actix-security-core/user-details"]
+user-details-cache = ["actix-security-core/user-details-cache"]
+
+# Enterprise Authentication
+ldap = ["actix-security-core/ldap"]
+saml = ["actix-security-core/saml"]
+
+# Full feature set (includes all available features)
+full = ["argon2", "bcrypt", "http-basic", "jwt", "session", "form-login", "csrf", "remember-me", "oauth2", "user-details", "rate-limit", "audit", "account-lock", "ldap", "saml", "macros"]
+
+[dependencies]
+# Core library (always included)
+actix-security-core = { path = "../core", version = "0.2" }
+
+# Procedural macros (optional, enabled by default via "macros" feature)
+actix-security-codegen = { path = "../codegen", version = "0.2", optional = true }

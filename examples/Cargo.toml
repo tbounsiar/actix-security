@@ -1,0 +1,96 @@
+[package]
+name = "actix-security-examples"
+version = "0.2.0"
+edition = "2021"
+publish = false
+description = "Examples and integration tests for actix-security"
+
+[lib]
+name = "actix_security_examples"
+path = "src/lib.rs"
+
+# =============================================================================
+# Example Binaries
+# =============================================================================
+# Run with: cargo run --bin <name>
+# Or:       cargo run -p actix-security-examples --bin <name>
+
+[[bin]]
+name = "basic_auth"
+path = "src/basic_auth/main.rs"
+
+[[bin]]
+name = "jwt_auth"
+path = "src/jwt_auth/main.rs"
+
+[[bin]]
+name = "session_auth"
+path = "src/session_auth/main.rs"
+
+[[bin]]
+name = "form_login"
+path = "src/form_login/main.rs"
+
+[[bin]]
+name = "security_headers"
+path = "src/security_headers/main.rs"
+
+[[bin]]
+name = "oidc_keycloak"
+path = "src/oidc_keycloak/main.rs"
+
+[[bin]]
+name = "security_complete"
+path = "src/security_complete/main.rs"
+
+[dependencies]
+actix-security = { path = "../actix-security", features = ["full"] }
+actix-web = "4"
+actix-session = { version = "0.10", features = ["cookie-session"] }
+actix-rt = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+env_logger = "0.11"
+log = "0.4"
+base64 = "0.22"
+urlencoding = "2"
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
+
+[dev-dependencies]
+actix-http = "3"
+actix-web = { version = "4", features = ["macros"] }
+tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
+reqwest = { version = "0.12", default-features = false, features = ["json", "cookies"] }
+
+# Integration test files
+[[test]]
+name = "basic_auth_tests"
+path = "tests/basic_auth_tests.rs"
+
+[[test]]
+name = "jwt_auth_tests"
+path = "tests/jwt_auth_tests.rs"
+
+[[test]]
+name = "session_auth_tests"
+path = "tests/session_auth_tests.rs"
+
+[[test]]
+name = "form_login_tests"
+path = "tests/form_login_tests.rs"
+
+[[test]]
+name = "security_headers_tests"
+path = "tests/security_headers_tests.rs"
+
+[[test]]
+name = "rate_limit_tests"
+path = "tests/rate_limit_tests.rs"
+
+[[test]]
+name = "account_lock_tests"
+path = "tests/account_lock_tests.rs"
+
+[[test]]
+name = "audit_tests"
+path = "tests/audit_tests.rs"

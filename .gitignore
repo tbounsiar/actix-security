@@ -1,0 +1,6 @@
+/target
+Cargo.lock
+.idea
+.claude
+.vscode
+.mcp.json

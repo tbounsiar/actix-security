@@ -1,0 +1,9 @@
+[workspace]
+resolver = "2"
+members = [
+    "actix-security",
+    "core",
+    "codegen",
+    "test",
+    "examples"
+]

@@ -1,0 +1,27 @@
+[package]
+name = "actix-security-codegen"
+version = "0.2.0"
+authors = ["tahar.bounsiar <tbounsiar@gmail.com>"]
+edition = "2021"
+rust-version = "1.70"
+description = "Procedural macros for actix-security (Spring Security-like annotations)"
+license = "MIT OR Apache-2.0"
+keywords = ["actix", "security", "macros", "proc-macro"]
+categories = ["web-programming", "authentication"]
+readme = "../README.md"
+repository = "https://github.com/tbounsiar/actix-security"
+homepage = "https://github.com/tbounsiar/actix-security"
+documentation = "https://docs.rs/actix-security-codegen"
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
+
+[lib]
+name = "actix_security_codegen"
+proc-macro = true
+
+[dependencies]
+syn = { version = "2", features = ["full", "parsing"] }
+quote = "1"
+proc-macro2 = "1"

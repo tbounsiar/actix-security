@@ -1,0 +1,106 @@
+[package]
+name = "actix-security-core"
+version = "0.2.0"
+authors = ["tahar.bounsiar <tbounsiar@gmail.com>"]
+edition = "2021"
+rust-version = "1.70"
+description = "Spring Security-like authentication and authorization for Actix Web - Core library"
+license = "MIT OR Apache-2.0"
+keywords = ["actix", "security", "authentication", "authorization", "web"]
+categories = ["web-programming", "authentication"]
+readme = "../README.md"
+repository = "https://github.com/tbounsiar/actix-security"
+homepage = "https://github.com/tbounsiar/actix-security"
+documentation = "https://docs.rs/actix-security-core"
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
+
+[lib]
+name = "actix_security_core"
+
+# =============================================================================
+# Feature Flags
+# =============================================================================
+# Usage: actix-security-core = { version = "0.2", features = ["argon2"] }
+#
+# Default features include the most common security components.
+# Disable default features for minimal builds:
+#   actix-security-core = { version = "0.2", default-features = false }
+
+[features]
+default = ["argon2", "http-basic"]
+
+# Password Encoders
+argon2 = ["dep:argon2"]           # Argon2 password hashing (recommended)
+bcrypt = ["dep:bcrypt"]           # BCrypt password hashing (compatible)
+
+# Authentication Methods
+http-basic = ["dep:base64"]       # HTTP Basic Authentication (RFC 7617)
+jwt = ["dep:jsonwebtoken", "dep:serde", "dep:serde_json"]  # JWT Authentication
+session = ["dep:actix-session", "dep:serde", "dep:serde_json"]  # Session-based Authentication
+form-login = ["session", "csrf"]  # Form-based login (requires session + CSRF)
+remember-me = ["session", "dep:base64"]  # Remember-me authentication
+oauth2 = ["dep:oauth2", "dep:openidconnect", "dep:reqwest", "dep:serde", "dep:serde_json", "dep:url"]  # OAuth2/OIDC
+
+# Security Features
+csrf = ["session"]  # CSRF protection
+rate-limit = []     # Rate limiting (brute-force protection)
+audit = ["dep:serde", "dep:serde_json"]  # Security audit logging (with JSON support)
+account-lock = []   # Account locking on failed attempts
+
+# User Details Service
+user-details = ["dep:async-trait"]  # Async UserDetailsService trait
+user-details-cache = ["user-details"]  # Caching wrapper for UserDetailsService
+
+# Enterprise Authentication
+ldap = ["dep:async-trait"]  # LDAP/Active Directory Authentication
+saml = ["dep:base64", "dep:urlencoding"]  # SAML 2.0 Single Sign-On
+
+# Full feature set (includes all available features)
+full = ["argon2", "bcrypt", "http-basic", "jwt", "session", "form-login", "csrf", "remember-me", "oauth2", "user-details", "rate-limit", "audit", "account-lock", "ldap", "saml"]
+
+[dependencies]
+# Actix Web 4.x
+actix-web = "4"
+actix-service = "2"
+
+# Async
+futures-util = "0.3"
+tokio = { version = "1", features = ["sync"] }
+
+# Utilities
+regex = "1"
+rand = "0.8"
+derive_more = { version = "1", features = ["display", "error"] }
+
+# Password encoding (optional - Spring's PasswordEncoder equivalent)
+argon2 = { version = "0.5", optional = true }
+bcrypt = { version = "0.16", optional = true }
+
+# HTTP Basic Auth (optional)
+base64 = { version = "0.22", optional = true }
+
+# JWT Authentication (optional)
+jsonwebtoken = { version = "9", optional = true }
+serde = { version = "1", features = ["derive"], optional = true }
+serde_json = { version = "1", optional = true }
+
+# Session Authentication (optional)
+actix-session = { version = "0.10", optional = true }
+
+# OAuth2/OIDC Authentication (optional)
+oauth2 = { version = "4.4", optional = true }
+openidconnect = { version = "3.5", optional = true }
+reqwest = { version = "0.12", default-features = false, features = ["rustls-tls", "json"], optional = true }
+url = { version = "2", optional = true }
+
+# Async traits (optional)
+async-trait = { version = "0.1", optional = true }
+
+# SAML (optional)
+urlencoding = { version = "2", optional = true }
+
+[dev-dependencies]
+tokio = { version = "1", features = ["macros", "rt"] }

@@ -1,0 +1,42 @@
+[book]
+authors = ["Actix Security Contributors"]
+language = "en"
+src = "src"
+title = "Actix Security"
+description = "Spring Security-inspired authentication and authorization for Actix Web"
+
+[build]
+build-dir = "book"
+create-missing = true
+
+[output.html]
+default-theme = "light"
+preferred-dark-theme = "ayu"
+git-repository-url = "https://github.com/tbounsiar/actix-security"
+edit-url-template = "https://github.com/tbounsiar/actix-security/edit/main/docs/{path}"
+site-url = "/actix-security/"
+cname = ""
+input-404 = "404.md"
+additional-css = ["theme/pagetoc.css"]
+additional-js = ["theme/pagetoc.js"]
+
+[output.html.fold]
+enable = true
+level = 0
+
+[output.html.playground]
+editable = true
+copyable = true
+copy-js = true
+line-numbers = true
+runnable = false
+
+[output.html.search]
+enable = true
+limit-results = 30
+teaser-word-count = 30
+boost-title = 2
+boost-hierarchy = 1
+boost-paragraph = 1
+expand = true
+heading-split-level = 3

@@ -338,7 +338,10 @@ impl ExpressionParser {
                         args.push(s);
                     }
                     Some(token) => {
-                        return Err(format!("unexpected token in function arguments: {:?}", token))
+                        return Err(format!(
+                            "unexpected token in function arguments: {:?}",
+                            token
+                        ))
                     }
                     None => return Err("unclosed function call".to_string()),
                 }

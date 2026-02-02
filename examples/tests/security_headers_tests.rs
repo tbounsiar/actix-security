@@ -15,7 +15,10 @@ async fn test_x_frame_options_header() {
                     .content_security_policy("default-src 'self'")
                     .permissions_policy("geolocation=(), camera=()"),
             )
-            .route("/", web::get().to(|| async { HttpResponse::Ok().body("OK") })),
+            .route(
+                "/",
+                web::get().to(|| async { HttpResponse::Ok().body("OK") }),
+            ),
     )
     .await;
 
@@ -33,11 +36,10 @@ async fn test_x_frame_options_header() {
 
 #[actix_web::test]
 async fn test_x_content_type_options_header() {
-    let app = test::init_service(
-        App::new()
-            .wrap(SecurityHeaders::strict())
-            .route("/", web::get().to(|| async { HttpResponse::Ok().body("OK") })),
-    )
+    let app = test::init_service(App::new().wrap(SecurityHeaders::strict()).route(
+        "/",
+        web::get().to(|| async { HttpResponse::Ok().body("OK") }),
+    ))
     .await;
 
     let req = test::TestRequest::get().uri("/").to_request();
@@ -60,7 +62,10 @@ async fn test_content_security_policy_header() {
     let app = test::init_service(
         App::new()
             .wrap(SecurityHeaders::strict().content_security_policy("default-src 'self'"))
-            .route("/", web::get().to(|| async { HttpResponse::Ok().body("OK") })),
+            .route(
+                "/",
+                web::get().to(|| async { HttpResponse::Ok().body("OK") }),
+            ),
     )
     .await;
 
@@ -79,11 +84,10 @@ async fn test_content_security_policy_header() {
 
 #[actix_web::test]
 async fn test_strict_transport_security_header() {
-    let app = test::init_service(
-        App::new()
-            .wrap(SecurityHeaders::strict())
-            .route("/", web::get().to(|| async { HttpResponse::Ok().body("OK") })),
-    )
+    let app = test::init_service(App::new().wrap(SecurityHeaders::strict()).route(
+        "/",
+        web::get().to(|| async { HttpResponse::Ok().body("OK") }),
+    ))
     .await;
 
     let req = test::TestRequest::get().uri("/").to_request();
@@ -101,11 +105,10 @@ async fn test_strict_transport_security_header() {
 
 #[actix_web::test]
 async fn test_referrer_policy_header() {
-    let app = test::init_service(
-        App::new()
-            .wrap(SecurityHeaders::strict())
-            .route("/", web::get().to(|| async { HttpResponse::Ok().body("OK") })),
-    )
+    let app = test::init_service(App::new().wrap(SecurityHeaders::strict()).route(
+        "/",
+        web::get().to(|| async { HttpResponse::Ok().body("OK") }),
+    ))
     .await;
 
     let req = test::TestRequest::get().uri("/").to_request();
@@ -120,7 +123,10 @@ async fn test_permissions_policy_header() {
     let app = test::init_service(
         App::new()
             .wrap(SecurityHeaders::strict().permissions_policy("geolocation=(), camera=()"))
-            .route("/", web::get().to(|| async { HttpResponse::Ok().body("OK") })),
+            .route(
+                "/",
+                web::get().to(|| async { HttpResponse::Ok().body("OK") }),
+            ),
     )
     .await;
 
@@ -129,11 +135,7 @@ async fn test_permissions_policy_header() {
 
     let headers = resp.headers();
     assert!(headers.get("Permissions-Policy").is_some());
-    let policy = headers
-        .get("Permissions-Policy")
-        .unwrap()
-        .to_str()
-        .unwrap();
+    let policy = headers.get("Permissions-Policy").unwrap().to_str().unwrap();
     assert!(policy.contains("geolocation=()"));
     assert!(policy.contains("camera=()"));
 }
@@ -143,7 +145,10 @@ async fn test_custom_frame_options() {
     let app = test::init_service(
         App::new()
             .wrap(SecurityHeaders::new().frame_options(FrameOptions::SameOrigin))
-            .route("/", web::get().to(|| async { HttpResponse::Ok().body("OK") })),
+            .route(
+                "/",
+                web::get().to(|| async { HttpResponse::Ok().body("OK") }),
+            ),
     )
     .await;
 
@@ -162,7 +167,10 @@ async fn test_custom_csp() {
     let app = test::init_service(
         App::new()
             .wrap(SecurityHeaders::new().content_security_policy("default-src 'none'"))
-            .route("/", web::get().to(|| async { HttpResponse::Ok().body("OK") })),
+            .route(
+                "/",
+                web::get().to(|| async { HttpResponse::Ok().body("OK") }),
+            ),
     )
     .await;
 

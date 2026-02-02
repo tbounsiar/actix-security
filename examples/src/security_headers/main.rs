@@ -67,9 +67,11 @@ async fn main() -> std::io::Result<()> {
             .wrap(
                 SecurityHeaders::strict()
                     // Customize CSP for your application
-                    .content_security_policy("default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'")
+                    .content_security_policy(
+                        "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'",
+                    )
                     // Add permissions policy
-                    .permissions_policy("geolocation=(), camera=(), microphone=()")
+                    .permissions_policy("geolocation=(), camera=(), microphone=()"),
             )
             .service(index)
             .service(api_data)

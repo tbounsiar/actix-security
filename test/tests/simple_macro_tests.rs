@@ -18,9 +18,7 @@ async fn test_permit_all_without_auth() {
     let app = create_test_app().await;
 
     // Public endpoint - no auth required
-    let req = test::TestRequest::get()
-        .uri("/public/info")
-        .to_request();
+    let req = test::TestRequest::get().uri("/public/info").to_request();
 
     let resp = test::call_service(&app, req).await;
     // Note: The middleware still requires auth for all routes in this test setup

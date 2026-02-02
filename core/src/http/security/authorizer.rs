@@ -153,9 +153,7 @@ impl<B: 'static> Authorizer<B> for RequestMatcherAuthorizer {
                         // User lacks required access -> 403 Forbidden
                         return Box::pin(async move {
                             Ok(req.into_response(
-                                HttpResponse::Forbidden()
-                                    .finish()
-                                    .map_into_right_body(),
+                                HttpResponse::Forbidden().finish().map_into_right_body(),
                             ))
                         });
                     }

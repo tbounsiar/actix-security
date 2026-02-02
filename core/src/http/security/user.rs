@@ -148,7 +148,9 @@ impl User {
     /// Checks if the user has ANY of the specified authorities (legacy).
     #[doc(hidden)]
     pub fn has_authorities(&self, authorities: &[String]) -> bool {
-        authorities.iter().any(|auth| self.authorities.contains(auth))
+        authorities
+            .iter()
+            .any(|auth| self.authorities.contains(auth))
     }
 }
 

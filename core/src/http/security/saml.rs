@@ -66,27 +66,17 @@ impl NameIdFormat {
     /// Get the URN for this name ID format
     pub fn as_urn(&self) -> &str {
         match self {
-            NameIdFormat::Unspecified => {
-                "urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified"
-            }
-            NameIdFormat::EmailAddress => {
-                "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress"
-            }
+            NameIdFormat::Unspecified => "urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified",
+            NameIdFormat::EmailAddress => "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress",
             NameIdFormat::X509SubjectName => {
                 "urn:oasis:names:tc:SAML:1.1:nameid-format:X509SubjectName"
             }
             NameIdFormat::WindowsDomainQualifiedName => {
                 "urn:oasis:names:tc:SAML:1.1:nameid-format:WindowsDomainQualifiedName"
             }
-            NameIdFormat::Kerberos => {
-                "urn:oasis:names:tc:SAML:2.0:nameid-format:kerberos"
-            }
-            NameIdFormat::Persistent => {
-                "urn:oasis:names:tc:SAML:2.0:nameid-format:persistent"
-            }
-            NameIdFormat::Transient => {
-                "urn:oasis:names:tc:SAML:2.0:nameid-format:transient"
-            }
+            NameIdFormat::Kerberos => "urn:oasis:names:tc:SAML:2.0:nameid-format:kerberos",
+            NameIdFormat::Persistent => "urn:oasis:names:tc:SAML:2.0:nameid-format:persistent",
+            NameIdFormat::Transient => "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
             NameIdFormat::Custom(urn) => urn,
         }
     }
@@ -109,7 +99,6 @@ impl NameIdFormat {
         }
     }
 }
-
 
 /// SAML 2.0 binding types
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
@@ -161,18 +150,14 @@ impl AuthnContextClass {
     /// Get the URN for this authentication context
     pub fn as_urn(&self) -> &str {
         match self {
-            AuthnContextClass::Unspecified => {
-                "urn:oasis:names:tc:SAML:2.0:ac:classes:unspecified"
-            }
+            AuthnContextClass::Unspecified => "urn:oasis:names:tc:SAML:2.0:ac:classes:unspecified",
             AuthnContextClass::Password => "urn:oasis:names:tc:SAML:2.0:ac:classes:Password",
             AuthnContextClass::PasswordProtectedTransport => {
                 "urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport"
             }
             AuthnContextClass::X509 => "urn:oasis:names:tc:SAML:2.0:ac:classes:X509",
             AuthnContextClass::Kerberos => "urn:oasis:names:tc:SAML:2.0:ac:classes:Kerberos",
-            AuthnContextClass::MultiFactor => {
-                "urn:oasis:names:tc:SAML:2.0:ac:classes:MultiFactor"
-            }
+            AuthnContextClass::MultiFactor => "urn:oasis:names:tc:SAML:2.0:ac:classes:MultiFactor",
             AuthnContextClass::Custom(urn) => urn,
         }
     }
@@ -480,10 +465,7 @@ impl SamlConfig {
                 "https://login.microsoftonline.com/{}/saml2",
                 tenant
             ))
-            .idp_entity_id(format!(
-                "https://sts.windows.net/{}/",
-                tenant
-            ))
+            .idp_entity_id(format!("https://sts.windows.net/{}/", tenant))
             .name_id_format(NameIdFormat::EmailAddress)
             .sso_binding(SamlBinding::HttpRedirect)
             .map_attribute(
@@ -686,10 +668,7 @@ impl AuthnRequest {
         xml.push('>');
 
         // Issuer
-        xml.push_str(&format!(
-            r#"<saml:Issuer>{}</saml:Issuer>"#,
-            self.issuer
-        ));
+        xml.push_str(&format!(r#"<saml:Issuer>{}</saml:Issuer>"#, self.issuer));
 
         // NameIDPolicy
         xml.push_str(&format!(
@@ -886,7 +865,8 @@ impl SamlResponse {
             .ok_or_else(|| SamlError::XmlParsingError("Missing Issuer".into()))?;
 
         // Parse status
-        let status_code = extract_status_code(xml).unwrap_or(SamlStatusCode::Unknown(String::new()));
+        let status_code =
+            extract_status_code(xml).unwrap_or(SamlStatusCode::Unknown(String::new()));
         let status_message = extract_element_text(xml, "StatusMessage");
 
         // Parse assertions (simplified)
@@ -1316,11 +1296,7 @@ fn parse_iso8601(s: &str) -> Result<u64, ()> {
 
     let months = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
     for (i, &d) in months.iter().take((month - 1) as usize).enumerate() {
-        days += if i == 1 && is_leap_year(year) {
-            29
-        } else {
-            d
-        };
+        days += if i == 1 && is_leap_year(year) { 29 } else { d };
     }
     days += day - 1;
 
@@ -1353,10 +1329,7 @@ fn extract_attribute(xml: &str, element: &str, attr: &str) -> Option<String> {
 /// Extract element text content (simplified parser)
 fn extract_element_text(xml: &str, element: &str) -> Option<String> {
     // Handle namespaced elements
-    let patterns = [
-        format!("<{}:", element),
-        format!("<{}>", element),
-    ];
+    let patterns = [format!("<{}:", element), format!("<{}>", element)];
 
     for pattern in &patterns {
         if let Some(start) = xml.find(pattern) {
@@ -1408,8 +1381,8 @@ fn parse_assertions(xml: &str) -> Result<Vec<SamlAssertion>, SamlError> {
 
         let id = extract_attribute(assertion_xml, "Assertion", "ID")
             .unwrap_or_else(|| format!("_generated_{}", timestamp_millis()));
-        let issue_instant = extract_attribute(assertion_xml, "Assertion", "IssueInstant")
-            .unwrap_or_default();
+        let issue_instant =
+            extract_attribute(assertion_xml, "Assertion", "IssueInstant").unwrap_or_default();
         let issuer = extract_element_text(assertion_xml, "Issuer").unwrap_or_default();
 
         // Parse NameID
@@ -1433,8 +1406,7 @@ fn parse_assertions(xml: &str) -> Result<Vec<SamlAssertion>, SamlError> {
             .unwrap_or_default();
 
         // Parse authn context
-        let authn_context_class =
-            extract_element_text(assertion_xml, "AuthnContextClassRef");
+        let authn_context_class = extract_element_text(assertion_xml, "AuthnContextClassRef");
 
         // Parse attributes
         let attributes = parse_attributes(assertion_xml);
@@ -1490,7 +1462,8 @@ fn parse_attributes(xml: &str) -> HashMap<String, Vec<String>> {
                     let value_start = value_pos + value_start;
                     if let Some(content_start) = attr_xml[value_start..].find('>') {
                         let content_start = value_start + content_start + 1;
-                        if let Some(content_end) = attr_xml[content_start..].find("</AttributeValue>")
+                        if let Some(content_end) =
+                            attr_xml[content_start..].find("</AttributeValue>")
                         {
                             let value = attr_xml[content_start..content_start + content_end].trim();
                             values.push(value.to_string());
@@ -1667,7 +1640,10 @@ mod tests {
         };
 
         let result = assertion.validate(&config);
-        assert!(matches!(result, Err(SamlError::AudienceRestrictionNotMet(_))));
+        assert!(matches!(
+            result,
+            Err(SamlError::AudienceRestrictionNotMet(_))
+        ));
     }
 
     #[test]

@@ -11,7 +11,9 @@ use base64::prelude::*;
 use actix_security_codegen::{deny_all, permit_all, pre_authorize, roles_allowed, secured};
 use actix_security_core::http::security::manager::AuthorizationManager;
 use actix_security_core::http::security::middleware::SecurityTransform;
-use actix_security_core::http::security::web::{Access, MemoryAuthenticator, RequestMatcherAuthorizer};
+use actix_security_core::http::security::web::{
+    Access, MemoryAuthenticator, RequestMatcherAuthorizer,
+};
 use actix_security_core::http::security::{
     Argon2PasswordEncoder, AuthenticatedUser, AuthenticationManager, PasswordEncoder, User,
 };
@@ -42,8 +44,7 @@ pub fn test_authenticator() -> MemoryAuthenticator {
                 .authorities(&["users:read".into()]),
         )
         .with_user(
-            User::with_encoded_password("guest", encoder.encode("guest"))
-                .roles(&["GUEST".into()]),
+            User::with_encoded_password("guest", encoder.encode("guest")).roles(&["GUEST".into()]),
         )
 }
 
@@ -237,9 +238,11 @@ pub async fn javaee_management(user: AuthenticatedUser) -> impl Responder {
 // =============================================================================
 
 /// Creates a fully configured test application.
-pub async fn create_test_app(
-) -> impl actix_web::dev::Service<actix_http::Request, Response = actix_web::dev::ServiceResponse, Error = actix_web::Error>
-{
+pub async fn create_test_app() -> impl actix_web::dev::Service<
+    actix_http::Request,
+    Response = actix_web::dev::ServiceResponse,
+    Error = actix_web::Error,
+> {
     test::init_service(
         App::new().service(
             web::scope("")
@@ -278,4 +281,3 @@ pub async fn create_test_app(
     )
     .await
 }
-

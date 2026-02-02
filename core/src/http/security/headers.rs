@@ -359,10 +359,7 @@ where
             if config.hsts_enabled {
                 let hsts_value = config.build_hsts_value();
                 if let Ok(value) = HeaderValue::from_str(&hsts_value) {
-                    headers.insert(
-                        HeaderName::from_static("strict-transport-security"),
-                        value,
-                    );
+                    headers.insert(HeaderName::from_static("strict-transport-security"), value);
                 }
             }
 

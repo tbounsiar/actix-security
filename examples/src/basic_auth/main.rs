@@ -21,11 +21,11 @@
 //! curl http://localhost:8080/  # 401 Unauthorized
 //! ```
 
-use actix_security::http::security::{
-    middleware::SecurityTransform, Argon2PasswordEncoder, AuthenticatedUser,
-    AuthenticationManager, AuthorizationManager, PasswordEncoder, User,
-};
 use actix_security::http::security::web::{Access, MemoryAuthenticator, RequestMatcherAuthorizer};
+use actix_security::http::security::{
+    middleware::SecurityTransform, Argon2PasswordEncoder, AuthenticatedUser, AuthenticationManager,
+    AuthorizationManager, PasswordEncoder, User,
+};
 use actix_web::{get, App, HttpResponse, HttpServer, Responder};
 
 /// Creates the authenticator with users stored in memory.
@@ -65,10 +65,7 @@ async fn index(user: AuthenticatedUser) -> impl Responder {
 
 #[get("/admin")]
 async fn admin(user: AuthenticatedUser) -> impl Responder {
-    HttpResponse::Ok().body(format!(
-        "Welcome to admin panel, {}!",
-        user.get_username()
-    ))
+    HttpResponse::Ok().body(format!("Welcome to admin panel, {}!", user.get_username()))
 }
 
 #[get("/api/users")]

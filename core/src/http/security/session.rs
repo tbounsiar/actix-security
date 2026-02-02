@@ -605,11 +605,7 @@ where
     }
 
     /// Get the saved request URL.
-    pub fn get_saved_request(
-        &self,
-        session: &actix_session::Session,
-        default_url: &str,
-    ) -> String {
+    pub fn get_saved_request(&self, session: &actix_session::Session, default_url: &str) -> String {
         SessionAuthenticator::get_saved_request(session, &self.config, default_url)
     }
 }
@@ -664,7 +660,10 @@ mod tests {
 
         assert_eq!(config.get_user_key(), "my_user");
         assert_eq!(config.get_authenticated_key(), "my_auth");
-        assert_eq!(config.get_fixation_strategy(), SessionFixationStrategy::NewSession);
+        assert_eq!(
+            config.get_fixation_strategy(),
+            SessionFixationStrategy::NewSession
+        );
         assert_eq!(config.get_maximum_sessions(), Some(2));
     }
 
@@ -704,7 +703,10 @@ mod tests {
         assert_eq!(config.get_user_key(), "user");
         assert_eq!(config.get_authenticated_key(), "auth");
         assert_eq!(config.get_saved_request_key(), "saved");
-        assert_eq!(config.get_fixation_strategy(), SessionFixationStrategy::MigrateSession);
+        assert_eq!(
+            config.get_fixation_strategy(),
+            SessionFixationStrategy::MigrateSession
+        );
         assert_eq!(config.get_maximum_sessions(), Some(1));
         assert_eq!(config.get_timeout(), Some(Duration::from_secs(3600)));
         assert!(config.should_expire_oldest());

@@ -24,10 +24,7 @@ pub enum Expression {
 
     /// A function call with name and arguments
     /// e.g., `hasRole('ADMIN')` -> Function("hasRole", vec!["ADMIN"])
-    Function {
-        name: String,
-        args: Vec<String>,
-    },
+    Function { name: String, args: Vec<String> },
 
     /// A binary operation combining two expressions
     /// e.g., `hasRole('ADMIN') AND hasRole('USER')`
@@ -39,10 +36,7 @@ pub enum Expression {
 
     /// A unary operation on an expression
     /// e.g., `NOT hasRole('ADMIN')`
-    Unary {
-        op: UnaryOp,
-        expr: Box<Expression>,
-    },
+    Unary { op: UnaryOp, expr: Box<Expression> },
 
     /// A grouped expression (parentheses)
     /// e.g., `(hasRole('ADMIN') OR hasRole('USER'))`

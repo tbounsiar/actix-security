@@ -155,7 +155,10 @@ impl std::fmt::Debug for RateLimitConfig {
             .field("key_extractor", &self.key_extractor)
             .field("excluded_paths", &self.excluded_paths)
             .field("add_headers", &self.add_headers)
-            .field("error_response", &self.error_response.as_ref().map(|_| "<fn>"))
+            .field(
+                "error_response",
+                &self.error_response.as_ref().map(|_| "<fn>"),
+            )
             .finish()
     }
 }
@@ -376,7 +379,10 @@ impl RateLimiterState {
 
         Ok(RateLimitInfo {
             limit: self.config.max_requests,
-            remaining: self.config.max_requests.saturating_sub(entry.timestamps.len() as u64),
+            remaining: self
+                .config
+                .max_requests
+                .saturating_sub(entry.timestamps.len() as u64),
             reset: self.config.window.as_secs(),
         })
     }
@@ -534,22 +540,13 @@ where
                     if add_headers {
                         let headers = resp.headers_mut();
                         if let Ok(v) = HeaderValue::from_str(&info.limit.to_string()) {
-                            headers.insert(
-                                HeaderName::from_static("x-ratelimit-limit"),
-                                v,
-                            );
+                            headers.insert(HeaderName::from_static("x-ratelimit-limit"), v);
                         }
                         if let Ok(v) = HeaderValue::from_str(&info.remaining.to_string()) {
-                            headers.insert(
-                                HeaderName::from_static("x-ratelimit-remaining"),
-                                v,
-                            );
+                            headers.insert(HeaderName::from_static("x-ratelimit-remaining"), v);
                         }
                         if let Ok(v) = HeaderValue::from_str(&info.reset.to_string()) {
-                            headers.insert(
-                                HeaderName::from_static("x-ratelimit-reset"),
-                                v,
-                            );
+                            headers.insert(HeaderName::from_static("x-ratelimit-reset"), v);
                         }
                     }
 
@@ -570,7 +567,7 @@ where
                     // We need to return the same response type
                     // This is a workaround - the response body type doesn't match
                     Err(actix_web::error::InternalError::from_response(
-                        std::io::Error::new(std::io::ErrorKind::Other, "Rate limit exceeded"),
+                        std::io::Error::other("Rate limit exceeded"),
                         response,
                     )
                     .into())
@@ -622,7 +619,9 @@ mod tests {
 
     #[tokio::test]
     async fn test_fixed_window_rate_limit() {
-        let config = RateLimitConfig::new().max_requests(3).window(Duration::from_secs(60));
+        let config = RateLimitConfig::new()
+            .max_requests(3)
+            .window(Duration::from_secs(60));
 
         let state = RateLimiterState::new(config);
 
@@ -674,7 +673,9 @@ mod tests {
 
     #[tokio::test]
     async fn test_different_keys_independent() {
-        let config = RateLimitConfig::new().max_requests(2).window(Duration::from_secs(60));
+        let config = RateLimitConfig::new()
+            .max_requests(2)
+            .window(Duration::from_secs(60));
 
         let state = RateLimiterState::new(config);
 

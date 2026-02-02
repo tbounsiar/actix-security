@@ -117,7 +117,8 @@ pub trait UserDetailsService: Send + Sync {
     ///
     /// Returns `Ok(Some(user))` if found, `Ok(None)` if not found,
     /// or `Err(...)` if an error occurred.
-    async fn load_user_by_username(&self, username: &str) -> Result<Option<User>, UserDetailsError>;
+    async fn load_user_by_username(&self, username: &str)
+        -> Result<Option<User>, UserDetailsError>;
 
     /// Check if a user exists.
     async fn user_exists(&self, username: &str) -> Result<bool, UserDetailsError> {
@@ -216,7 +217,10 @@ impl InMemoryUserDetailsService {
 
 #[async_trait]
 impl UserDetailsService for InMemoryUserDetailsService {
-    async fn load_user_by_username(&self, username: &str) -> Result<Option<User>, UserDetailsError> {
+    async fn load_user_by_username(
+        &self,
+        username: &str,
+    ) -> Result<Option<User>, UserDetailsError> {
         let users = self.users.read().await;
         Ok(users.get(username).cloned())
     }
@@ -343,7 +347,10 @@ impl<S> UserDetailsService for CachingUserDetailsService<S>
 where
     S: UserDetailsService + Send + Sync,
 {
-    async fn load_user_by_username(&self, username: &str) -> Result<Option<User>, UserDetailsError> {
+    async fn load_user_by_username(
+        &self,
+        username: &str,
+    ) -> Result<Option<User>, UserDetailsError> {
         // Check cache first
         {
             let cache = self.cache.read().await;
@@ -489,11 +496,15 @@ mod tests {
         assert!(matches!(result, Err(UserDetailsError::AlreadyExists)));
 
         // Update user
-        let updated = User::new("testuser".to_string(), "newpass".to_string())
-            .roles(&["ADMIN".into()]);
+        let updated =
+            User::new("testuser".to_string(), "newpass".to_string()).roles(&["ADMIN".into()]);
         service.update_user(&updated).await.unwrap();
 
-        let loaded = service.load_user_by_username("testuser").await.unwrap().unwrap();
+        let loaded = service
+            .load_user_by_username("testuser")
+            .await
+            .unwrap()
+            .unwrap();
         assert!(loaded.has_role("ADMIN"));
 
         // Delete user
@@ -510,8 +521,7 @@ mod tests {
         let inner = InMemoryUserDetailsService::new();
         inner.add_user(test_user()).await;
 
-        let cached = CachingUserDetailsService::new(inner)
-            .ttl(Duration::from_secs(60));
+        let cached = CachingUserDetailsService::new(inner).ttl(Duration::from_secs(60));
 
         // First load (from inner)
         let user1 = cached.load_user_by_username("testuser").await.unwrap();

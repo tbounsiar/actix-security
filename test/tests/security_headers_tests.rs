@@ -33,22 +33,13 @@ async fn test_default_security_headers() {
     let headers = resp.headers();
 
     // X-Content-Type-Options should be set
-    assert_eq!(
-        headers.get("x-content-type-options").unwrap(),
-        "nosniff"
-    );
+    assert_eq!(headers.get("x-content-type-options").unwrap(), "nosniff");
 
     // X-Frame-Options should be DENY by default
-    assert_eq!(
-        headers.get("x-frame-options").unwrap(),
-        "DENY"
-    );
+    assert_eq!(headers.get("x-frame-options").unwrap(), "DENY");
 
     // X-XSS-Protection should be 0 (disabled)
-    assert_eq!(
-        headers.get("x-xss-protection").unwrap(),
-        "0"
-    );
+    assert_eq!(headers.get("x-xss-protection").unwrap(), "0");
 
     // Referrer-Policy should be set
     assert_eq!(
@@ -73,10 +64,7 @@ async fn test_frame_options_sameorigin() {
     let req = test::TestRequest::get().uri("/test").to_request();
     let resp = test::call_service(&app, req).await;
 
-    assert_eq!(
-        resp.headers().get("x-frame-options").unwrap(),
-        "SAMEORIGIN"
-    );
+    assert_eq!(resp.headers().get("x-frame-options").unwrap(), "SAMEORIGIN");
 }
 
 #[actix_web::test]
@@ -262,6 +250,9 @@ async fn test_strict_security_headers() {
 
     // Verify strict values
     assert_eq!(headers.get("x-frame-options").unwrap(), "DENY");
-    assert_eq!(headers.get("content-security-policy").unwrap(), "default-src 'self'");
+    assert_eq!(
+        headers.get("content-security-policy").unwrap(),
+        "default-src 'self'"
+    );
     assert_eq!(headers.get("referrer-policy").unwrap(), "no-referrer");
 }

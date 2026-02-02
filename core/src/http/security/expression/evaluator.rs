@@ -86,11 +86,10 @@ impl ExpressionEvaluator {
         match expr {
             Expression::Boolean(value) => Ok(*value),
 
-            Expression::Function { name, args } => {
-                self.root
-                    .evaluate_function(name, args, user)
-                    .ok_or_else(|| EvaluationError::UnknownFunction(name.clone()))
-            }
+            Expression::Function { name, args } => self
+                .root
+                .evaluate_function(name, args, user)
+                .ok_or_else(|| EvaluationError::UnknownFunction(name.clone())),
 
             Expression::Binary { left, op, right } => {
                 let left_result = self.evaluate(left, user)?;
@@ -136,11 +135,7 @@ impl ExpressionEvaluator {
     /// * `Ok(true)` - Access granted
     /// * `Ok(false)` - Access denied
     /// * `Err` - Parse or evaluation error
-    pub fn evaluate_str(
-        &self,
-        expr: &str,
-        user: Option<&User>,
-    ) -> Result<bool, ExpressionError> {
+    pub fn evaluate_str(&self, expr: &str, user: Option<&User>) -> Result<bool, ExpressionError> {
         let parsed = super::SecurityExpression::parse(expr)?;
         self.evaluate(parsed.ast(), user)
             .map_err(ExpressionError::Evaluation)

@@ -61,10 +61,17 @@ async fn login(
     credentials: web::Json<LoginRequest>,
 ) -> impl Responder {
     // Find user and verify password
-    let user = data.users.iter().find(|u| u.get_username() == credentials.username);
+    let user = data
+        .users
+        .iter()
+        .find(|u| u.get_username() == credentials.username);
 
     match user {
-        Some(user) if data.encoder.matches(&credentials.password, user.get_password()) => {
+        Some(user)
+            if data
+                .encoder
+                .matches(&credentials.password, user.get_password()) =>
+        {
             // Generate token pair
             match data.jwt_service.generate_token_pair(user) {
                 Ok(pair) => HttpResponse::Ok().json(TokenResponse {
@@ -180,8 +187,7 @@ async fn main() -> std::io::Result<()> {
         .audience("api-users")
         .expiration_secs(3600); // 1 hour
 
-    let jwt_service = JwtTokenService::new(jwt_config.clone())
-        .refresh_expiration_days(7); // 7 days
+    let jwt_service = JwtTokenService::new(jwt_config.clone()).refresh_expiration_days(7); // 7 days
 
     let jwt_authenticator = JwtAuthenticator::new(jwt_config);
 

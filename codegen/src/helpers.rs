@@ -9,11 +9,7 @@ pub fn find_user_param(item_fn: &ItemFn) -> Option<Ident> {
     for arg in &item_fn.sig.inputs {
         if let FnArg::Typed(pat_type) = arg {
             if let Type::Path(type_path) = pat_type.ty.as_ref() {
-                let type_name = type_path
-                    .path
-                    .segments
-                    .last()
-                    .map(|s| s.ident.to_string());
+                let type_name = type_path.path.segments.last().map(|s| s.ident.to_string());
 
                 if type_name.as_deref() == Some("AuthenticatedUser") {
                     if let Pat::Ident(pat_ident) = pat_type.pat.as_ref() {

@@ -514,11 +514,7 @@ mod tests {
 
     #[test]
     fn test_csrf_token_custom_names() {
-        let token = CsrfToken::with_names(
-            "test-token".to_string(),
-            "X-Custom-CSRF",
-            "csrf_token",
-        );
+        let token = CsrfToken::with_names("test-token".to_string(), "X-Custom-CSRF", "csrf_token");
         assert_eq!(token.header_name(), "X-Custom-CSRF");
         assert_eq!(token.parameter_name(), "csrf_token");
     }
@@ -549,8 +545,7 @@ mod tests {
 
     #[test]
     fn test_csrf_config_protected_methods() {
-        let config = CsrfConfig::new()
-            .protected_methods(vec![Method::POST]);
+        let config = CsrfConfig::new().protected_methods(vec![Method::POST]);
 
         assert!(config.requires_protection(&Method::POST));
         assert!(!config.requires_protection(&Method::PUT));

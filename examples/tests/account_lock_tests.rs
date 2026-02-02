@@ -1,7 +1,7 @@
 //! Integration tests for account locking.
 
 use actix_security::http::security::account::{
-    AccountLockManager, LockConfig, LockStatus, check_login, LoginCheckResult,
+    check_login, AccountLockManager, LockConfig, LockStatus, LoginCheckResult,
 };
 use std::time::Duration;
 
@@ -30,9 +30,7 @@ async fn test_lock_after_max_attempts() {
 
 #[tokio::test]
 async fn test_reset_on_success() {
-    let config = LockConfig::new()
-        .max_attempts(3)
-        .reset_on_success(true);
+    let config = LockConfig::new().max_attempts(3).reset_on_success(true);
     let manager = AccountLockManager::new(config);
 
     // Record 2 failures
@@ -176,7 +174,9 @@ async fn test_check_login_blocked() {
 async fn test_permanent_lock() {
     let manager = AccountLockManager::with_defaults();
 
-    manager.lock_permanently("bad_user", "Suspicious activity").await;
+    manager
+        .lock_permanently("bad_user", "Suspicious activity")
+        .await;
 
     let status = manager.get_lock_status("bad_user").await;
     assert!(matches!(status, LockStatus::PermanentlyLocked { .. }));

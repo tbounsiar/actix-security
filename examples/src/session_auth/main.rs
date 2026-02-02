@@ -25,7 +25,7 @@ use actix_security::http::security::{
     Argon2PasswordEncoder, PasswordEncoder, SessionAuthenticator, SessionConfig,
     SessionFixationStrategy, User,
 };
-use actix_session::{Session, SessionMiddleware, storage::CookieSessionStore};
+use actix_session::{storage::CookieSessionStore, Session, SessionMiddleware};
 use actix_web::{cookie::Key, get, post, web, App, HttpResponse, HttpServer, Responder};
 use serde::Deserialize;
 use std::sync::Arc;
@@ -52,10 +52,17 @@ async fn login(
     credentials: web::Json<LoginRequest>,
 ) -> impl Responder {
     // Find user and verify password
-    let user = data.users.iter().find(|u| u.get_username() == credentials.username);
+    let user = data
+        .users
+        .iter()
+        .find(|u| u.get_username() == credentials.username);
 
     match user {
-        Some(user) if data.encoder.matches(&credentials.password, user.get_password()) => {
+        Some(user)
+            if data
+                .encoder
+                .matches(&credentials.password, user.get_password()) =>
+        {
             // Login with session fixation protection
             match SessionAuthenticator::login(&session, user, &data.session_config) {
                 Ok(()) => HttpResponse::Ok().json(serde_json::json!({
@@ -124,8 +131,7 @@ async fn main() -> std::io::Result<()> {
     let users = vec![
         User::with_encoded_password("admin", encoder.encode("admin"))
             .roles(&["ADMIN".into(), "USER".into()]),
-        User::with_encoded_password("user", encoder.encode("user"))
-            .roles(&["USER".into()]),
+        User::with_encoded_password("user", encoder.encode("user")).roles(&["USER".into()]),
     ];
 
     // Session configuration with fixation protection

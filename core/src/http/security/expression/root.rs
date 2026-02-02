@@ -85,9 +85,7 @@ impl ExpressionRoot for DefaultExpressionRoot {
                 if args.is_empty() {
                     return Some(false);
                 }
-                Some(user.is_some_and(|u| {
-                    args.iter().any(|role| u.has_role(role))
-                }))
+                Some(user.is_some_and(|u| args.iter().any(|role| u.has_role(role))))
             }
 
             // Authority-based functions
@@ -99,9 +97,7 @@ impl ExpressionRoot for DefaultExpressionRoot {
                 if args.is_empty() {
                     return Some(false);
                 }
-                Some(user.is_some_and(|u| {
-                    args.iter().any(|auth| u.has_authority(auth))
-                }))
+                Some(user.is_some_and(|u| args.iter().any(|auth| u.has_authority(auth))))
             }
 
             // Authentication state functions

@@ -246,7 +246,10 @@ pub fn has_role(attrs: TokenStream, input: TokenStream) -> TokenStream {
 ///
 /// This macro is kept for backward compatibility.
 #[proc_macro_attribute]
-#[deprecated(since = "0.3.0", note = "Use #[pre_authorize(authority = \"...\")] instead")]
+#[deprecated(
+    since = "0.3.0",
+    note = "Use #[pre_authorize(authority = \"...\")] instead"
+)]
 pub fn has_access(attrs: TokenStream, input: TokenStream) -> TokenStream {
     legacy::has_access_impl(attrs, input)
 }

@@ -291,7 +291,7 @@ cargo run -p actix-security-examples --bin <example_name>
 
 | Actix Security | Actix Web | Rust |
 |----------------|-----------|------|
-| 0.2.x | 4.x | 1.70+ |
+| 0.2.x | 4.x | 1.78+ |
 
 ## Spring Security Comparison
 

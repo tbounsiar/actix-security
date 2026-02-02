@@ -89,7 +89,9 @@ pub mod prelude {
     };
 
     #[cfg(feature = "form-login")]
-    pub use actix_security_core::http::security::{FormLoginConfig, FormLoginHandler, FormLoginService};
+    pub use actix_security_core::http::security::{
+        FormLoginConfig, FormLoginHandler, FormLoginService,
+    };
 
     #[cfg(feature = "csrf")]
     pub use actix_security_core::http::security::{CsrfConfig, CsrfProtection, CsrfToken};
@@ -98,7 +100,7 @@ pub mod prelude {
     pub use actix_security_core::http::security::{RememberMeConfig, RememberMeServices};
 
     #[cfg(feature = "user-details")]
-    pub use actix_security_core::http::security::{UserDetailsService, UserDetailsAuthenticator};
+    pub use actix_security_core::http::security::{UserDetailsAuthenticator, UserDetailsService};
 
     #[cfg(feature = "macros")]
     pub use actix_security_codegen::{

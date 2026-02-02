@@ -49,7 +49,9 @@ fn test_parse_and_expression() {
     match expr.ast() {
         Expression::Binary { left, op, right } => {
             assert_eq!(*op, BinaryOp::And);
-            assert!(matches!(left.as_ref(), Expression::Function { name, .. } if name == "hasRole"));
+            assert!(
+                matches!(left.as_ref(), Expression::Function { name, .. } if name == "hasRole")
+            );
             assert!(
                 matches!(right.as_ref(), Expression::Function { name, .. } if name == "hasAuthority")
             );
@@ -77,7 +79,9 @@ fn test_parse_not_expression() {
     match expr.ast() {
         Expression::Unary { op, expr } => {
             assert_eq!(*op, UnaryOp::Not);
-            assert!(matches!(expr.as_ref(), Expression::Function { name, .. } if name == "hasRole"));
+            assert!(
+                matches!(expr.as_ref(), Expression::Function { name, .. } if name == "hasRole")
+            );
         }
         _ => panic!("Expected unary expression"),
     }
@@ -120,18 +124,23 @@ fn test_parse_complex_expression() {
 fn test_parse_operator_precedence() {
     // AND has higher precedence than OR
     // "A OR B AND C" should parse as "A OR (B AND C)"
-    let expr = SecurityExpression::parse(
-        "hasRole('A') OR hasRole('B') AND hasRole('C')",
-    )
-    .unwrap();
+    let expr = SecurityExpression::parse("hasRole('A') OR hasRole('B') AND hasRole('C')").unwrap();
 
     match expr.ast() {
         Expression::Binary { left, op, right } => {
             assert_eq!(*op, BinaryOp::Or);
             // Left should be just hasRole('A')
-            assert!(matches!(left.as_ref(), Expression::Function { name, .. } if name == "hasRole"));
+            assert!(
+                matches!(left.as_ref(), Expression::Function { name, .. } if name == "hasRole")
+            );
             // Right should be (B AND C)
-            assert!(matches!(right.as_ref(), Expression::Binary { op: BinaryOp::And, .. }));
+            assert!(matches!(
+                right.as_ref(),
+                Expression::Binary {
+                    op: BinaryOp::And,
+                    ..
+                }
+            ));
         }
         _ => panic!("Expected OR at top level"),
     }
@@ -141,16 +150,34 @@ fn test_parse_operator_precedence() {
 fn test_parse_symbol_operators() {
     // Test && and || operators
     let expr = SecurityExpression::parse("hasRole('ADMIN') && hasRole('USER')").unwrap();
-    assert!(matches!(expr.ast(), Expression::Binary { op: BinaryOp::And, .. }));
+    assert!(matches!(
+        expr.ast(),
+        Expression::Binary {
+            op: BinaryOp::And,
+            ..
+        }
+    ));
 
     let expr = SecurityExpression::parse("hasRole('ADMIN') || hasRole('USER')").unwrap();
-    assert!(matches!(expr.ast(), Expression::Binary { op: BinaryOp::Or, .. }));
+    assert!(matches!(
+        expr.ast(),
+        Expression::Binary {
+            op: BinaryOp::Or,
+            ..
+        }
+    ));
 }
 
 #[test]
 fn test_parse_not_symbol() {
     let expr = SecurityExpression::parse("!hasRole('GUEST')").unwrap();
-    assert!(matches!(expr.ast(), Expression::Unary { op: UnaryOp::Not, .. }));
+    assert!(matches!(
+        expr.ast(),
+        Expression::Unary {
+            op: UnaryOp::Not,
+            ..
+        }
+    ));
 }
 
 #[test]
@@ -208,8 +235,7 @@ fn create_user() -> User {
 }
 
 fn create_guest() -> User {
-    User::new("guest".to_string(), "password".to_string())
-        .roles(&["GUEST".to_string()])
+    User::new("guest".to_string(), "password".to_string()).roles(&["GUEST".to_string()])
 }
 
 #[test]
@@ -319,9 +345,7 @@ fn test_evaluate_deny_all() {
     let evaluator = ExpressionEvaluator::new();
     let user = create_admin_user();
 
-    let result = evaluator
-        .evaluate_str("denyAll()", Some(&user))
-        .unwrap();
+    let result = evaluator.evaluate_str("denyAll()", Some(&user)).unwrap();
     assert!(!result);
 }
 
@@ -333,13 +357,19 @@ fn test_evaluate_and_expression() {
 
     // Admin has both ADMIN role and write authority
     let result = evaluator
-        .evaluate_str("hasRole('ADMIN') AND hasAuthority('users:write')", Some(&admin))
+        .evaluate_str(
+            "hasRole('ADMIN') AND hasAuthority('users:write')",
+            Some(&admin),
+        )
         .unwrap();
     assert!(result);
 
     // User has USER role but not write authority
     let result = evaluator
-        .evaluate_str("hasRole('USER') AND hasAuthority('users:write')", Some(&user))
+        .evaluate_str(
+            "hasRole('USER') AND hasAuthority('users:write')",
+            Some(&user),
+        )
         .unwrap();
     assert!(!result);
 }
@@ -351,7 +381,10 @@ fn test_evaluate_or_expression() {
 
     // User doesn't have ADMIN but has users:read
     let result = evaluator
-        .evaluate_str("hasRole('ADMIN') OR hasAuthority('users:read')", Some(&user))
+        .evaluate_str(
+            "hasRole('ADMIN') OR hasAuthority('users:read')",
+            Some(&user),
+        )
         .unwrap();
     assert!(result);
 }
@@ -499,14 +532,10 @@ fn test_custom_expression_root() {
     let user = create_user();
 
     // Test custom isPremium function
-    let result = evaluator
-        .evaluate_str("isPremium()", Some(&admin))
-        .unwrap();
+    let result = evaluator.evaluate_str("isPremium()", Some(&admin)).unwrap();
     assert!(result);
 
-    let result = evaluator
-        .evaluate_str("isPremium()", Some(&user))
-        .unwrap();
+    let result = evaluator.evaluate_str("isPremium()", Some(&user)).unwrap();
     assert!(!result);
 }
 

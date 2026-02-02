@@ -687,8 +687,8 @@ impl JwtAuthenticator {
             return self.validate_token(token);
         }
 
-        let key = DecodingKey::from_rsa_pem(self.config.secret.as_bytes())
-            .map_err(JwtError::Decoding)?;
+        let key =
+            DecodingKey::from_rsa_pem(self.config.secret.as_bytes()).map_err(JwtError::Decoding)?;
 
         let mut validation = Validation::new(self.config.algorithm);
         validation.leeway = self.config.leeway_secs;
@@ -770,8 +770,7 @@ mod tests {
 
     #[test]
     fn test_token_service() {
-        let config = JwtConfig::new("super-secret-key-that-is-long-enough")
-            .expiration_hours(1);
+        let config = JwtConfig::new("super-secret-key-that-is-long-enough").expiration_hours(1);
 
         let service = JwtTokenService::new(config).refresh_expiration_days(7);
         let user = test_user();

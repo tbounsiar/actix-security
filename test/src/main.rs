@@ -8,7 +8,9 @@ use actix_web::{web, App, HttpServer};
 
 use actix_security_core::http::security::manager::AuthorizationManager;
 use actix_security_core::http::security::middleware::SecurityTransform;
-use actix_security_core::http::security::web::{Access, MemoryAuthenticator, RequestMatcherAuthorizer};
+use actix_security_core::http::security::web::{
+    Access, MemoryAuthenticator, RequestMatcherAuthorizer,
+};
 use actix_security_core::http::security::{
     Argon2PasswordEncoder, AuthenticationManager, PasswordEncoder, User,
 };
@@ -41,8 +43,7 @@ fn authenticator() -> MemoryAuthenticator {
                 .authorities(&["users:read".into()]),
         )
         .with_user(
-            User::with_encoded_password("guest", encoder.encode("guest"))
-                .roles(&["GUEST".into()]),
+            User::with_encoded_password("guest", encoder.encode("guest")).roles(&["GUEST".into()]),
         )
 }
 

@@ -19,13 +19,15 @@
 //! - Check console for audit logs
 
 use actix_security::http::security::{
-    account::{AccountLockManager, LockConfig, check_login},
+    account::{check_login, AccountLockManager, LockConfig},
     audit::{AuditLogger, SecurityEvent, SecurityEventType, StdoutHandler},
-    rate_limit::{RateLimiter, RateLimitConfig},
+    rate_limit::{RateLimitConfig, RateLimiter},
     Argon2PasswordEncoder, PasswordEncoder, SecurityHeaders, User,
 };
-use actix_session::{Session, SessionMiddleware, storage::CookieSessionStore};
-use actix_web::{cookie::Key, get, post, web, App, HttpRequest, HttpResponse, HttpServer, Responder};
+use actix_session::{storage::CookieSessionStore, Session, SessionMiddleware};
+use actix_web::{
+    cookie::Key, get, post, web, App, HttpRequest, HttpResponse, HttpServer, Responder,
+};
 use serde::Deserialize;
 use std::sync::Arc;
 
@@ -150,7 +152,8 @@ async fn login(
                 .ip_address(&ip)
                 .error("Account locked"),
         );
-        return HttpResponse::Forbidden().body("Account is locked. Please try again later.".to_string());
+        return HttpResponse::Forbidden()
+            .body("Account is locked. Please try again later.".to_string());
     }
 
     // Find user and verify password
@@ -181,7 +184,10 @@ async fn login(
             data.audit_logger
                 .log_login_failure(&form.username, &ip, "Invalid credentials");
 
-            let remaining = data.lock_manager.get_remaining_attempts(&form.username).await;
+            let remaining = data
+                .lock_manager
+                .get_remaining_attempts(&form.username)
+                .await;
 
             let message = if status.is_locked() {
                 "Account has been locked due to too many failed attempts. Please try again later."

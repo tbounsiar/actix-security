@@ -82,7 +82,7 @@ impl FromRequest for AuthenticatedUser {
 pub struct OptionalUser(Option<User>);
 
 impl OptionalUser {
-    /// Returns the inner Option<User>.
+    /// Returns the inner `Option<User>`.
     pub fn into_inner(self) -> Option<User> {
         self.0
     }

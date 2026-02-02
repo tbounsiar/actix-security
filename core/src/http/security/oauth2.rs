@@ -55,9 +55,7 @@ use oauth2::{
     AuthUrl, AuthorizationCode, ClientId, ClientSecret, CsrfToken, PkceCodeChallenge,
     PkceCodeVerifier, RedirectUrl, Scope, TokenResponse, TokenUrl,
 };
-use openidconnect::core::{
-    CoreAuthenticationFlow, CoreClient, CoreProviderMetadata,
-};
+use openidconnect::core::{CoreAuthenticationFlow, CoreClient, CoreProviderMetadata};
 use openidconnect::{
     ClientId as OidcClientId, ClientSecret as OidcClientSecret, IssuerUrl, Nonce,
     RedirectUrl as OidcRedirectUrl, TokenResponse as OidcTokenResponse,
@@ -133,9 +131,9 @@ impl OAuth2Provider {
             OAuth2Provider::Google => {
                 Some("https://accounts.google.com/.well-known/openid-configuration")
             }
-            OAuth2Provider::Microsoft => {
-                Some("https://login.microsoftonline.com/common/v2.0/.well-known/openid-configuration")
-            }
+            OAuth2Provider::Microsoft => Some(
+                "https://login.microsoftonline.com/common/v2.0/.well-known/openid-configuration",
+            ),
             OAuth2Provider::Apple => {
                 Some("https://appleid.apple.com/.well-known/openid-configuration")
             }
@@ -165,9 +163,7 @@ impl OAuth2Provider {
             OAuth2Provider::Microsoft => {
                 Some("https://login.microsoftonline.com/common/oauth2/v2.0/token")
             }
-            OAuth2Provider::Facebook => {
-                Some("https://graph.facebook.com/v18.0/oauth/access_token")
-            }
+            OAuth2Provider::Facebook => Some("https://graph.facebook.com/v18.0/oauth/access_token"),
             OAuth2Provider::Apple => Some("https://appleid.apple.com/auth/token"),
             _ => None,
         }
@@ -670,9 +666,7 @@ impl OAuth2Client {
     /// Generate an authorization URL for the OAuth2 flow
     ///
     /// Returns (authorization_url, state, pkce_verifier, nonce)
-    pub fn authorization_url(
-        &self,
-    ) -> (Url, CsrfToken, Option<PkceCodeVerifier>, Option<Nonce>) {
+    pub fn authorization_url(&self) -> (Url, CsrfToken, Option<PkceCodeVerifier>, Option<Nonce>) {
         if let Some(oidc_client) = &self.oidc_client {
             // OIDC flow with nonce
             let mut auth_request = oidc_client.authorize_url(
@@ -748,11 +742,11 @@ impl OAuth2Client {
 
             let id_token_verifier = oidc_client.id_token_verifier();
             let nonce_ref = nonce.cloned().unwrap_or_else(|| Nonce::new(String::new()));
-            let claims = id_token
-                .claims(&id_token_verifier, &nonce_ref)
-                .map_err(|e: openidconnect::ClaimsVerificationError| {
+            let claims = id_token.claims(&id_token_verifier, &nonce_ref).map_err(
+                |e: openidconnect::ClaimsVerificationError| {
                     OAuth2Error::TokenValidation(e.to_string())
-                })?;
+                },
+            )?;
 
             // Extract basic info from claims
             let subject = claims.subject().as_str().to_string();

@@ -597,7 +597,10 @@ mod tests {
 
         assert_eq!(config.url, "ldap://localhost:389");
         assert_eq!(config.base_dn, "dc=example,dc=com");
-        assert_eq!(config.bind_dn, Some("cn=admin,dc=example,dc=com".to_string()));
+        assert_eq!(
+            config.bind_dn,
+            Some("cn=admin,dc=example,dc=com".to_string())
+        );
     }
 
     #[test]
@@ -618,8 +621,8 @@ mod tests {
 
     #[test]
     fn test_build_user_dn() {
-        let config =
-            LdapConfig::new("ldap://localhost").user_dn_pattern("uid={0},ou=users,dc=example,dc=com");
+        let config = LdapConfig::new("ldap://localhost")
+            .user_dn_pattern("uid={0},ou=users,dc=example,dc=com");
 
         assert_eq!(
             config.build_user_dn("john"),

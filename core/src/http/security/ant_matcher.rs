@@ -258,8 +258,7 @@ impl AntMatcher {
             PatternSegment::Literal(literal) => {
                 if path_idx >= path_segments.len() {
                     // Check for empty literal (matches root)
-                    return literal.is_empty()
-                        && pattern_idx + 1 >= pattern_segments.len();
+                    return literal.is_empty() && pattern_idx + 1 >= pattern_segments.len();
                 }
 
                 let path_segment = path_segments[path_idx];
@@ -582,9 +581,7 @@ mod tests {
 
     #[test]
     fn test_ant_matchers_find() {
-        let matchers = AntMatchers::new()
-            .add("/api/**")
-            .add("/admin/**");
+        let matchers = AntMatchers::new().add("/api/**").add("/admin/**");
 
         let found = matchers.find_match("/api/users");
         assert!(found.is_some());
@@ -626,8 +623,14 @@ mod tests {
 
     #[test]
     fn test_pattern_segment_equality() {
-        assert_eq!(PatternSegment::SingleWildcard, PatternSegment::SingleWildcard);
-        assert_eq!(PatternSegment::DoubleWildcard, PatternSegment::DoubleWildcard);
+        assert_eq!(
+            PatternSegment::SingleWildcard,
+            PatternSegment::SingleWildcard
+        );
+        assert_eq!(
+            PatternSegment::DoubleWildcard,
+            PatternSegment::DoubleWildcard
+        );
         assert_eq!(
             PatternSegment::Literal("test".to_string()),
             PatternSegment::Literal("test".to_string())

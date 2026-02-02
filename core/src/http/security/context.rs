@@ -100,9 +100,7 @@ impl SecurityContext {
     /// }
     /// ```
     pub fn has_role(role: &str) -> bool {
-        Self::get_user()
-            .map(|u| u.has_role(role))
-            .unwrap_or(false)
+        Self::get_user().map(|u| u.has_role(role)).unwrap_or(false)
     }
 
     /// Checks if the current user has any of the specified roles.
@@ -153,9 +151,7 @@ impl SecurityContext {
     where
         F: std::future::Future<Output = R>,
     {
-        SECURITY_CONTEXT
-            .scope(RefCell::new(user), f)
-            .await
+        SECURITY_CONTEXT.scope(RefCell::new(user), f).await
     }
 
     /// Sets the user in the current security context.

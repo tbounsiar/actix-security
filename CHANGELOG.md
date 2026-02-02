@@ -107,7 +107,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - InMemoryUserDetailsService implementation
 
 ### Changed
-- Minimum Rust version is now 1.70
+- Minimum Rust version is now 1.78
 - Updated all dependencies to latest versions
 - Improved error messages and documentation
 - Reorganized module structure

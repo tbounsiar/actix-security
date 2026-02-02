@@ -32,7 +32,7 @@
 //! Click "Login with Keycloak" to start the OIDC flow.
 
 use actix_security::http::security::OAuth2Config;
-use actix_session::{Session, SessionMiddleware, storage::CookieSessionStore};
+use actix_session::{storage::CookieSessionStore, Session, SessionMiddleware};
 use actix_web::{cookie::Key, get, web, App, HttpResponse, HttpServer, Responder};
 use serde::{Deserialize, Serialize};
 use std::env;
@@ -235,9 +235,14 @@ async fn callback(
     let tokens: TokenResponse = match token_response {
         Ok(resp) => match resp.json().await {
             Ok(t) => t,
-            Err(e) => return HttpResponse::InternalServerError().body(format!("Token parse error: {}", e)),
+            Err(e) => {
+                return HttpResponse::InternalServerError()
+                    .body(format!("Token parse error: {}", e))
+            }
         },
-        Err(e) => return HttpResponse::InternalServerError().body(format!("Token exchange error: {}", e)),
+        Err(e) => {
+            return HttpResponse::InternalServerError().body(format!("Token exchange error: {}", e))
+        }
     };
 
     // Get user info
@@ -250,9 +255,14 @@ async fn callback(
     let userinfo: UserInfoResponse = match userinfo_response {
         Ok(resp) => match resp.json().await {
             Ok(u) => u,
-            Err(e) => return HttpResponse::InternalServerError().body(format!("Userinfo parse error: {}", e)),
+            Err(e) => {
+                return HttpResponse::InternalServerError()
+                    .body(format!("Userinfo parse error: {}", e))
+            }
         },
-        Err(e) => return HttpResponse::InternalServerError().body(format!("Userinfo error: {}", e)),
+        Err(e) => {
+            return HttpResponse::InternalServerError().body(format!("Userinfo error: {}", e))
+        }
     };
 
     // Extract roles from Keycloak token (realm_access.roles or resource_access)
@@ -260,7 +270,9 @@ async fn callback(
 
     // Store user in session
     let session_user = SessionUser {
-        username: userinfo.preferred_username.unwrap_or_else(|| userinfo.sub.clone()),
+        username: userinfo
+            .preferred_username
+            .unwrap_or_else(|| userinfo.sub.clone()),
         email: userinfo.email,
         name: userinfo.name,
         roles,
@@ -420,7 +432,9 @@ async fn main() -> std::io::Result<()> {
     println!("  Issuer: {}", config.issuer_url());
     println!();
     println!("Make sure Keycloak is running and configured:");
-    println!("  docker run -p 8180:8080 -e KEYCLOAK_ADMIN=admin -e KEYCLOAK_ADMIN_PASSWORD=admin \\");
+    println!(
+        "  docker run -p 8180:8080 -e KEYCLOAK_ADMIN=admin -e KEYCLOAK_ADMIN_PASSWORD=admin \\"
+    );
     println!("    quay.io/keycloak/keycloak:latest start-dev");
     println!();
     println!("Open http://localhost:8081 in your browser.");

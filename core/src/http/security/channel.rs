@@ -302,12 +302,8 @@ where
 
         // Check if redirect is needed
         let redirect_url = match requirement {
-            ChannelRequirement::Secure if !is_secure => {
-                Some(self.build_redirect_url(&req, true))
-            }
-            ChannelRequirement::Insecure if is_secure => {
-                Some(self.build_redirect_url(&req, false))
-            }
+            ChannelRequirement::Secure if !is_secure => Some(self.build_redirect_url(&req, true)),
+            ChannelRequirement::Insecure if is_secure => Some(self.build_redirect_url(&req, false)),
             _ => None,
         };
 
@@ -357,7 +353,11 @@ impl<S> ChannelSecurityService<S> {
         };
 
         // Build URL
-        let path_and_query = req.uri().path_and_query().map(|pq| pq.as_str()).unwrap_or("/");
+        let path_and_query = req
+            .uri()
+            .path_and_query()
+            .map(|pq| pq.as_str())
+            .unwrap_or("/");
 
         // Strip existing port from host
         let host_without_port = host.split(':').next().unwrap_or(&host);
@@ -369,7 +369,10 @@ impl<S> ChannelSecurityService<S> {
             format!(":{}", port)
         };
 
-        format!("{}://{}{}{}", scheme, host_without_port, port_str, path_and_query)
+        format!(
+            "{}://{}{}{}",
+            scheme, host_without_port, port_str, path_and_query
+        )
     }
 }
 
@@ -418,21 +421,14 @@ mod tests {
 
     #[test]
     fn test_config_require_https() {
-        let config = ChannelSecurityConfig::new()
-            .require_https(&["/login", "/api/**"]);
+        let config = ChannelSecurityConfig::new().require_https(&["/login", "/api/**"]);
 
-        assert_eq!(
-            config.get_requirement("/login"),
-            ChannelRequirement::Secure
-        );
+        assert_eq!(config.get_requirement("/login"), ChannelRequirement::Secure);
         assert_eq!(
             config.get_requirement("/api/users"),
             ChannelRequirement::Secure
         );
-        assert_eq!(
-            config.get_requirement("/public"),
-            ChannelRequirement::Any
-        );
+        assert_eq!(config.get_requirement("/public"), ChannelRequirement::Any);
     }
 
     #[test]
@@ -463,19 +459,16 @@ mod tests {
 
     #[test]
     fn test_config_redirect_status() {
-        let config = ChannelSecurityConfig::new()
-            .temporary_redirect();
+        let config = ChannelSecurityConfig::new().temporary_redirect();
         assert_eq!(config.redirect_status, StatusCode::FOUND);
 
-        let config = ChannelSecurityConfig::new()
-            .permanent_redirect_preserve_method();
+        let config = ChannelSecurityConfig::new().permanent_redirect_preserve_method();
         assert_eq!(config.redirect_status, StatusCode::PERMANENT_REDIRECT);
     }
 
     #[test]
     fn test_config_port_mapper() {
-        let config = ChannelSecurityConfig::new()
-            .port_mapper(8080, 8443);
+        let config = ChannelSecurityConfig::new().port_mapper(8080, 8443);
 
         assert_eq!(config.port_mapper.get_http_port(), 8080);
         assert_eq!(config.port_mapper.get_https_port(), 8443);
@@ -484,10 +477,7 @@ mod tests {
     #[test]
     fn test_channel_security_creation() {
         let cs = ChannelSecurity::https_everywhere();
-        assert_eq!(
-            cs.config().default_requirement,
-            ChannelRequirement::Secure
-        );
+        assert_eq!(cs.config().default_requirement, ChannelRequirement::Secure);
     }
 
     #[test]
@@ -501,10 +491,7 @@ mod tests {
             config.get_requirement("/admin/dashboard"),
             ChannelRequirement::Secure
         );
-        assert_eq!(
-            config.get_requirement("/login"),
-            ChannelRequirement::Secure
-        );
+        assert_eq!(config.get_requirement("/login"), ChannelRequirement::Secure);
         assert_eq!(
             config.get_requirement("/public/css/style.css"),
             ChannelRequirement::Any

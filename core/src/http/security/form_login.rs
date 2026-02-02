@@ -27,7 +27,9 @@
 //! // and redirects on success/failure
 //! ```
 
-use crate::http::security::session::{CredentialAuthenticator, SessionAuthenticator, SessionConfig};
+use crate::http::security::session::{
+    CredentialAuthenticator, SessionAuthenticator, SessionConfig,
+};
 use crate::http::security::User;
 use actix_web::http::header::LOCATION;
 use actix_web::HttpResponse;
@@ -462,11 +464,7 @@ where
     A: CredentialAuthenticator + Clone,
 {
     /// Create a new form login service.
-    pub fn new(
-        authenticator: A,
-        config: FormLoginConfig,
-        session_config: SessionConfig,
-    ) -> Self {
+    pub fn new(authenticator: A, config: FormLoginConfig, session_config: SessionConfig) -> Self {
         Self {
             authenticator,
             handler: FormLoginHandler::new(config, session_config),

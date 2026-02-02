@@ -356,9 +356,8 @@ impl RememberMeServices {
 
     /// Create a remember-me cookie with the given value.
     fn create_cookie(&self, value: String) -> Cookie<'static> {
-        let max_age = actix_web::cookie::time::Duration::seconds(
-            self.config.token_validity.as_secs() as i64,
-        );
+        let max_age =
+            actix_web::cookie::time::Duration::seconds(self.config.token_validity.as_secs() as i64);
 
         let mut cookie = Cookie::build(self.config.cookie_name.clone(), value)
             .path(self.config.cookie_path.clone())
@@ -441,8 +440,7 @@ mod tests {
     use super::*;
 
     fn test_user() -> User {
-        User::new("testuser".to_string(), "password".to_string())
-            .roles(&["USER".into()])
+        User::new("testuser".to_string(), "password".to_string()).roles(&["USER".into()])
     }
 
     #[test]
@@ -454,7 +452,10 @@ mod tests {
             .parameter_name("rememberMe");
 
         assert_eq!(config.get_key(), "secret");
-        assert_eq!(config.get_token_validity(), Duration::from_secs(7 * 24 * 60 * 60));
+        assert_eq!(
+            config.get_token_validity(),
+            Duration::from_secs(7 * 24 * 60 * 60)
+        );
         assert_eq!(config.get_cookie_name(), "my-remember-me");
         assert_eq!(config.get_parameter_name(), "rememberMe");
     }

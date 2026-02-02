@@ -5,3 +5,4 @@ Cargo.lock
 .vscode
 .mcp.json
 docs/book
+CLAUDE.md

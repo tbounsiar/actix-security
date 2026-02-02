@@ -4,3 +4,4 @@ Cargo.lock
 .claude
 .vscode
 .mcp.json
+docs/book

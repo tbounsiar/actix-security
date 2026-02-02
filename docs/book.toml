@@ -18,7 +18,7 @@ site-url = "/actix-security/"
 cname = ""
 input-404 = "404.md"
 additional-css = ["theme/pagetoc.css"]
-additional-js = ["theme/pagetoc.js"]
+additional-js = ["theme/pagetoc.js", "theme/version-selector.js"]
 
 [output.html.fold]
 enable = true

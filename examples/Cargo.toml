@@ -1,6 +1,6 @@
 [package]
 name = "actix-security-examples"
-version = "0.2.0"
+version = "0.2.1"
 edition = "2021"
 publish = false
 description = "Examples and integration tests for actix-security"

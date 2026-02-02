@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-02-02
+
+### Fixed
+- Correct minimum supported Rust version (MSRV) to 1.78 for Cargo.lock v4 compatibility
+- Fix clippy warning: use `std::io::Error::other()` instead of deprecated pattern
+- Fix rustdoc warning: escape generic type in documentation comments
+- Fix GitHub Actions workflow using correct `dtolnay/rust-toolchain` action
+
+### Changed
+- Add versioned documentation support with version selector
+- Remove generated `docs/book` from version control
+
 ## [0.2.0] - 2026-02-02
 
 ### Added
@@ -131,6 +143,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Security headers middleware
 - Security context for accessing current user
 
-[Unreleased]: https://github.com/tbounsiar/actix-security/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/tbounsiar/actix-security/compare/v0.2.1...HEAD
+[0.2.1]: https://github.com/tbounsiar/actix-security/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/tbounsiar/actix-security/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/tbounsiar/actix-security/releases/tag/v0.1.0

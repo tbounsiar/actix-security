@@ -13,7 +13,7 @@ env:
 jobs:
   test:
     name: Test Suite
-    runs-on: [self-hosted, Linux]
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         rust: [stable, beta, 1.78.0]
@@ -44,7 +44,7 @@ jobs:
 
   fmt:
     name: Rustfmt
-    runs-on: [self-hosted, Linux]
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
@@ -58,7 +58,7 @@ jobs:
 
   clippy:
     name: Clippy
-    runs-on: [self-hosted, Linux]
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
@@ -83,7 +83,7 @@ jobs:
 
   docs:
     name: Documentation
-    runs-on: [self-hosted, Linux]
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
@@ -108,7 +108,7 @@ jobs:
 
   examples:
     name: Examples
-    runs-on: [self-hosted, Linux]
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
@@ -131,7 +131,7 @@ jobs:
 
   coverage:
     name: Code Coverage
-    runs-on: [self-hosted, Linux]
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 

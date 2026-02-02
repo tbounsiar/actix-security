@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["admin","basic_auth","guest","user"]};

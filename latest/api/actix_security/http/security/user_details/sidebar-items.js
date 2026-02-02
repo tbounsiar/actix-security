@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["UserDetailsError"],"struct":["CachingUserDetailsService","InMemoryUserDetailsService","UserDetailsAuthenticator"],"trait":["UserDetailsManager","UserDetailsService"]};

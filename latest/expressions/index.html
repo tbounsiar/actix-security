@@ -1,0 +1,371 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Expression Language - Actix Security</title>
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="Spring Security-inspired authentication and authorization for Actix Web">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="../theme/pagetoc.css">
+
+    </head>
+    <body class="sidebar-visible no-js">
+    <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "ayu" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('light')
+            html.classList.add(theme);
+            var body = document.querySelector('body');
+            body.classList.remove('no-js')
+            body.classList.add('js');
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var body = document.querySelector('body');
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            body.classList.remove('sidebar-visible');
+            body.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item affix "><a href="../introduction.html">Introduction</a></li><li class="chapter-item affix "><li class="part-title">Getting Started</li><li class="chapter-item "><a href="../getting-started/quick-start.html"><strong aria-hidden="true">1.</strong> Quick Start</a></li><li class="chapter-item "><a href="../getting-started/installation.html"><strong aria-hidden="true">2.</strong> Installation</a></li><li class="chapter-item "><a href="../getting-started/first-app.html"><strong aria-hidden="true">3.</strong> Your First Secured App</a></li><li class="chapter-item affix "><li class="part-title">Core Concepts</li><li class="chapter-item "><a href="../authentication/index.html"><strong aria-hidden="true">4.</strong> Authentication</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../authentication/memory.html"><strong aria-hidden="true">4.1.</strong> In-Memory Authentication</a></li><li class="chapter-item "><a href="../authentication/password-encoding.html"><strong aria-hidden="true">4.2.</strong> Password Encoding</a></li><li class="chapter-item "><a href="../authentication/http-basic.html"><strong aria-hidden="true">4.3.</strong> HTTP Basic</a></li><li class="chapter-item "><a href="../authentication/jwt.html"><strong aria-hidden="true">4.4.</strong> JWT Authentication</a></li><li class="chapter-item "><a href="../authentication/session-auth.html"><strong aria-hidden="true">4.5.</strong> Session Authentication</a></li><li class="chapter-item "><a href="../authentication/oauth2.html"><strong aria-hidden="true">4.6.</strong> OAuth2 / OIDC</a></li><li class="chapter-item "><a href="../authentication/custom.html"><strong aria-hidden="true">4.7.</strong> Custom Authenticators</a></li></ol></li><li class="chapter-item "><a href="../authorization/index.html"><strong aria-hidden="true">5.</strong> Authorization</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../authorization/url-based.html"><strong aria-hidden="true">5.1.</strong> URL-Based Authorization</a></li><li class="chapter-item "><a href="../authorization/method-security.html"><strong aria-hidden="true">5.2.</strong> Method Security</a></li><li class="chapter-item "><a href="../authorization/roles-authorities.html"><strong aria-hidden="true">5.3.</strong> Roles vs Authorities</a></li><li class="chapter-item "><a href="../authorization/custom.html"><strong aria-hidden="true">5.4.</strong> Custom Authorizers</a></li></ol></li><li class="chapter-item "><li class="part-title">Macros & Annotations</li><li class="chapter-item "><a href="../macros/index.html"><strong aria-hidden="true">6.</strong> Overview</a></li><li class="chapter-item "><a href="../macros/secured.html"><strong aria-hidden="true">7.</strong> @secured</a></li><li class="chapter-item "><a href="../macros/pre-authorize.html"><strong aria-hidden="true">8.</strong> @pre_authorize</a></li><li class="chapter-item "><a href="../macros/permit-all.html"><strong aria-hidden="true">9.</strong> @permit_all</a></li><li class="chapter-item "><a href="../macros/deny-all.html"><strong aria-hidden="true">10.</strong> @deny_all</a></li><li class="chapter-item "><a href="../macros/roles-allowed.html"><strong aria-hidden="true">11.</strong> @roles_allowed</a></li><li class="chapter-item affix "><li class="part-title">Security Expressions</li><li class="chapter-item expanded "><a href="../expressions/index.html" class="active"><strong aria-hidden="true">12.</strong> Expression Language</a></li><li class="chapter-item "><a href="../expressions/builtin.html"><strong aria-hidden="true">13.</strong> Built-in Functions</a></li><li class="chapter-item "><a href="../expressions/custom.html"><strong aria-hidden="true">14.</strong> Custom Expressions</a></li><li class="chapter-item affix "><li class="part-title">Additional Features</li><li class="chapter-item "><a href="../features/security-headers.html"><strong aria-hidden="true">15.</strong> Security Headers</a></li><li class="chapter-item "><a href="../features/security-context.html"><strong aria-hidden="true">16.</strong> Security Context</a></li><li class="chapter-item "><a href="../features/csrf-protection.html"><strong aria-hidden="true">17.</strong> CSRF Protection</a></li><li class="chapter-item "><a href="../features/rate-limiting.html"><strong aria-hidden="true">18.</strong> Rate Limiting</a></li><li class="chapter-item "><a href="../features/account-locking.html"><strong aria-hidden="true">19.</strong> Account Locking</a></li><li class="chapter-item "><a href="../features/audit-logging.html"><strong aria-hidden="true">20.</strong> Audit Logging</a></li><li class="chapter-item "><a href="../features/remember-me.html"><strong aria-hidden="true">21.</strong> Remember-Me</a></li><li class="chapter-item "><a href="../features/channel-security.html"><strong aria-hidden="true">22.</strong> Channel Security</a></li><li class="chapter-item "><a href="../features/ldap.html"><strong aria-hidden="true">23.</strong> LDAP Authentication</a></li><li class="chapter-item "><a href="../features/saml.html"><strong aria-hidden="true">24.</strong> SAML 2.0 Authentication</a></li><li class="chapter-item affix "><li class="part-title">Advanced Topics</li><li class="chapter-item "><a href="../advanced/architecture.html"><strong aria-hidden="true">25.</strong> Architecture</a></li><li class="chapter-item "><a href="../advanced/extending.html"><strong aria-hidden="true">26.</strong> Extending the Framework</a></li><li class="chapter-item "><a href="../advanced/testing.html"><strong aria-hidden="true">27.</strong> Testing</a></li><li class="chapter-item affix "><li class="part-title">Reference</li><li class="chapter-item "><a href="../reference/api.html"><strong aria-hidden="true">28.</strong> API Documentation</a></li><li class="chapter-item "><a href="../reference/spring-comparison.html"><strong aria-hidden="true">29.</strong> Spring Security Comparison</a></li><li class="chapter-item "><a href="../reference/migration.html"><strong aria-hidden="true">30.</strong> Migration Guide</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <!-- Track and set sidebar scroll position -->
+        <script>
+            var sidebarScrollbox = document.querySelector('#sidebar .sidebar-scrollbox');
+            sidebarScrollbox.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    sessionStorage.setItem('sidebar-scroll', sidebarScrollbox.scrollTop);
+                }
+            }, { passive: true });
+            var sidebarScrollTop = sessionStorage.getItem('sidebar-scroll');
+            sessionStorage.removeItem('sidebar-scroll');
+            if (sidebarScrollTop) {
+                // preserve sidebar scroll position when navigating via links within sidebar
+                sidebarScrollbox.scrollTop = sidebarScrollTop;
+            } else {
+                // scroll sidebar to current active section when navigating via "next/previous chapter" buttons
+                var activeSection = document.querySelector('#sidebar .active');
+                if (activeSection) {
+                    activeSection.scrollIntoView({ block: 'center' });
+                }
+            }
+        </script>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Actix Security</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/tbounsiar/actix-security" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+                        <a href="https://github.com/tbounsiar/actix-security/edit/main/docs/src/expressions/index.md" title="Suggest an edit" aria-label="Suggest an edit">
+                            <i id="git-edit-button" class="fa fa-edit"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="security-expression-language"><a class="header" href="#security-expression-language">Security Expression Language</a></h1>
+<p>Actix Security includes a powerful expression language inspired by Spring Security's SpEL (Spring Expression Language) for security.</p>
+<h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
+<p>Security expressions allow you to write complex authorization rules in a readable, declarative syntax:</p>
+<pre><code class="language-rust">#[pre_authorize("hasRole('ADMIN') OR (hasRole('USER') AND hasAuthority('posts:write'))")]</code></pre>
+<h2 id="key-features"><a class="header" href="#key-features">Key Features</a></h2>
+<ul>
+<li><strong>Compile-time parsing</strong> - Expressions are validated at compile time</li>
+<li><strong>Zero runtime overhead</strong> - Expressions are compiled to Rust code</li>
+<li><strong>Extensible</strong> - Add custom functions via <code>ExpressionRoot</code> trait</li>
+<li><strong>Familiar syntax</strong> - Similar to Spring Security SpEL</li>
+</ul>
+<h2 id="expression-syntax"><a class="header" href="#expression-syntax">Expression Syntax</a></h2>
+<h3 id="functions"><a class="header" href="#functions">Functions</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Function</th><th>Description</th><th>Example</th></tr></thead><tbody>
+<tr><td><code>hasRole('R')</code></td><td>User has role R</td><td><code>hasRole('ADMIN')</code></td></tr>
+<tr><td><code>hasAnyRole('R1', 'R2')</code></td><td>User has any of the roles</td><td><code>hasAnyRole('ADMIN', 'MANAGER')</code></td></tr>
+<tr><td><code>hasAuthority('A')</code></td><td>User has authority A</td><td><code>hasAuthority('users:read')</code></td></tr>
+<tr><td><code>hasAnyAuthority('A1', 'A2')</code></td><td>User has any of the authorities</td><td><code>hasAnyAuthority('read', 'write')</code></td></tr>
+<tr><td><code>isAuthenticated()</code></td><td>User is authenticated</td><td><code>isAuthenticated()</code></td></tr>
+<tr><td><code>permitAll()</code></td><td>Always true</td><td><code>permitAll()</code></td></tr>
+<tr><td><code>denyAll()</code></td><td>Always false</td><td><code>denyAll()</code></td></tr>
+</tbody></table>
+</div>
+<h3 id="operators"><a class="header" href="#operators">Operators</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Operator</th><th>Description</th><th>Example</th></tr></thead><tbody>
+<tr><td><code>AND</code></td><td>Both must be true</td><td><code>hasRole('A') AND hasRole('B')</code></td></tr>
+<tr><td><code>OR</code></td><td>Either can be true</td><td><code>hasRole('A') OR hasRole('B')</code></td></tr>
+<tr><td><code>NOT</code></td><td>Negation</td><td><code>NOT hasRole('GUEST')</code></td></tr>
+<tr><td><code>( )</code></td><td>Grouping</td><td><code>(hasRole('A') OR hasRole('B')) AND hasAuthority('x')</code></td></tr>
+</tbody></table>
+</div>
+<h2 id="examples"><a class="header" href="#examples">Examples</a></h2>
+<h3 id="basic-expressions"><a class="header" href="#basic-expressions">Basic Expressions</a></h3>
+<pre><code class="language-rust">// Single role check
+#[pre_authorize("hasRole('ADMIN')")]
+
+// Single authority check
+#[pre_authorize("hasAuthority('posts:write')")]
+
+// Any of multiple roles
+#[pre_authorize("hasAnyRole('ADMIN', 'MANAGER', 'SUPERVISOR')")]
+
+// Any of multiple authorities
+#[pre_authorize("hasAnyAuthority('read', 'write', 'delete')")]
+
+// Authenticated user
+#[pre_authorize("isAuthenticated()")]</code></pre>
+<h3 id="combining-conditions"><a class="header" href="#combining-conditions">Combining Conditions</a></h3>
+<pre><code class="language-rust">// AND - both must be true
+#[pre_authorize("hasRole('USER') AND hasAuthority('premium')")]
+
+// OR - either can be true
+#[pre_authorize("hasRole('ADMIN') OR hasAuthority('users:manage')")]
+
+// NOT - negation
+#[pre_authorize("NOT hasRole('GUEST')")]
+#[pre_authorize("isAuthenticated() AND NOT hasRole('SUSPENDED')")]</code></pre>
+<h3 id="complex-expressions"><a class="header" href="#complex-expressions">Complex Expressions</a></h3>
+<pre><code class="language-rust">// Admin OR (User with write permission)
+#[pre_authorize("hasRole('ADMIN') OR (hasRole('USER') AND hasAuthority('posts:write'))")]
+
+// Multiple groups
+#[pre_authorize("(hasRole('ADMIN') OR hasRole('MANAGER')) AND hasAuthority('reports:view')")]
+
+// Nested conditions
+#[pre_authorize("hasRole('ADMIN') OR (hasRole('USER') AND (hasAuthority('a') OR hasAuthority('b')))")]</code></pre>
+<h2 id="compile-time-validation"><a class="header" href="#compile-time-validation">Compile-Time Validation</a></h2>
+<p>Expressions are parsed and validated at compile time:</p>
+<pre><code class="language-rust">// ✓ Valid
+#[pre_authorize("hasRole('ADMIN') AND hasAuthority('write')")]
+
+// ✗ Compile error: Use 'AND' not '&amp;&amp;'
+#[pre_authorize("hasRole('ADMIN') &amp;&amp; hasAuthority('write')")]
+
+// ✗ Compile error: Unknown function
+#[pre_authorize("hasPermission('admin')")]
+
+// ✗ Compile error: Syntax error
+#[pre_authorize("hasRole('ADMIN'")]</code></pre>
+<h2 id="how-it-works"><a class="header" href="#how-it-works">How It Works</a></h2>
+<h3 id="1-parse-at-compile-time"><a class="header" href="#1-parse-at-compile-time">1. Parse at Compile Time</a></h3>
+<p>The expression is parsed into an AST:</p>
+<pre><code>hasRole('ADMIN') OR hasAuthority('write')
+                 ↓
+         Binary(OR)
+        /         \
+   hasRole      hasAuthority
+   ('ADMIN')    ('write')
+</code></pre>
+<h3 id="2-generate-rust-code"><a class="header" href="#2-generate-rust-code">2. Generate Rust Code</a></h3>
+<p>The AST is compiled to Rust code:</p>
+<pre><code class="language-rust">// Expression: hasRole('ADMIN') OR hasAuthority('write')
+// Generates:
+user.has_role("ADMIN") || user.has_authority("write")</code></pre>
+<h3 id="3-execute-at-runtime"><a class="header" href="#3-execute-at-runtime">3. Execute at Runtime</a></h3>
+<p>The generated Rust code executes with zero parsing overhead.</p>
+<h2 id="spring-security-comparison"><a class="header" href="#spring-security-comparison">Spring Security Comparison</a></h2>
+<p><strong>Spring Security (Java):</strong></p>
+<pre><code class="language-java">@PreAuthorize("hasRole('ADMIN') or hasAuthority('users:write')")
+public void updateUser() {}
+
+@PreAuthorize("hasAnyRole('ADMIN', 'MANAGER') and hasAuthority('reports:view')")
+public void viewReports() {}
+
+@PreAuthorize("isAuthenticated() and !hasRole('GUEST')")
+public void premiumContent() {}
+</code></pre>
+<p><strong>Actix Security (Rust):</strong></p>
+<pre><code class="language-rust">#[pre_authorize("hasRole('ADMIN') OR hasAuthority('users:write')")]
+async fn update_user() {}
+
+#[pre_authorize("hasAnyRole('ADMIN', 'MANAGER') AND hasAuthority('reports:view')")]
+async fn view_reports() {}
+
+#[pre_authorize("isAuthenticated() AND NOT hasRole('GUEST')")]
+async fn premium_content() {}</code></pre>
+<p>Key differences:</p>
+<ul>
+<li>Use <code>AND</code>/<code>OR</code>/<code>NOT</code> instead of <code>and</code>/<code>or</code>/<code>!</code> (case-insensitive)</li>
+<li>Use single quotes for strings: <code>'ADMIN'</code> not <code>"ADMIN"</code></li>
+</ul>
+<h2 id="sections"><a class="header" href="#sections">Sections</a></h2>
+<ul>
+<li><a href="./builtin.html">Built-in Functions</a> - Detailed function reference</li>
+<li><a href="./custom.html">Custom Expressions</a> - Extend with your own functions</li>
+</ul>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../macros/roles-allowed.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../expressions/builtin.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../macros/roles-allowed.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../expressions/builtin.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+        <script>
+            window.playground_line_numbers = true;
+        </script>
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+        <script src="../ace.js"></script>
+        <script src="../editor.js"></script>
+        <script src="../mode-rust.js"></script>
+        <script src="../theme-dawn.js"></script>
+        <script src="../theme-tomorrow_night.js"></script>
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+        <script src="../theme/pagetoc.js"></script>
+        <script src="../theme/version-selector.js"></script>
+
+
+    </div>
+    </body>
+</html>

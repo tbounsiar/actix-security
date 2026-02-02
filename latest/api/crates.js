@@ -1,0 +1,2 @@
+window.ALL_CRATES = ["actix_security","actix_security_codegen","actix_security_core","actix_security_examples","actix_security_test","basic_auth","form_login","jwt_auth","oidc_keycloak","security_complete","security_headers","session_auth"];
+//{"start":21,"fragment_lengths":[16,25,22,26,22,13,13,11,16,20,19,15]}

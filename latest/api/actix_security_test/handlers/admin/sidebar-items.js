@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":["admin_dashboard","admin_users","user_settings"]};

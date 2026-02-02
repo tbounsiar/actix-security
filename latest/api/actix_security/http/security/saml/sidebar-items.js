@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["AuthnContextClass","NameIdFormat","SamlBinding","SamlError","SamlStatusCode"],"struct":["AuthnRequest","SamlAssertion","SamlAuthResult","SamlAuthenticator","SamlConfig","SamlResponse"]};

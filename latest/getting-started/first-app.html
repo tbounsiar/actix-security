@@ -1,0 +1,461 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Your First Secured App - Actix Security</title>
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="Spring Security-inspired authentication and authorization for Actix Web">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="../theme/pagetoc.css">
+
+    </head>
+    <body class="sidebar-visible no-js">
+    <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "ayu" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('light')
+            html.classList.add(theme);
+            var body = document.querySelector('body');
+            body.classList.remove('no-js')
+            body.classList.add('js');
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var body = document.querySelector('body');
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            body.classList.remove('sidebar-visible');
+            body.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item affix "><a href="../introduction.html">Introduction</a></li><li class="chapter-item affix "><li class="part-title">Getting Started</li><li class="chapter-item "><a href="../getting-started/quick-start.html"><strong aria-hidden="true">1.</strong> Quick Start</a></li><li class="chapter-item "><a href="../getting-started/installation.html"><strong aria-hidden="true">2.</strong> Installation</a></li><li class="chapter-item expanded "><a href="../getting-started/first-app.html" class="active"><strong aria-hidden="true">3.</strong> Your First Secured App</a></li><li class="chapter-item affix "><li class="part-title">Core Concepts</li><li class="chapter-item "><a href="../authentication/index.html"><strong aria-hidden="true">4.</strong> Authentication</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../authentication/memory.html"><strong aria-hidden="true">4.1.</strong> In-Memory Authentication</a></li><li class="chapter-item "><a href="../authentication/password-encoding.html"><strong aria-hidden="true">4.2.</strong> Password Encoding</a></li><li class="chapter-item "><a href="../authentication/http-basic.html"><strong aria-hidden="true">4.3.</strong> HTTP Basic</a></li><li class="chapter-item "><a href="../authentication/jwt.html"><strong aria-hidden="true">4.4.</strong> JWT Authentication</a></li><li class="chapter-item "><a href="../authentication/session-auth.html"><strong aria-hidden="true">4.5.</strong> Session Authentication</a></li><li class="chapter-item "><a href="../authentication/oauth2.html"><strong aria-hidden="true">4.6.</strong> OAuth2 / OIDC</a></li><li class="chapter-item "><a href="../authentication/custom.html"><strong aria-hidden="true">4.7.</strong> Custom Authenticators</a></li></ol></li><li class="chapter-item "><a href="../authorization/index.html"><strong aria-hidden="true">5.</strong> Authorization</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../authorization/url-based.html"><strong aria-hidden="true">5.1.</strong> URL-Based Authorization</a></li><li class="chapter-item "><a href="../authorization/method-security.html"><strong aria-hidden="true">5.2.</strong> Method Security</a></li><li class="chapter-item "><a href="../authorization/roles-authorities.html"><strong aria-hidden="true">5.3.</strong> Roles vs Authorities</a></li><li class="chapter-item "><a href="../authorization/custom.html"><strong aria-hidden="true">5.4.</strong> Custom Authorizers</a></li></ol></li><li class="chapter-item "><li class="part-title">Macros & Annotations</li><li class="chapter-item "><a href="../macros/index.html"><strong aria-hidden="true">6.</strong> Overview</a></li><li class="chapter-item "><a href="../macros/secured.html"><strong aria-hidden="true">7.</strong> @secured</a></li><li class="chapter-item "><a href="../macros/pre-authorize.html"><strong aria-hidden="true">8.</strong> @pre_authorize</a></li><li class="chapter-item "><a href="../macros/permit-all.html"><strong aria-hidden="true">9.</strong> @permit_all</a></li><li class="chapter-item "><a href="../macros/deny-all.html"><strong aria-hidden="true">10.</strong> @deny_all</a></li><li class="chapter-item "><a href="../macros/roles-allowed.html"><strong aria-hidden="true">11.</strong> @roles_allowed</a></li><li class="chapter-item affix "><li class="part-title">Security Expressions</li><li class="chapter-item "><a href="../expressions/index.html"><strong aria-hidden="true">12.</strong> Expression Language</a></li><li class="chapter-item "><a href="../expressions/builtin.html"><strong aria-hidden="true">13.</strong> Built-in Functions</a></li><li class="chapter-item "><a href="../expressions/custom.html"><strong aria-hidden="true">14.</strong> Custom Expressions</a></li><li class="chapter-item affix "><li class="part-title">Additional Features</li><li class="chapter-item "><a href="../features/security-headers.html"><strong aria-hidden="true">15.</strong> Security Headers</a></li><li class="chapter-item "><a href="../features/security-context.html"><strong aria-hidden="true">16.</strong> Security Context</a></li><li class="chapter-item "><a href="../features/csrf-protection.html"><strong aria-hidden="true">17.</strong> CSRF Protection</a></li><li class="chapter-item "><a href="../features/rate-limiting.html"><strong aria-hidden="true">18.</strong> Rate Limiting</a></li><li class="chapter-item "><a href="../features/account-locking.html"><strong aria-hidden="true">19.</strong> Account Locking</a></li><li class="chapter-item "><a href="../features/audit-logging.html"><strong aria-hidden="true">20.</strong> Audit Logging</a></li><li class="chapter-item "><a href="../features/remember-me.html"><strong aria-hidden="true">21.</strong> Remember-Me</a></li><li class="chapter-item "><a href="../features/channel-security.html"><strong aria-hidden="true">22.</strong> Channel Security</a></li><li class="chapter-item "><a href="../features/ldap.html"><strong aria-hidden="true">23.</strong> LDAP Authentication</a></li><li class="chapter-item "><a href="../features/saml.html"><strong aria-hidden="true">24.</strong> SAML 2.0 Authentication</a></li><li class="chapter-item affix "><li class="part-title">Advanced Topics</li><li class="chapter-item "><a href="../advanced/architecture.html"><strong aria-hidden="true">25.</strong> Architecture</a></li><li class="chapter-item "><a href="../advanced/extending.html"><strong aria-hidden="true">26.</strong> Extending the Framework</a></li><li class="chapter-item "><a href="../advanced/testing.html"><strong aria-hidden="true">27.</strong> Testing</a></li><li class="chapter-item affix "><li class="part-title">Reference</li><li class="chapter-item "><a href="../reference/api.html"><strong aria-hidden="true">28.</strong> API Documentation</a></li><li class="chapter-item "><a href="../reference/spring-comparison.html"><strong aria-hidden="true">29.</strong> Spring Security Comparison</a></li><li class="chapter-item "><a href="../reference/migration.html"><strong aria-hidden="true">30.</strong> Migration Guide</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <!-- Track and set sidebar scroll position -->
+        <script>
+            var sidebarScrollbox = document.querySelector('#sidebar .sidebar-scrollbox');
+            sidebarScrollbox.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    sessionStorage.setItem('sidebar-scroll', sidebarScrollbox.scrollTop);
+                }
+            }, { passive: true });
+            var sidebarScrollTop = sessionStorage.getItem('sidebar-scroll');
+            sessionStorage.removeItem('sidebar-scroll');
+            if (sidebarScrollTop) {
+                // preserve sidebar scroll position when navigating via links within sidebar
+                sidebarScrollbox.scrollTop = sidebarScrollTop;
+            } else {
+                // scroll sidebar to current active section when navigating via "next/previous chapter" buttons
+                var activeSection = document.querySelector('#sidebar .active');
+                if (activeSection) {
+                    activeSection.scrollIntoView({ block: 'center' });
+                }
+            }
+        </script>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Actix Security</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/tbounsiar/actix-security" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+                        <a href="https://github.com/tbounsiar/actix-security/edit/main/docs/src/getting-started/first-app.md" title="Suggest an edit" aria-label="Suggest an edit">
+                            <i id="git-edit-button" class="fa fa-edit"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="your-first-secured-app"><a class="header" href="#your-first-secured-app">Your First Secured App</a></h1>
+<p>This guide walks you through building a complete secured application step by step.</p>
+<h2 id="what-well-build"><a class="header" href="#what-well-build">What We'll Build</a></h2>
+<p>A simple REST API with:</p>
+<ul>
+<li>Public endpoints (no auth required)</li>
+<li>User-only endpoints (requires USER role)</li>
+<li>Admin-only endpoints (requires ADMIN role)</li>
+<li>Authority-based endpoints (requires specific permissions)</li>
+</ul>
+<h2 id="project-setup"><a class="header" href="#project-setup">Project Setup</a></h2>
+<pre><code class="language-bash">cargo new my-secured-app
+cd my-secured-app
+</code></pre>
+<p>Update <code>Cargo.toml</code>:</p>
+<pre><code class="language-toml">[package]
+name = "my-secured-app"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+actix-web = "4"
+actix-security = { version = "0.2", features = ["argon2", "http-basic"] }
+tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
+</code></pre>
+<h2 id="step-1-define-your-users"><a class="header" href="#step-1-define-your-users">Step 1: Define Your Users</a></h2>
+<p>First, create a function that configures your user store:</p>
+<pre><code class="language-rust">use actix_security::http::security::{
+    AuthenticationManager, Argon2PasswordEncoder, PasswordEncoder, User,
+};
+use actix_security::http::security::web::MemoryAuthenticator;
+
+fn create_authenticator(encoder: Argon2PasswordEncoder) -&gt; MemoryAuthenticator {
+    AuthenticationManager::in_memory_authentication()
+        .password_encoder(encoder.clone())
+        // Admin user with full access
+        .with_user(
+            User::with_encoded_password("admin", encoder.encode("admin123"))
+                .roles(&amp;["ADMIN".into(), "USER".into()])
+                .authorities(&amp;[
+                    "users:read".into(),
+                    "users:write".into(),
+                    "posts:read".into(),
+                    "posts:write".into(),
+                ])
+        )
+        // Regular user
+        .with_user(
+            User::with_encoded_password("user", encoder.encode("user123"))
+                .roles(&amp;["USER".into()])
+                .authorities(&amp;["posts:read".into()])
+        )
+        // Guest with limited access
+        .with_user(
+            User::with_encoded_password("guest", encoder.encode("guest123"))
+                .roles(&amp;["GUEST".into()])
+        )
+}</code></pre>
+<h2 id="step-2-configure-url-based-authorization"><a class="header" href="#step-2-configure-url-based-authorization">Step 2: Configure URL-Based Authorization</a></h2>
+<p>Create rules for URL patterns:</p>
+<pre><code class="language-rust">use actix_security::http::security::{AuthorizationManager, Access};
+use actix_security::http::security::web::RequestMatcherAuthorizer;
+
+fn create_authorizer() -&gt; RequestMatcherAuthorizer {
+    AuthorizationManager::request_matcher()
+        .login_url("/login")
+        .http_basic()
+        // Admin section requires ADMIN role
+        .add_matcher("/admin/.*", Access::new().roles(vec!["ADMIN"]))
+        // API requires authentication
+        .add_matcher("/api/.*", Access::new().authenticated())
+        // Everything else is public
+}</code></pre>
+<h2 id="step-3-create-your-handlers"><a class="header" href="#step-3-create-your-handlers">Step 3: Create Your Handlers</a></h2>
+<pre><code class="language-rust">use actix_web::{get, post, web, HttpResponse, Responder};
+use actix_security::{secured, pre_authorize, permit_all};
+use actix_security::http::security::AuthenticatedUser;
+
+// ============= Public Endpoints =============
+
+#[permit_all]
+#[get("/")]
+async fn index() -&gt; impl Responder {
+    HttpResponse::Ok().body("Welcome to My App!")
+}
+
+#[permit_all]
+#[get("/health")]
+async fn health() -&gt; impl Responder {
+    HttpResponse::Ok().body("OK")
+}
+
+// ============= User Endpoints =============
+
+#[secured("USER")]
+#[get("/profile")]
+async fn get_profile(user: AuthenticatedUser) -&gt; impl Responder {
+    HttpResponse::Ok().body(format!(
+        "Profile for: {}\nRoles: {:?}\nAuthorities: {:?}",
+        user.get_username(),
+        user.get_roles(),
+        user.get_authorities()
+    ))
+}
+
+#[pre_authorize("hasRole('USER') AND hasAuthority('posts:read')")]
+#[get("/posts")]
+async fn list_posts(user: AuthenticatedUser) -&gt; impl Responder {
+    HttpResponse::Ok().body(format!("Posts for {}", user.get_username()))
+}
+
+#[pre_authorize(authority = "posts:write")]
+#[post("/posts")]
+async fn create_post(user: AuthenticatedUser) -&gt; impl Responder {
+    HttpResponse::Created().body(format!("Post created by {}", user.get_username()))
+}
+
+// ============= Admin Endpoints =============
+
+#[secured("ADMIN")]
+#[get("/admin/dashboard")]
+async fn admin_dashboard(user: AuthenticatedUser) -&gt; impl Responder {
+    HttpResponse::Ok().body(format!("Admin Dashboard - Welcome {}!", user.get_username()))
+}
+
+#[pre_authorize("hasRole('ADMIN') AND hasAuthority('users:write')")]
+#[post("/admin/users")]
+async fn create_user(user: AuthenticatedUser) -&gt; impl Responder {
+    HttpResponse::Created().body("User created")
+}</code></pre>
+<h2 id="step-4-wire-it-all-together"><a class="header" href="#step-4-wire-it-all-together">Step 4: Wire It All Together</a></h2>
+<pre><code class="language-rust">use actix_web::{App, HttpServer};
+use actix_security::http::security::middleware::SecurityTransform;
+use actix_security::http::security::SecurityHeaders;
+
+#[actix_web::main]
+async fn main() -&gt; std::io::Result&lt;()&gt; {
+    println!("🚀 Starting secured server at http://127.0.0.1:8080");
+
+    let encoder = Argon2PasswordEncoder::new();
+
+    HttpServer::new(move || {
+        let enc = encoder.clone();
+        App::new()
+            // Add security headers
+            .wrap(SecurityHeaders::default())
+            // Add authentication &amp; authorization
+            .wrap(
+                SecurityTransform::new()
+                    .config_authenticator(move || create_authenticator(enc.clone()))
+                    .config_authorizer(create_authorizer)
+            )
+            // Register routes
+            .service(index)
+            .service(health)
+            .service(get_profile)
+            .service(list_posts)
+            .service(create_post)
+            .service(admin_dashboard)
+            .service(create_user)
+    })
+    .bind("127.0.0.1:8080")?
+    .run()
+    .await
+}</code></pre>
+<h2 id="step-5-test-your-application"><a class="header" href="#step-5-test-your-application">Step 5: Test Your Application</a></h2>
+<pre><code class="language-bash"># Start the server
+cargo run
+</code></pre>
+<h3 id="test-public-endpoints"><a class="header" href="#test-public-endpoints">Test Public Endpoints</a></h3>
+<pre><code class="language-bash">curl http://127.0.0.1:8080/
+# Output: Welcome to My App!
+
+curl http://127.0.0.1:8080/health
+# Output: OK
+</code></pre>
+<h3 id="test-user-endpoints"><a class="header" href="#test-user-endpoints">Test User Endpoints</a></h3>
+<pre><code class="language-bash"># Guest can't access profile
+curl -u guest:guest123 http://127.0.0.1:8080/profile
+# Output: 403 Forbidden
+
+# User can access profile
+curl -u user:user123 http://127.0.0.1:8080/profile
+# Output: Profile for: user...
+
+# User can read posts
+curl -u user:user123 http://127.0.0.1:8080/posts
+# Output: Posts for user
+
+# User can't create posts (no posts:write authority)
+curl -X POST -u user:user123 http://127.0.0.1:8080/posts
+# Output: 403 Forbidden
+</code></pre>
+<h3 id="test-admin-endpoints"><a class="header" href="#test-admin-endpoints">Test Admin Endpoints</a></h3>
+<pre><code class="language-bash"># Admin can access everything
+curl -u admin:admin123 http://127.0.0.1:8080/admin/dashboard
+# Output: Admin Dashboard - Welcome admin!
+
+curl -X POST -u admin:admin123 http://127.0.0.1:8080/posts
+# Output: Post created by admin
+
+curl -X POST -u admin:admin123 http://127.0.0.1:8080/admin/users
+# Output: User created
+
+# Regular user can't access admin
+curl -u user:user123 http://127.0.0.1:8080/admin/dashboard
+# Output: 403 Forbidden
+</code></pre>
+<h2 id="complete-source-code"><a class="header" href="#complete-source-code">Complete Source Code</a></h2>
+<p>See the full working example in the <a href="https://github.com/your-org/actix-security/tree/main/test">test crate</a>.</p>
+<h2 id="next-steps"><a class="header" href="#next-steps">Next Steps</a></h2>
+<ul>
+<li>Learn about different <a href="../authentication/index.html">Authentication</a> methods</li>
+<li>Explore <a href="../authorization/index.html">Authorization</a> patterns</li>
+<li>Master <a href="../expressions/index.html">Security Expressions</a></li>
+<li>Add <a href="../features/security-headers.html">Security Headers</a></li>
+</ul>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../getting-started/installation.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../authentication/index.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../getting-started/installation.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../authentication/index.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+        <script>
+            window.playground_line_numbers = true;
+        </script>
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+        <script src="../ace.js"></script>
+        <script src="../editor.js"></script>
+        <script src="../mode-rust.js"></script>
+        <script src="../theme-dawn.js"></script>
+        <script src="../theme-tomorrow_night.js"></script>
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+        <script src="../theme/pagetoc.js"></script>
+        <script src="../theme/version-selector.js"></script>
+
+
+    </div>
+    </body>
+</html>

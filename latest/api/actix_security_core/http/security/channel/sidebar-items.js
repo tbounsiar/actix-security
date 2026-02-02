@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["ChannelRequirement"],"struct":["ChannelSecurity","ChannelSecurityConfig","ChannelSecurityService","PortMapper"],"trait":["ChannelSecurityExt"]};

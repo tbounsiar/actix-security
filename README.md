@@ -2,6 +2,7 @@
 
 [![Crates.io](https://img.shields.io/crates/v/actix-security)](https://crates.io/crates/actix-security)
 [![Documentation](https://docs.rs/actix-security/badge.svg)](https://docs.rs/actix-security)
+[![User Guide](https://img.shields.io/badge/docs-User%20Guide-blue)](https://tbounsiar.github.io/actix-security/)
 [![License: MIT/Apache-2.0](https://img.shields.io/badge/License-MIT%2FApache--2.0-blue.svg)](LICENSE-MIT)
 
 **Spring Security-inspired authentication and authorization for Actix Web.**

@@ -2,6 +2,17 @@
 
 This example demonstrates security headers middleware using the actix-security library.
 
+## Quick Start
+
+Add these dependencies to your `Cargo.toml`:
+
+```toml
+[dependencies]
+actix-web = "4"
+actix-security = "0.2"  # Security headers are always available (no feature flag needed)
+tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
+```
+
 ## Features
 
 - Content Security Policy (CSP)

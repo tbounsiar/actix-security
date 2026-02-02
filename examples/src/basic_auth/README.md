@@ -2,6 +2,17 @@
 
 This example demonstrates HTTP Basic Authentication using the actix-security library.
 
+## Quick Start
+
+Add these dependencies to your `Cargo.toml`:
+
+```toml
+[dependencies]
+actix-web = "4"
+actix-security = { version = "0.2", features = ["http-basic", "argon2"] }
+tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
+```
+
 ## Features
 
 - HTTP Basic Authentication (RFC 7617)

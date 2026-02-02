@@ -2,6 +2,40 @@
 
 This example demonstrates all major security features of actix-security working together.
 
+## Quick Start
+
+Add these dependencies to your `Cargo.toml`:
+
+```toml
+[dependencies]
+actix-web = "4"
+actix-security = { version = "0.2", features = ["full"] }
+actix-session = { version = "0.10", features = ["cookie-session"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
+log = "0.4"
+env_logger = "0.11"
+```
+
+Or with only the specific features used:
+
+```toml
+[dependencies]
+actix-web = "4"
+actix-security = { version = "0.2", features = [
+    "form-login",
+    "csrf",
+    "rate-limit",
+    "account-lock",
+    "audit",
+    "argon2"
+] }
+actix-session = { version = "0.10", features = ["cookie-session"] }
+serde = { version = "1", features = ["derive"] }
+tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
+```
+
 ## Features
 
 - **Rate Limiting**: Brute-force protection (5 requests/minute)

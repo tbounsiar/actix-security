@@ -2,6 +2,19 @@
 
 This example demonstrates form-based login with CSRF protection using the actix-security library.
 
+## Quick Start
+
+Add these dependencies to your `Cargo.toml`:
+
+```toml
+[dependencies]
+actix-web = "4"
+actix-security = { version = "0.2", features = ["form-login", "csrf", "argon2"] }
+actix-session = { version = "0.10", features = ["cookie-session"] }
+serde = { version = "1", features = ["derive"] }
+tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
+```
+
 ## Features
 
 - HTML form-based authentication

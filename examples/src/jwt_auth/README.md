@@ -2,6 +2,19 @@
 
 This example demonstrates JWT (JSON Web Token) authentication using the actix-security library.
 
+## Quick Start
+
+Add these dependencies to your `Cargo.toml`:
+
+```toml
+[dependencies]
+actix-web = "4"
+actix-security = { version = "0.2", features = ["jwt", "argon2"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
+```
+
 ## Features
 
 - JWT token generation and validation

@@ -2,6 +2,19 @@
 
 This example demonstrates session-based authentication using the actix-security library.
 
+## Quick Start
+
+Add these dependencies to your `Cargo.toml`:
+
+```toml
+[dependencies]
+actix-web = "4"
+actix-security = { version = "0.2", features = ["session", "argon2"] }
+actix-session = { version = "0.10", features = ["cookie-session"] }
+serde = { version = "1", features = ["derive"] }
+tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
+```
+
 ## Features
 
 - Cookie-based session management

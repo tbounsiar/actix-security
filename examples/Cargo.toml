@@ -1,6 +1,6 @@
 [package]
 name = "actix-security-examples"
-version = "0.2.1"
+version = "0.2.2"
 edition = "2021"
 publish = false
 description = "Examples and integration tests for actix-security"
@@ -43,8 +43,13 @@ path = "src/oidc_keycloak/main.rs"
 name = "security_complete"
 path = "src/security_complete/main.rs"
 
+[[bin]]
+name = "custom_expressions"
+path = "src/custom_expressions/main.rs"
+
 [dependencies]
 actix-security = { path = "../actix-security", features = ["full"] }
+actix-security-core = { path = "../core", features = ["full"] }
 actix-web = "4"
 actix-session = { version = "0.10", features = ["cookie-session"] }
 actix-rt = "2"

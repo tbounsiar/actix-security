@@ -7,6 +7,7 @@
 
 use actix_web::{get, post, test, web, App, HttpResponse, Responder};
 use base64::prelude::*;
+use serde::Deserialize;
 
 use actix_security_codegen::{deny_all, permit_all, pre_authorize, roles_allowed, secured};
 use actix_security_core::http::security::manager::AuthorizationManager;
@@ -45,6 +46,11 @@ pub fn test_authenticator() -> MemoryAuthenticator {
         )
         .with_user(
             User::with_encoded_password("guest", encoder.encode("guest")).roles(&["GUEST".into()]),
+        )
+        .with_user(
+            User::with_encoded_password("premium", encoder.encode("premium"))
+                .roles(&["USER".into()])
+                .authorities(&["users:read".into(), "premium:access".into()]),
         )
 }
 
@@ -202,6 +208,231 @@ pub async fn expr_deny_all(user: AuthenticatedUser) -> impl Responder {
 }
 
 // =============================================================================
+// Snake_case and Rust-style Operators Tests
+// =============================================================================
+
+/// has_role('ADMIN') - snake_case version
+#[pre_authorize("has_role('ADMIN')")]
+#[get("/expr/snake-role")]
+pub async fn expr_snake_role(user: AuthenticatedUser) -> impl Responder {
+    HttpResponse::Ok().body(format!("Snake Role: {}", user.get_username()))
+}
+
+/// has_role('ADMIN') || has_authority('users:write') - using || operator
+#[pre_authorize("has_role('ADMIN') || has_authority('users:write')")]
+#[get("/expr/rust-or")]
+pub async fn expr_rust_or(user: AuthenticatedUser) -> impl Responder {
+    HttpResponse::Ok().body(format!("Rust OR: {}", user.get_username()))
+}
+
+/// has_role('USER') && has_authority('users:read') - using && operator
+#[pre_authorize("has_role('USER') && has_authority('users:read')")]
+#[get("/expr/rust-and")]
+pub async fn expr_rust_and(user: AuthenticatedUser) -> impl Responder {
+    HttpResponse::Ok().body(format!("Rust AND: {}", user.get_username()))
+}
+
+/// !has_role('GUEST') - using ! operator
+#[pre_authorize("!has_role('GUEST')")]
+#[get("/expr/rust-not")]
+pub async fn expr_rust_not(user: AuthenticatedUser) -> impl Responder {
+    HttpResponse::Ok().body(format!("Rust NOT: {}", user.get_username()))
+}
+
+/// Mixed: has_any_role('ADMIN', 'USER') && is_authenticated()
+#[pre_authorize("has_any_role('ADMIN', 'USER') && is_authenticated()")]
+#[get("/expr/snake-mixed")]
+pub async fn expr_snake_mixed(user: AuthenticatedUser) -> impl Responder {
+    HttpResponse::Ok().body(format!("Snake Mixed: {}", user.get_username()))
+}
+
+/// permit_all() - snake_case version
+#[pre_authorize("permit_all()")]
+#[get("/expr/snake-permit")]
+pub async fn expr_snake_permit(user: AuthenticatedUser) -> impl Responder {
+    HttpResponse::Ok().body(format!("Snake Permit: {}", user.get_username()))
+}
+
+/// deny_all() - snake_case version
+#[pre_authorize("deny_all()")]
+#[get("/expr/snake-deny")]
+pub async fn expr_snake_deny(user: AuthenticatedUser) -> impl Responder {
+    HttpResponse::Ok().body(format!("Snake Deny: {}", user.get_username()))
+}
+
+// =============================================================================
+// Custom Expression Handlers (with parameter references)
+// =============================================================================
+
+/// Custom authorization function: checks if user is admin of a specific tenant
+pub async fn is_tenant_admin(user: &User, tenant_id: i64) -> bool {
+    // Admin user can access all tenants
+    if user.has_role("ADMIN") {
+        return true;
+    }
+    // User can only access their own tenant (tenant_id == 1 for user "user")
+    if user.get_username() == "user" && tenant_id == 1 {
+        return true;
+    }
+    false
+}
+
+/// Custom authorization function: checks if user can access a specific resource
+pub async fn can_access_resource(user: &User, resource_id: String) -> bool {
+    // Admin can access all resources
+    if user.has_role("ADMIN") {
+        return true;
+    }
+    // Regular users can only access public resources
+    resource_id.starts_with("public-")
+}
+
+/// Handler using custom function with path parameter
+#[pre_authorize("is_tenant_admin(#tenant_id)")]
+#[get("/tenants/{tenant_id}")]
+pub async fn get_tenant(tenant_id: web::Path<i64>, user: AuthenticatedUser) -> impl Responder {
+    HttpResponse::Ok().body(format!(
+        "Tenant {} accessed by {}",
+        tenant_id.into_inner(),
+        user.get_username()
+    ))
+}
+
+/// Handler combining custom function with built-in
+#[pre_authorize("hasRole('ADMIN') OR is_tenant_admin(#tenant_id)")]
+#[get("/tenants/{tenant_id}/settings")]
+pub async fn get_tenant_settings(
+    tenant_id: web::Path<i64>,
+    user: AuthenticatedUser,
+) -> impl Responder {
+    HttpResponse::Ok().body(format!(
+        "Tenant {} settings for {}",
+        tenant_id.into_inner(),
+        user.get_username()
+    ))
+}
+
+/// Handler with string path parameter
+#[pre_authorize("can_access_resource(#resource_id)")]
+#[get("/resources/{resource_id}")]
+pub async fn get_resource(
+    resource_id: web::Path<String>,
+    user: AuthenticatedUser,
+) -> impl Responder {
+    HttpResponse::Ok().body(format!(
+        "Resource {} accessed by {}",
+        resource_id.into_inner(),
+        user.get_username()
+    ))
+}
+
+// =============================================================================
+// Query and Json DTOs for Custom Expressions
+// =============================================================================
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct SearchQuery {
+    pub min_price: i32,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct CreateOrderRequest {
+    pub amount: i64,
+}
+
+// =============================================================================
+// Custom Functions for Query and Json Parameters
+// =============================================================================
+
+/// Custom authorization function: checks if user can perform premium search.
+/// Accepts the full SearchQuery struct.
+pub async fn can_search_premium(user: &User, query: SearchQuery) -> bool {
+    // Admin and premium users can search with any price filter
+    if user.has_role("ADMIN") || user.has_authority("premium:access") {
+        return true;
+    }
+    // Regular users limited to min_price <= 100
+    query.min_price <= 100
+}
+
+/// Custom authorization function: validates order amount based on user role.
+/// Accepts the full CreateOrderRequest struct.
+pub async fn can_create_order(user: &User, order: CreateOrderRequest) -> bool {
+    // Admin can create orders of any amount
+    if user.has_role("ADMIN") {
+        return true;
+    }
+    // Regular users limited to orders <= 1000
+    order.amount <= 1000
+}
+
+// =============================================================================
+// Custom Expression Handlers with Query Parameter
+// =============================================================================
+
+/// Handler with Query parameter validation.
+/// References the `query` parameter which is a Query<SearchQuery>.
+#[pre_authorize("can_search_premium(#query)")]
+#[get("/products/search")]
+pub async fn search_products(
+    query: web::Query<SearchQuery>,
+    user: AuthenticatedUser,
+) -> impl Responder {
+    HttpResponse::Ok().body(format!(
+        "Search with min_price={} by {}",
+        query.min_price,
+        user.get_username()
+    ))
+}
+
+/// Handler combining custom function with built-in for Query.
+#[pre_authorize("hasRole('ADMIN') OR can_search_premium(#query)")]
+#[get("/products/premium-search")]
+pub async fn premium_search_products(
+    query: web::Query<SearchQuery>,
+    user: AuthenticatedUser,
+) -> impl Responder {
+    HttpResponse::Ok().body(format!(
+        "Premium search with min_price={} by {}",
+        query.min_price,
+        user.get_username()
+    ))
+}
+
+// =============================================================================
+// Custom Expression Handlers with Json Body
+// =============================================================================
+
+/// Handler with Json body parameter validation.
+/// References the `body` parameter which is a Json<CreateOrderRequest>.
+#[pre_authorize("can_create_order(#body)")]
+#[post("/orders")]
+pub async fn create_order(
+    body: web::Json<CreateOrderRequest>,
+    user: AuthenticatedUser,
+) -> impl Responder {
+    HttpResponse::Created().body(format!(
+        "Order created with amount={} by {}",
+        body.amount,
+        user.get_username()
+    ))
+}
+
+/// Handler combining custom function with built-in for Json.
+#[pre_authorize("hasRole('ADMIN') OR can_create_order(#body)")]
+#[post("/orders/bulk")]
+pub async fn create_bulk_orders(
+    body: web::Json<CreateOrderRequest>,
+    user: AuthenticatedUser,
+) -> impl Responder {
+    HttpResponse::Created().body(format!(
+        "Bulk order created with amount={} by {}",
+        body.amount,
+        user.get_username()
+    ))
+}
+
+// =============================================================================
 // Simple Macro Handlers (permit_all, deny_all, roles_allowed)
 // =============================================================================
 
@@ -272,6 +503,23 @@ pub async fn create_test_app() -> impl actix_web::dev::Service<
                 .service(expr_authenticated)
                 .service(expr_permit_all)
                 .service(expr_deny_all)
+                // Snake_case and Rust-style operators
+                .service(expr_snake_role)
+                .service(expr_rust_or)
+                .service(expr_rust_and)
+                .service(expr_rust_not)
+                .service(expr_snake_mixed)
+                .service(expr_snake_permit)
+                .service(expr_snake_deny)
+                // Custom expression handlers (with #param)
+                .service(get_tenant)
+                .service(get_tenant_settings)
+                .service(get_resource)
+                // Custom expression handlers with Query/Json
+                .service(search_products)
+                .service(premium_search_products)
+                .service(create_order)
+                .service(create_bulk_orders)
                 // Simple macro handlers
                 .service(public_info)
                 .service(disabled_endpoint)

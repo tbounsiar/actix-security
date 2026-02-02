@@ -7,6 +7,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.2] - 2026-02-02
+
+### Added
+- **Custom Expressions with Parameter References** - Spring Security-style `#param` syntax
+  - Reference handler parameters directly in `#[pre_authorize]` expressions
+  - Support for `Path<T>`, `Query<T>`, `Json<T>`, and `Form<T>` extractors
+  - Custom async authorization functions with signature `async fn(user: &User, ...) -> bool`
+  - Combine custom functions with built-in expressions using AND/OR operators
+
+- **Rust-style Expression Syntax** - snake_case functions and Rust operators
+  - Snake_case function aliases: `has_role`, `has_any_role`, `has_authority`, `has_any_authority`, `is_authenticated`, `permit_all`, `deny_all`
+  - Rust operators: `&&` (AND), `||` (OR), `!` (NOT)
+  - Both Spring style (camelCase, AND/OR/NOT) and Rust style work interchangeably
+
+### Examples
+```rust
+// Define custom authorization function
+pub async fn is_tenant_admin(user: &User, tenant_id: i64) -> bool {
+    user.has_authority(&format!("tenant:{}:admin", tenant_id))
+}
+
+// Use with parameter reference
+#[pre_authorize("is_tenant_admin(#tenant_id)")]
+#[get("/tenants/{tenant_id}")]
+async fn get_tenant(tenant_id: Path<i64>, user: AuthenticatedUser) -> impl Responder { }
+
+// Combine with built-in functions
+#[pre_authorize("hasRole('ADMIN') OR is_tenant_admin(#tenant_id)")]
+#[get("/tenants/{tenant_id}/settings")]
+async fn get_settings(tenant_id: Path<i64>, user: AuthenticatedUser) -> impl Responder { }
+```
+
 ## [0.2.1] - 2026-02-02
 
 ### Fixed
@@ -143,7 +175,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Security headers middleware
 - Security context for accessing current user
 
-[Unreleased]: https://github.com/tbounsiar/actix-security/compare/v0.2.1...HEAD
+[Unreleased]: https://github.com/tbounsiar/actix-security/compare/v0.2.2...HEAD
+[0.2.2]: https://github.com/tbounsiar/actix-security/compare/v0.2.1...v0.2.2
 [0.2.1]: https://github.com/tbounsiar/actix-security/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/tbounsiar/actix-security/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/tbounsiar/actix-security/releases/tag/v0.1.0

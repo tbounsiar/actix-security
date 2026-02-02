@@ -2,6 +2,206 @@
 
 Extend the security expression language with your own functions.
 
+## Custom Functions with Parameter References (v0.2.2+)
+
+The most powerful way to implement custom authorization is using async functions with parameter references. This approach allows you to reference handler parameters directly in your expressions, similar to Spring Security's SpEL:
+
+### Defining Custom Authorization Functions
+
+Create an async function that takes a user reference and any parameters you need:
+
+```rust
+use actix_security_core::http::security::User;
+
+/// Check if user is admin of a specific tenant
+pub async fn is_tenant_admin(user: &User, tenant_id: i64) -> bool {
+    // Admin users can access all tenants
+    if user.has_role("ADMIN") {
+        return true;
+    }
+    // Check tenant-specific authority
+    user.has_authority(&format!("tenant:{}:admin", tenant_id))
+}
+
+/// Check if user can access a specific resource
+pub async fn can_access_resource(user: &User, resource_id: String) -> bool {
+    // Your authorization logic here
+    if user.has_role("ADMIN") {
+        return true;
+    }
+    // Regular users can only access public resources
+    resource_id.starts_with("public-")
+}
+```
+
+### Using Parameter References
+
+Use `#param_name` to reference handler parameters in your expressions:
+
+```rust
+use actix_web::{get, web::Path, HttpResponse, Responder};
+use actix_security_codegen::pre_authorize;
+use actix_security_core::http::security::AuthenticatedUser;
+
+// Reference the tenant_id path parameter
+#[pre_authorize("is_tenant_admin(#tenant_id)")]
+#[get("/tenants/{tenant_id}")]
+async fn get_tenant(
+    tenant_id: Path<i64>,
+    user: AuthenticatedUser,
+) -> impl Responder {
+    HttpResponse::Ok().body(format!("Tenant {}", tenant_id.into_inner()))
+}
+
+// Reference a string path parameter
+#[pre_authorize("can_access_resource(#resource_id)")]
+#[get("/resources/{resource_id}")]
+async fn get_resource(
+    resource_id: Path<String>,
+    user: AuthenticatedUser,
+) -> impl Responder {
+    HttpResponse::Ok().body("Resource data")
+}
+
+// Combine with built-in functions
+#[pre_authorize("hasRole('ADMIN') OR is_tenant_admin(#tenant_id)")]
+#[get("/tenants/{tenant_id}/settings")]
+async fn get_tenant_settings(
+    tenant_id: Path<i64>,
+    user: AuthenticatedUser,
+) -> impl Responder {
+    HttpResponse::Ok().body("Settings")
+}
+```
+
+### Supported Extractor Types
+
+Parameter references work with these Actix Web extractors:
+
+| Extractor | Example | Description |
+|-----------|---------|-------------|
+| `Path<T>` | `tenant_id: Path<i64>` | URL path parameters |
+| `Query<T>` | `params: Query<SearchParams>` | Query string parameters |
+| `Json<T>` | `body: Json<CreateRequest>` | JSON request body |
+| `Form<T>` | `form: Form<LoginForm>` | Form data |
+
+**Important:** For `Query<T>`, `Json<T>`, and `Form<T>`, the parameter reference must be the extractor parameter name, not individual fields within the struct. Your custom function should accept the full struct type:
+
+```rust
+use serde::Deserialize;
+use actix_web::{get, post, web};
+use actix_security_codegen::pre_authorize;
+use actix_security_core::http::security::{AuthenticatedUser, User};
+
+// DTOs must implement Clone for parameter references
+#[derive(Debug, Clone, Deserialize)]
+pub struct SearchQuery {
+    pub min_price: i32,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct CreateOrderRequest {
+    pub amount: i64,
+}
+
+// Custom function accepts the full struct
+pub async fn can_search_premium(user: &User, query: SearchQuery) -> bool {
+    if user.has_role("ADMIN") {
+        return true;
+    }
+    query.min_price <= 100
+}
+
+pub async fn can_create_order(user: &User, order: CreateOrderRequest) -> bool {
+    if user.has_role("ADMIN") {
+        return true;
+    }
+    order.amount <= 1000
+}
+
+// Reference the extractor parameter name (#query, not #min_price)
+#[pre_authorize("can_search_premium(#query)")]
+#[get("/products/search")]
+async fn search_products(
+    query: web::Query<SearchQuery>,
+    user: AuthenticatedUser,
+) -> impl actix_web::Responder {
+    actix_web::HttpResponse::Ok().body("Search results")
+}
+
+// Reference the extractor parameter name (#body, not #amount)
+#[pre_authorize("can_create_order(#body)")]
+#[post("/orders")]
+async fn create_order(
+    body: web::Json<CreateOrderRequest>,
+    user: AuthenticatedUser,
+) -> impl actix_web::Responder {
+    actix_web::HttpResponse::Created().body("Order created")
+}
+```
+
+### Function Signature Requirements
+
+Custom authorization functions must:
+
+1. Be `async`
+2. Return `bool`
+3. Take `&User` as the first parameter
+4. Be in scope where the handler is defined
+
+```rust
+// ✓ Valid function signature
+pub async fn my_check(user: &User, param1: i64, param2: String) -> bool {
+    // ...
+    true
+}
+
+// ✗ Invalid - not async
+pub fn my_check(user: &User, param: i64) -> bool { true }
+
+// ✗ Invalid - wrong return type
+pub async fn my_check(user: &User) -> Result<bool, Error> { Ok(true) }
+
+// ✗ Invalid - no user parameter
+pub async fn my_check(param: i64) -> bool { true }
+```
+
+### Spring Security Comparison
+
+**Spring Security (Java):**
+```java
+@Service
+public class TenantService {
+    public boolean isTenantAdmin(Long tenantId) {
+        // Uses SecurityContextHolder internally
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        return checkTenantAdmin(auth, tenantId);
+    }
+}
+
+@PreAuthorize("@tenantService.isTenantAdmin(#tenantId)")
+@GetMapping("/tenants/{tenantId}")
+public Tenant getTenant(@PathVariable Long tenantId) { }
+```
+
+**Actix Security (Rust):**
+```rust
+pub async fn is_tenant_admin(user: &User, tenant_id: i64) -> bool {
+    user.has_authority(&format!("tenant:{}:admin", tenant_id))
+}
+
+#[pre_authorize("is_tenant_admin(#tenant_id)")]
+#[get("/tenants/{tenant_id}")]
+async fn get_tenant(tenant_id: Path<i64>, user: AuthenticatedUser) -> impl Responder { }
+```
+
+Key differences:
+- In Rust, the user is passed explicitly (no thread-local storage)
+- Function name is used directly (no `@` prefix or bean reference)
+- Compile-time verification of parameter references
+
+---
+
 ## The ExpressionRoot Trait
 
 Custom expression functions are added by implementing `ExpressionRoot`:

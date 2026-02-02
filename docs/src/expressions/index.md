@@ -14,48 +14,59 @@ Security expressions allow you to write complex authorization rules in a readabl
 
 - **Compile-time parsing** - Expressions are validated at compile time
 - **Zero runtime overhead** - Expressions are compiled to Rust code
-- **Extensible** - Add custom functions via `ExpressionRoot` trait
-- **Familiar syntax** - Similar to Spring Security SpEL
+- **Parameter references** - Reference handler parameters with `#param_name` syntax
+- **Custom functions** - Define async authorization functions with any logic
+- **Dual syntax support** - Both Spring Security style (camelCase) and Rust style (snake_case)
 
 ## Expression Syntax
 
 ### Functions
 
-| Function | Description | Example |
-|----------|-------------|---------|
-| `hasRole('R')` | User has role R | `hasRole('ADMIN')` |
-| `hasAnyRole('R1', 'R2')` | User has any of the roles | `hasAnyRole('ADMIN', 'MANAGER')` |
-| `hasAuthority('A')` | User has authority A | `hasAuthority('users:read')` |
-| `hasAnyAuthority('A1', 'A2')` | User has any of the authorities | `hasAnyAuthority('read', 'write')` |
-| `isAuthenticated()` | User is authenticated | `isAuthenticated()` |
-| `permitAll()` | Always true | `permitAll()` |
-| `denyAll()` | Always false | `denyAll()` |
+Both camelCase (Spring Security style) and snake_case (Rust style) are supported:
+
+| Spring Style | Rust Style | Description |
+|--------------|------------|-------------|
+| `hasRole('R')` | `has_role('R')` | User has role R |
+| `hasAnyRole('R1', 'R2')` | `has_any_role('R1', 'R2')` | User has any of the roles |
+| `hasAuthority('A')` | `has_authority('A')` | User has authority A |
+| `hasAnyAuthority('A1', 'A2')` | `has_any_authority('A1', 'A2')` | User has any of the authorities |
+| `isAuthenticated()` | `is_authenticated()` | User is authenticated |
+| `permitAll()` | `permit_all()` | Always true |
+| `denyAll()` | `deny_all()` | Always false |
 
 ### Operators
 
-| Operator | Description | Example |
-|----------|-------------|---------|
-| `AND` | Both must be true | `hasRole('A') AND hasRole('B')` |
-| `OR` | Either can be true | `hasRole('A') OR hasRole('B')` |
-| `NOT` | Negation | `NOT hasRole('GUEST')` |
-| `( )` | Grouping | `(hasRole('A') OR hasRole('B')) AND hasAuthority('x')` |
+Both Spring Security style and Rust style operators are supported:
+
+| Spring Style | Rust Style | Description |
+|--------------|------------|-------------|
+| `AND` | `&&` | Both must be true |
+| `OR` | `\|\|` | Either can be true |
+| `NOT` | `!` | Negation |
+| `( )` | `( )` | Grouping |
+
+**Note:** Operators are case-insensitive (`AND`, `and`, `And` all work).
 
 ## Examples
 
 ### Basic Expressions
 
 ```rust
-// Single role check
+// Single role check (both styles work)
 #[pre_authorize("hasRole('ADMIN')")]
+#[pre_authorize("has_role('ADMIN')")]
 
 // Single authority check
 #[pre_authorize("hasAuthority('posts:write')")]
+#[pre_authorize("has_authority('posts:write')")]
 
 // Any of multiple roles
 #[pre_authorize("hasAnyRole('ADMIN', 'MANAGER', 'SUPERVISOR')")]
+#[pre_authorize("has_any_role('ADMIN', 'MANAGER', 'SUPERVISOR')")]
 
 // Any of multiple authorities
 #[pre_authorize("hasAnyAuthority('read', 'write', 'delete')")]
+#[pre_authorize("has_any_authority('read', 'write', 'delete')")]
 
 // Authenticated user
 #[pre_authorize("isAuthenticated()")]
@@ -64,28 +75,35 @@ Security expressions allow you to write complex authorization rules in a readabl
 ### Combining Conditions
 
 ```rust
-// AND - both must be true
+// AND - both must be true (Spring style)
 #[pre_authorize("hasRole('USER') AND hasAuthority('premium')")]
+// Rust style
+#[pre_authorize("has_role('USER') && has_authority('premium')")]
 
-// OR - either can be true
+// OR - either can be true (Spring style)
 #[pre_authorize("hasRole('ADMIN') OR hasAuthority('users:manage')")]
+// Rust style
+#[pre_authorize("has_role('ADMIN') || has_authority('users:manage')")]
 
-// NOT - negation
+// NOT - negation (Spring style)
 #[pre_authorize("NOT hasRole('GUEST')")]
-#[pre_authorize("isAuthenticated() AND NOT hasRole('SUSPENDED')")]
+// Rust style
+#[pre_authorize("!has_role('GUEST')")]
 ```
 
 ### Complex Expressions
 
 ```rust
-// Admin OR (User with write permission)
+// Admin OR (User with write permission) - Spring style
 #[pre_authorize("hasRole('ADMIN') OR (hasRole('USER') AND hasAuthority('posts:write'))")]
+// Rust style
+#[pre_authorize("has_role('ADMIN') || (has_role('USER') && has_authority('posts:write'))")]
 
-// Multiple groups
-#[pre_authorize("(hasRole('ADMIN') OR hasRole('MANAGER')) AND hasAuthority('reports:view')")]
+// Mixed styles also work!
+#[pre_authorize("hasRole('ADMIN') || has_role('USER') && has_authority('write')")]
 
-// Nested conditions
-#[pre_authorize("hasRole('ADMIN') OR (hasRole('USER') AND (hasAuthority('a') OR hasAuthority('b')))")]
+// Complex nested conditions
+#[pre_authorize("has_role('ADMIN') || (has_role('USER') && (has_authority('a') || has_authority('b')))")]
 ```
 
 ## Compile-Time Validation
@@ -93,14 +111,17 @@ Security expressions allow you to write complex authorization rules in a readabl
 Expressions are parsed and validated at compile time:
 
 ```rust
-// ✓ Valid
+// ✓ Valid - built-in function
 #[pre_authorize("hasRole('ADMIN') AND hasAuthority('write')")]
 
-// ✗ Compile error: Use 'AND' not '&&'
-#[pre_authorize("hasRole('ADMIN') && hasAuthority('write')")]
+// ✓ Valid - custom function with parameter reference (v0.2.2+)
+#[pre_authorize("is_tenant_admin(#tenant_id)")]
 
-// ✗ Compile error: Unknown function
-#[pre_authorize("hasPermission('admin')")]
+// ✓ Valid - combining built-in and custom functions
+#[pre_authorize("hasRole('ADMIN') OR my_custom_check(#resource_id)")]
+
+// ✗ Compile error: Unknown parameter reference
+#[pre_authorize("my_check(#nonexistent_param)")]
 
 // ✗ Compile error: Syntax error
 #[pre_authorize("hasRole('ADMIN'")]
@@ -149,7 +170,7 @@ public void viewReports() {}
 public void premiumContent() {}
 ```
 
-**Actix Security (Rust):**
+**Actix Security (Rust) - Spring style:**
 ```rust
 #[pre_authorize("hasRole('ADMIN') OR hasAuthority('users:write')")]
 async fn update_user() {}
@@ -161,8 +182,22 @@ async fn view_reports() {}
 async fn premium_content() {}
 ```
 
-Key differences:
-- Use `AND`/`OR`/`NOT` instead of `and`/`or`/`!` (case-insensitive)
+**Actix Security (Rust) - Rust style:**
+```rust
+#[pre_authorize("has_role('ADMIN') || has_authority('users:write')")]
+async fn update_user() {}
+
+#[pre_authorize("has_any_role('ADMIN', 'MANAGER') && has_authority('reports:view')")]
+async fn view_reports() {}
+
+#[pre_authorize("is_authenticated() && !has_role('GUEST')")]
+async fn premium_content() {}
+```
+
+**Syntax flexibility:**
+- Both camelCase and snake_case function names work
+- Both `AND`/`OR`/`NOT` and `&&`/`||`/`!` operators work
+- Operators are case-insensitive (`AND`, `and`, `And` all work)
 - Use single quotes for strings: `'ADMIN'` not `"ADMIN"`
 
 ## Sections

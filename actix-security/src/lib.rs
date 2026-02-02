@@ -66,6 +66,11 @@
 // Re-export everything from actix-security-core
 pub use actix_security_core::*;
 
+// Re-export actix_security_core as a module so macros can find it
+// This is needed because macros generate code like ::actix_security_core::http::error::AuthError
+#[doc(hidden)]
+pub use actix_security_core;
+
 // Re-export procedural macros when the "macros" feature is enabled
 #[cfg(feature = "macros")]
 pub use actix_security_codegen::*;

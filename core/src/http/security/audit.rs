@@ -379,11 +379,21 @@ impl SecurityEvent {
     }
 
     /// Format the event as JSON.
+    ///
+    /// Requires features that include serde (e.g., `jwt` or `session` features).
+    #[cfg(any(feature = "jwt", feature = "session", feature = "oauth2"))]
     pub fn to_json(&self) -> String {
         serde_json::to_string(self).unwrap_or_else(|_| self.to_log_line())
     }
+
+    /// Format the event as a simple JSON-like string (without serde).
+    #[cfg(not(any(feature = "jwt", feature = "session", feature = "oauth2")))]
+    pub fn to_json(&self) -> String {
+        self.to_log_line()
+    }
 }
 
+#[cfg(any(feature = "jwt", feature = "session", feature = "oauth2"))]
 impl serde::Serialize for SecurityEvent {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -447,6 +457,97 @@ impl SecurityEventHandler for StdoutHandler {
     fn handle(&self, event: &SecurityEvent) {
         if event.severity >= self.min_severity {
             println!("[SECURITY] {}", event.to_log_line());
+        }
+    }
+}
+
+/// Handler that emits security events using the `tracing` crate.
+///
+/// This integrates security audit logging with the broader Rust ecosystem's
+/// tracing infrastructure, allowing security events to be processed by any
+/// tracing subscriber (console, file, OpenTelemetry, etc.).
+///
+/// # Example
+///
+/// ```ignore
+/// use actix_security::http::security::audit::{AuditLogger, TracingHandler};
+/// use tracing_subscriber;
+///
+/// // Initialize tracing subscriber
+/// tracing_subscriber::fmt::init();
+///
+/// // Create audit logger with tracing handler
+/// let logger = AuditLogger::new().add_handler(TracingHandler::new());
+/// ```
+#[derive(Default, Clone, Copy)]
+pub struct TracingHandler;
+
+impl TracingHandler {
+    /// Create a new tracing handler.
+    ///
+    /// Events are emitted to the `actix_security::audit` target.
+    pub fn new() -> Self {
+        Self
+    }
+}
+
+impl SecurityEventHandler for TracingHandler {
+    fn handle(&self, event: &SecurityEvent) {
+        let username = event.username.as_deref().unwrap_or("-");
+        let ip = event.ip_address.as_deref().unwrap_or("-");
+        let path = event.path.as_deref().unwrap_or("-");
+        let method = event.method.as_deref().unwrap_or("-");
+        let event_type = event.event_type.to_string();
+        let error_msg = event.error.as_deref().unwrap_or("");
+
+        match event.severity {
+            SecurityEventSeverity::Info => {
+                tracing::info!(
+                    target: "actix_security::audit",
+                    event_type = %event_type,
+                    user = %username,
+                    ip = %ip,
+                    path = %path,
+                    method = %method,
+                    "Security event"
+                );
+            }
+            SecurityEventSeverity::Warning => {
+                tracing::warn!(
+                    target: "actix_security::audit",
+                    event_type = %event_type,
+                    user = %username,
+                    ip = %ip,
+                    path = %path,
+                    method = %method,
+                    "Security warning"
+                );
+            }
+            SecurityEventSeverity::Error => {
+                tracing::error!(
+                    target: "actix_security::audit",
+                    event_type = %event_type,
+                    user = %username,
+                    ip = %ip,
+                    path = %path,
+                    method = %method,
+                    error = %error_msg,
+                    "Security error"
+                );
+            }
+            SecurityEventSeverity::Critical => {
+                tracing::error!(
+                    target: "actix_security::audit",
+                    event_type = %event_type,
+                    user = %username,
+                    ip = %ip,
+                    path = %path,
+                    method = %method,
+                    error = %error_msg,
+                    severity = "CRITICAL",
+                    "Critical security event"
+                );
+            }
         }
     }
 }

@@ -100,9 +100,34 @@ logger.log(
 
 ## Event Handlers
 
+### TracingHandler (Recommended)
+
+Emits events through the `tracing` crate, integrating with the Rust ecosystem's standard observability infrastructure:
+
+```rust
+use actix_security::http::security::{AuditLogger, TracingHandler};
+use tracing_subscriber;
+
+// Initialize tracing subscriber (console output)
+tracing_subscriber::fmt::init();
+
+// Create audit logger with tracing handler
+let logger = AuditLogger::new()
+    .add_handler(TracingHandler::new());
+
+// Events are emitted to target "actix_security::audit"
+logger.log_login_success("admin", "192.168.1.1");
+// Output: INFO actix_security::audit: Security event event_type="AUTHENTICATION_SUCCESS" user="admin" ip="192.168.1.1"
+```
+
+This handler automatically maps event severity to tracing levels:
+- `Info` → `tracing::info!`
+- `Warning` → `tracing::warn!`
+- `Error`/`Critical` → `tracing::error!`
+
 ### StdoutHandler
 
-Prints events to standard output:
+Prints events to standard output (simpler, no tracing dependency):
 
 ```rust
 let handler = StdoutHandler::new();
@@ -166,7 +191,7 @@ if let Some(logger) = global_logger() {
 
 ## JSON Output
 
-Events can be serialized to JSON (enabled by default with the `audit` feature):
+Events can be serialized to JSON when serde is available (via `jwt`, `session`, or `oauth2` features):
 
 ```json
 {
@@ -182,6 +207,42 @@ Events can be serialized to JSON (enabled by default with the `audit` feature):
 }
 ```
 
+## Automatic Tracing in Middleware
+
+When the `audit` feature is enabled, the security middleware automatically emits tracing events for:
+
+### Authentication Events
+- `AUTHENTICATION_SUCCESS` - User authenticated successfully
+- `AUTHENTICATION_ANONYMOUS` - Anonymous request (debug level)
+
+### Authorization Events
+- `ACCESS_GRANTED` - User has required permissions (debug level)
+- `ACCESS_DENIED` - User lacks required permissions (warning level)
+- `AUTHENTICATION_REQUIRED` - Redirecting to login or returning 401
+
+Example output with `tracing-subscriber`:
+
+```
+INFO actix_security::audit: User authenticated successfully event_type="AUTHENTICATION_SUCCESS" user="admin" ip="192.168.1.1" path="/api/users" method="GET"
+WARN actix_security::audit: Access denied: insufficient permissions event_type="ACCESS_DENIED" user="user1" path="/admin" required_roles=["ADMIN"]
+```
+
+### Filtering by Target
+
+Use tracing's target filtering to control output:
+
+```rust
+use tracing_subscriber::EnvFilter;
+
+tracing_subscriber::fmt()
+    .with_env_filter(
+        EnvFilter::from_default_env()
+            // Show all security audit events
+            .add_directive("actix_security::audit=info".parse().unwrap())
+    )
+    .init();
+```
+
 ## Spring Security Comparison
 
 | Spring Security | Actix Security |
@@ -189,3 +250,4 @@ Events can be serialized to JSON (enabled by default with the `audit` feature):
 | `AuthenticationEventPublisher` | `AuditLogger` |
 | `AbstractAuthenticationEvent` | `SecurityEvent` |
 | `@EventListener` | `SecurityEventHandler` trait |
+| Spring AOP logging | `tracing` integration |

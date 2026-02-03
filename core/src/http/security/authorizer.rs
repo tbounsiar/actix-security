@@ -145,12 +145,30 @@ impl<B: 'static> Authorizer<B> for RequestMatcherAuthorizer {
                 if let Some(access) = self.matches(&path) {
                     if self.check_access(u, access) {
                         // User has access, forward to inner service
+                        #[cfg(feature = "audit")]
+                        tracing::debug!(
+                            target: "actix_security::audit",
+                            event_type = "ACCESS_GRANTED",
+                            user = %u.get_username(),
+                            path = %path,
+                            "Access granted"
+                        );
                         return Box::pin(async move {
                             let res = next(req).await?;
                             Ok(res.map_into_left_body())
                         });
                     } else {
                         // User lacks required access -> 403 Forbidden
+                        #[cfg(feature = "audit")]
+                        tracing::warn!(
+                            target: "actix_security::audit",
+                            event_type = "ACCESS_DENIED",
+                            user = %u.get_username(),
+                            path = %path,
+                            required_roles = ?access.roles,
+                            required_authorities = ?access.authorities,
+                            "Access denied: insufficient permissions"
+                        );
                         return Box::pin(async move {
                             Ok(req.into_response(
                                 HttpResponse::Forbidden().finish().map_into_right_body(),
@@ -178,6 +196,14 @@ impl<B: 'static> Authorizer<B> for RequestMatcherAuthorizer {
                     #[cfg(feature = "http-basic")]
                     if let Some(basic_config) = http_basic {
                         // HTTP Basic Auth: Return 401 with WWW-Authenticate header
+                        #[cfg(feature = "audit")]
+                        tracing::debug!(
+                            target: "actix_security::audit",
+                            event_type = "AUTHENTICATION_REQUIRED",
+                            path = %path,
+                            auth_method = "http_basic",
+                            "Authentication required (HTTP Basic challenge)"
+                        );
                         let www_auth = basic_config.www_authenticate_header();
                         return Box::pin(async move {
                             Ok(req.into_response(
@@ -190,6 +216,14 @@ impl<B: 'static> Authorizer<B> for RequestMatcherAuthorizer {
                     }
 
                     // Redirect to login page (fallback when http-basic not enabled or not configured)
+                    #[cfg(feature = "audit")]
+                    tracing::debug!(
+                        target: "actix_security::audit",
+                        event_type = "AUTHENTICATION_REQUIRED",
+                        path = %path,
+                        redirect_to = %login_url,
+                        "Authentication required (redirecting to login)"
+                    );
                     let redirect_url = login_url.to_string();
                     Box::pin(async move {
                         Ok(req.into_response(

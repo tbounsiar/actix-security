@@ -13,6 +13,15 @@ use futures_util::future::{ok, LocalBoxFuture, Ready};
 
 use crate::http::security::config::{Authenticator, Authorizer};
 
+/// Helper function to get client IP from request
+#[cfg(feature = "audit")]
+fn get_client_ip(req: &ServiceRequest) -> String {
+    req.connection_info()
+        .realip_remote_addr()
+        .unwrap_or("-")
+        .to_string()
+}
+
 /// Security middleware factory.
 ///
 /// # Spring Equivalent
@@ -114,6 +123,35 @@ where
             .authenticator
             .as_ref()
             .and_then(|auth| auth.get_user(&req));
+
+        // Audit log authentication result
+        #[cfg(feature = "audit")]
+        {
+            let path = req.path().to_string();
+            let method = req.method().to_string();
+            let ip = get_client_ip(&req);
+
+            if let Some(ref u) = user {
+                tracing::info!(
+                    target: "actix_security::audit",
+                    event_type = "AUTHENTICATION_SUCCESS",
+                    user = %u.get_username(),
+                    ip = %ip,
+                    path = %path,
+                    method = %method,
+                    "User authenticated successfully"
+                );
+            } else if self.authenticator.is_some() {
+                tracing::debug!(
+                    target: "actix_security::audit",
+                    event_type = "AUTHENTICATION_ANONYMOUS",
+                    ip = %ip,
+                    path = %path,
+                    method = %method,
+                    "Anonymous request (no credentials provided)"
+                );
+            }
+        }
 
         // Step 2: Store user in request extensions (if authenticated)
         // This makes the user available to handlers via AuthenticatedUser extractor

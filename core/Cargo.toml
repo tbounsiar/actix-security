@@ -49,7 +49,7 @@ websocket = []  # WebSocket security (origin validation, auth during handshake)
 # Security Features
 csrf = ["session"]  # CSRF protection
 rate-limit = []     # Rate limiting (brute-force protection)
-audit = ["dep:serde", "dep:serde_json"]  # Security audit logging (with JSON support)
+audit = ["dep:tracing"]  # Security audit logging with tracing
 account-lock = []   # Account locking on failed attempts
 
 # User Details Service
@@ -107,6 +107,9 @@ async-trait = { version = "0.1", optional = true }
 
 # SAML (optional)
 urlencoding = { version = "2", optional = true }
+
+# Audit/Tracing (optional)
+tracing = { version = "0.1", optional = true }
 
 [dev-dependencies]
 tokio = { version = "1", features = ["macros", "rt"] }

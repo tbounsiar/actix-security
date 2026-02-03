@@ -57,7 +57,7 @@ pub use api_key::{
 #[cfg(feature = "audit")]
 pub use audit::{
     audit_log, global_logger, init_global_logger, AuditLogger, InMemoryEventStore, SecurityEvent,
-    SecurityEventHandler, SecurityEventSeverity, SecurityEventType, StdoutHandler,
+    SecurityEventHandler, SecurityEventSeverity, SecurityEventType, StdoutHandler, TracingHandler,
 };
 pub use authenticator::MemoryAuthenticator;
 pub use authorizer::{Access, RequestMatcherAuthorizer};

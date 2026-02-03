@@ -13,11 +13,11 @@
         const pathParts = path.split('/').filter(p => p);
         if (pathParts.length > 0) {
             const version = pathParts[0];
-            if (version === 'latest' || /^\d+\.\d+$/.test(version)) {
+            if (version === 'next' || /^\d+\.\d+$/.test(version)) {
                 return version;
             }
         }
-        return 'latest';
+        return 'next';
     }
 
     // Create version selector dropdown
@@ -38,7 +38,7 @@
         versions.forEach(function(version) {
             const option = document.createElement('option');
             option.value = version;
-            option.textContent = version === 'latest' ? 'latest (dev)' : 'v' + version;
+            option.textContent = version === 'next' ? 'next (dev)' : 'v' + version;
             if (version === currentVersion) {
                 option.selected = true;
             }

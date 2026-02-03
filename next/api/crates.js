@@ -1,2 +1,2 @@
-window.ALL_CRATES = ["actix_security","actix_security_codegen","actix_security_core","actix_security_examples","actix_security_test","api_key_auth","audit_logging","basic_auth","custom_expressions","form_login","jwt_auth","oidc_keycloak","security_complete","security_headers","session_auth","websocket_auth"];
-//{"start":21,"fragment_lengths":[16,25,22,26,22,15,16,13,21,13,11,16,20,19,15,17]}
+window.ALL_CRATES = ["actix_security","actix_security_codegen","actix_security_core","actix_security_examples","actix_security_test","api_key_auth","audit_logging","basic_auth","custom_expressions","form_login","jwt_auth","ldap_auth","oauth2_google","oidc_keycloak","saml_auth","security_complete","security_headers","session_auth","websocket_auth"];
+//{"start":21,"fragment_lengths":[16,25,22,26,22,15,16,13,21,13,11,12,16,16,12,20,19,15,17]}

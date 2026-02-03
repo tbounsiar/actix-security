@@ -188,19 +188,21 @@
 actix-security = { version = "0.2", features = ["ldap"] }
 </code></pre>
 <h2 id="basic-usage"><a class="header" href="#basic-usage">Basic Usage</a></h2>
-<pre><code class="language-rust">use actix_security::http::security::{LdapAuthenticator, LdapConfig};
+<pre><code class="language-rust">use actix_security::http::security::{LdapAuthenticator, LdapConfig, MockLdapClient};
 use actix_web::{App, HttpServer};
 
 #[actix_web::main]
 async fn main() -&gt; std::io::Result&lt;()&gt; {
-    let ldap_config = LdapConfig::new()
-        .url("ldap://ldap.example.com:389")
+    let ldap_config = LdapConfig::new("ldap://ldap.example.com:389")
         .base_dn("dc=example,dc=com")
         .user_search_filter("(uid={0})")
         .bind_dn("cn=admin,dc=example,dc=com")
         .bind_password("admin_password");
 
-    let authenticator = LdapAuthenticator::new(ldap_config);
+    // Create authenticator with a client that implements LdapOperations
+    // For testing, use MockLdapClient; for production, use a real LDAP client
+    let client = MockLdapClient::new();
+    let authenticator = LdapAuthenticator::new(ldap_config, client);
 
     HttpServer::new(move || {
         App::new()
@@ -212,14 +214,12 @@ async fn main() -&gt; std::io::Result&lt;()&gt; {
     .await
 }</code></pre>
 <h2 id="configuration-options"><a class="header" href="#configuration-options">Configuration Options</a></h2>
-<pre><code class="language-rust">LdapConfig::new()
-    // LDAP server URL
-    .url("ldap://ldap.example.com:389")
-
+<pre><code class="language-rust">LdapConfig::new("ldap://ldap.example.com:389")
     // Base DN for user searches
     .base_dn("dc=example,dc=com")
 
-    // Filter to find users ({0} is replaced with username)
+    // User search configuration
+    .user_search_base("ou=users")
     .user_search_filter("(uid={0})")
 
     // Service account for binding
@@ -227,12 +227,16 @@ async fn main() -&gt; std::io::Result&lt;()&gt; {
     .bind_password("admin_password")
 
     // Group configuration
-    .group_search_base("ou=groups,dc=example,dc=com")
+    .group_search_base("ou=groups")
     .group_search_filter("(member={0})")
 
-    // Map LDAP groups to roles
-    .group_role_mapping("cn=admins,ou=groups,dc=example,dc=com", "ADMIN")
-    .group_role_mapping("cn=users,ou=groups,dc=example,dc=com", "USER")</code></pre>
+    // Role configuration
+    .role_prefix("ROLE_")
+    .convert_to_uppercase(true)
+
+    // Timeouts
+    .connect_timeout(Duration::from_secs(5))
+    .operation_timeout(Duration::from_secs(10))</code></pre>
 <h2 id="active-directory-configuration"><a class="header" href="#active-directory-configuration">Active Directory Configuration</a></h2>
 <p>For Active Directory, use the preset configuration:</p>
 <pre><code class="language-rust">let config = LdapConfig::active_directory(

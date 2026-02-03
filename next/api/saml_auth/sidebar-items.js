@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["create_saml_config","main"],"struct":["AcsForm","AppState","SamlUser","acs","demo_response","index","metadata","saml_login","saml_logout"]};

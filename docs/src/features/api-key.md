@@ -115,6 +115,52 @@ let key = ApiKey::builder("sk_live_abc123")
     .build();
 ```
 
+### Metadata
+
+Store additional information with API keys for business logic:
+
+```rust
+let key = ApiKey::new("sk_live_abc123")
+    .with_metadata("environment", "production")
+    .with_metadata("tier", "premium")
+    .with_metadata("rate_limit", "1000");
+
+// Access metadata in handlers
+fn handle_request(user: AuthenticatedUser, key_repo: &impl ApiKeyRepository) {
+    if let Some(key) = key_repo.find_by_key(/* key value */) {
+        let metadata = key.get_metadata();
+
+        // Use metadata for business logic
+        if metadata.get("tier") == Some(&"premium".to_string()) {
+            // Premium features
+        }
+
+        // Rate limiting based on tier
+        let limit: u32 = metadata
+            .get("rate_limit")
+            .and_then(|s| s.parse().ok())
+            .unwrap_or(100);
+    }
+}
+```
+
+### Key Validation State
+
+Keys track multiple states for comprehensive validation:
+
+```rust
+let key = ApiKey::new("sk_test")
+    .enabled(true)
+    .expires_in(Duration::from_secs(3600));
+
+// Individual checks
+assert!(key.is_enabled());   // Check if key is active
+assert!(!key.is_expired());  // Check if key hasn't expired
+
+// Combined validation (enabled AND not expired)
+assert!(key.is_valid());
+```
+
 ## Custom Repository
 
 Implement `ApiKeyRepository` for custom storage backends:

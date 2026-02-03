@@ -389,3 +389,318 @@ where
         })
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    // =============================================================================
+    // FrameOptions Tests
+    // =============================================================================
+
+    #[test]
+    fn test_frame_options_deny() {
+        assert_eq!(FrameOptions::Deny.to_header_value(), Some("DENY"));
+    }
+
+    #[test]
+    fn test_frame_options_same_origin() {
+        assert_eq!(
+            FrameOptions::SameOrigin.to_header_value(),
+            Some("SAMEORIGIN")
+        );
+    }
+
+    #[test]
+    fn test_frame_options_disabled() {
+        assert_eq!(FrameOptions::Disabled.to_header_value(), None);
+    }
+
+    #[test]
+    fn test_frame_options_equality() {
+        assert_eq!(FrameOptions::Deny, FrameOptions::Deny);
+        assert_ne!(FrameOptions::Deny, FrameOptions::SameOrigin);
+    }
+
+    // =============================================================================
+    // ReferrerPolicy Tests
+    // =============================================================================
+
+    #[test]
+    fn test_referrer_policy_values() {
+        assert_eq!(
+            ReferrerPolicy::NoReferrer.to_header_value(),
+            Some("no-referrer")
+        );
+        assert_eq!(
+            ReferrerPolicy::NoReferrerWhenDowngrade.to_header_value(),
+            Some("no-referrer-when-downgrade")
+        );
+        assert_eq!(ReferrerPolicy::Origin.to_header_value(), Some("origin"));
+        assert_eq!(
+            ReferrerPolicy::OriginWhenCrossOrigin.to_header_value(),
+            Some("origin-when-cross-origin")
+        );
+        assert_eq!(
+            ReferrerPolicy::SameOrigin.to_header_value(),
+            Some("same-origin")
+        );
+        assert_eq!(
+            ReferrerPolicy::StrictOrigin.to_header_value(),
+            Some("strict-origin")
+        );
+        assert_eq!(
+            ReferrerPolicy::StrictOriginWhenCrossOrigin.to_header_value(),
+            Some("strict-origin-when-cross-origin")
+        );
+        assert_eq!(
+            ReferrerPolicy::UnsafeUrl.to_header_value(),
+            Some("unsafe-url")
+        );
+        assert_eq!(ReferrerPolicy::Disabled.to_header_value(), None);
+    }
+
+    // =============================================================================
+    // SecurityHeaders Default Tests
+    // =============================================================================
+
+    #[test]
+    fn test_default_security_headers() {
+        let headers = SecurityHeaders::default();
+
+        assert!(headers.content_type_options);
+        assert_eq!(headers.frame_options, FrameOptions::Deny);
+        assert!(!headers.xss_protection);
+        assert!(headers.content_security_policy.is_none());
+        assert!(!headers.hsts_enabled);
+        assert_eq!(headers.hsts_max_age, 31536000);
+        assert!(!headers.hsts_include_subdomains);
+        assert!(!headers.hsts_preload);
+        assert_eq!(
+            headers.referrer_policy,
+            ReferrerPolicy::StrictOriginWhenCrossOrigin
+        );
+        assert!(headers.permissions_policy.is_none());
+        assert!(headers.cache_control.is_none());
+    }
+
+    #[test]
+    fn test_new_equals_default() {
+        let new = SecurityHeaders::new();
+        let default = SecurityHeaders::default();
+
+        assert_eq!(new.content_type_options, default.content_type_options);
+        assert_eq!(new.frame_options, default.frame_options);
+        assert_eq!(new.hsts_enabled, default.hsts_enabled);
+    }
+
+    // =============================================================================
+    // SecurityHeaders Strict Tests
+    // =============================================================================
+
+    #[test]
+    fn test_strict_security_headers() {
+        let headers = SecurityHeaders::strict();
+
+        assert!(headers.content_type_options);
+        assert_eq!(headers.frame_options, FrameOptions::Deny);
+        assert!(headers.content_security_policy.is_some());
+        assert_eq!(
+            headers.content_security_policy.as_deref(),
+            Some("default-src 'self'")
+        );
+        assert!(headers.hsts_enabled);
+        assert!(headers.hsts_include_subdomains);
+        assert!(!headers.hsts_preload);
+        assert_eq!(headers.referrer_policy, ReferrerPolicy::NoReferrer);
+        assert!(headers.permissions_policy.is_some());
+        assert!(headers.cache_control.is_some());
+    }
+
+    // =============================================================================
+    // Builder Pattern Tests
+    // =============================================================================
+
+    #[test]
+    fn test_frame_options_builder() {
+        let headers = SecurityHeaders::new().frame_options(FrameOptions::SameOrigin);
+
+        assert_eq!(headers.frame_options, FrameOptions::SameOrigin);
+    }
+
+    #[test]
+    fn test_content_security_policy_builder() {
+        let headers =
+            SecurityHeaders::new().content_security_policy("default-src 'self'; script-src 'self'");
+
+        assert_eq!(
+            headers.content_security_policy.as_deref(),
+            Some("default-src 'self'; script-src 'self'")
+        );
+    }
+
+    #[test]
+    fn test_hsts_builder() {
+        let headers = SecurityHeaders::new().hsts(true, 86400);
+
+        assert!(headers.hsts_enabled);
+        assert_eq!(headers.hsts_max_age, 86400);
+    }
+
+    #[test]
+    fn test_hsts_include_subdomains_builder() {
+        let headers = SecurityHeaders::new().hsts_include_subdomains(true);
+
+        assert!(headers.hsts_include_subdomains);
+    }
+
+    #[test]
+    fn test_hsts_preload_builder() {
+        let headers = SecurityHeaders::new().hsts_preload(true);
+
+        assert!(headers.hsts_preload);
+    }
+
+    #[test]
+    fn test_referrer_policy_builder() {
+        let headers = SecurityHeaders::new().referrer_policy(ReferrerPolicy::NoReferrer);
+
+        assert_eq!(headers.referrer_policy, ReferrerPolicy::NoReferrer);
+    }
+
+    #[test]
+    fn test_permissions_policy_builder() {
+        let headers = SecurityHeaders::new().permissions_policy("geolocation=(), camera=()");
+
+        assert_eq!(
+            headers.permissions_policy.as_deref(),
+            Some("geolocation=(), camera=()")
+        );
+    }
+
+    #[test]
+    fn test_cache_control_builder() {
+        let headers = SecurityHeaders::new().cache_control("no-cache, no-store");
+
+        assert_eq!(headers.cache_control.as_deref(), Some("no-cache, no-store"));
+    }
+
+    #[test]
+    fn test_disable_content_type_options() {
+        let headers = SecurityHeaders::new().disable_content_type_options();
+
+        assert!(!headers.content_type_options);
+    }
+
+    #[test]
+    fn test_chained_builders() {
+        let headers = SecurityHeaders::new()
+            .frame_options(FrameOptions::SameOrigin)
+            .content_security_policy("default-src 'self'")
+            .hsts(true, 86400)
+            .hsts_include_subdomains(true)
+            .referrer_policy(ReferrerPolicy::StrictOrigin)
+            .permissions_policy("geolocation=()")
+            .cache_control("private");
+
+        assert_eq!(headers.frame_options, FrameOptions::SameOrigin);
+        assert!(headers.content_security_policy.is_some());
+        assert!(headers.hsts_enabled);
+        assert!(headers.hsts_include_subdomains);
+        assert_eq!(headers.referrer_policy, ReferrerPolicy::StrictOrigin);
+        assert!(headers.permissions_policy.is_some());
+        assert!(headers.cache_control.is_some());
+    }
+
+    // =============================================================================
+    // HSTS Value Building Tests
+    // =============================================================================
+
+    #[test]
+    fn test_build_hsts_value_basic() {
+        let headers = SecurityHeaders::new().hsts(true, 31536000);
+
+        assert_eq!(headers.build_hsts_value(), "max-age=31536000");
+    }
+
+    #[test]
+    fn test_build_hsts_value_with_subdomains() {
+        let headers = SecurityHeaders::new()
+            .hsts(true, 31536000)
+            .hsts_include_subdomains(true);
+
+        assert_eq!(
+            headers.build_hsts_value(),
+            "max-age=31536000; includeSubDomains"
+        );
+    }
+
+    #[test]
+    fn test_build_hsts_value_with_preload() {
+        let headers = SecurityHeaders::new()
+            .hsts(true, 31536000)
+            .hsts_preload(true);
+
+        assert_eq!(headers.build_hsts_value(), "max-age=31536000; preload");
+    }
+
+    #[test]
+    fn test_build_hsts_value_full() {
+        let headers = SecurityHeaders::new()
+            .hsts(true, 31536000)
+            .hsts_include_subdomains(true)
+            .hsts_preload(true);
+
+        assert_eq!(
+            headers.build_hsts_value(),
+            "max-age=31536000; includeSubDomains; preload"
+        );
+    }
+
+    // =============================================================================
+    // Clone Tests
+    // =============================================================================
+
+    #[test]
+    fn test_security_headers_clone() {
+        let original = SecurityHeaders::new()
+            .frame_options(FrameOptions::SameOrigin)
+            .content_security_policy("default-src 'self'");
+
+        let cloned = original.clone();
+
+        assert_eq!(cloned.frame_options, original.frame_options);
+        assert_eq!(
+            cloned.content_security_policy,
+            original.content_security_policy
+        );
+    }
+
+    // =============================================================================
+    // Debug Tests
+    // =============================================================================
+
+    #[test]
+    fn test_security_headers_debug() {
+        let headers = SecurityHeaders::new();
+        let debug_str = format!("{:?}", headers);
+
+        assert!(debug_str.contains("SecurityHeaders"));
+    }
+
+    #[test]
+    fn test_frame_options_debug() {
+        let deny = FrameOptions::Deny;
+        let debug_str = format!("{:?}", deny);
+
+        assert!(debug_str.contains("Deny"));
+    }
+
+    #[test]
+    fn test_referrer_policy_debug() {
+        let policy = ReferrerPolicy::StrictOriginWhenCrossOrigin;
+        let debug_str = format!("{:?}", policy);
+
+        assert!(debug_str.contains("StrictOriginWhenCrossOrigin"));
+    }
+}

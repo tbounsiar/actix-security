@@ -1,6 +1,6 @@
 [package]
 name = "actix-security-examples"
-version = "0.2.2"
+version = "0.2.3"
 edition = "2021"
 publish = false
 description = "Examples and integration tests for actix-security"
@@ -134,3 +134,15 @@ path = "tests/remember_me_tests.rs"
 [[test]]
 name = "csrf_tests"
 path = "tests/csrf_tests.rs"
+
+[[test]]
+name = "api_key_tests"
+path = "tests/api_key_tests.rs"
+
+[[test]]
+name = "websocket_tests"
+path = "tests/websocket_tests.rs"
+
+[[test]]
+name = "oauth2_tests"
+path = "tests/oauth2_tests.rs"

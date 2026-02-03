@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.3] - 2026-02-03
+
 ### Added
 - **API Key Authentication** (`api-key` feature)
   - Support for header, query parameter, and Authorization header extraction
@@ -26,6 +28,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - JWT authentication during WebSocket handshake
   - Role and authority checks for WebSocket connections
   - Example application demonstrating WebSocket security patterns
+
+- **Integration Tests**
+  - API Key authentication tests (27 tests)
+  - WebSocket security tests (24 tests)
+  - OAuth2/OIDC configuration tests (20 tests)
+
+- **Unit Tests**
+  - User model tests (37 tests)
+  - SecurityHeaders configuration tests (27 tests)
+
+- **Documentation**
+  - README files for all examples (14 examples)
+  - Enhanced mdBook documentation for OAuth2, WebSocket, API Key, and Audit features
 
 ## [0.2.2] - 2026-02-02
 
@@ -199,7 +214,8 @@ async fn get_settings(tenant_id: Path<i64>, user: AuthenticatedUser) -> impl Res
 - Security headers middleware
 - Security context for accessing current user
 
-[Unreleased]: https://github.com/tbounsiar/actix-security/compare/v0.2.2...HEAD
+[Unreleased]: https://github.com/tbounsiar/actix-security/compare/v0.2.3...HEAD
+[0.2.3]: https://github.com/tbounsiar/actix-security/compare/v0.2.2...v0.2.3
 [0.2.2]: https://github.com/tbounsiar/actix-security/compare/v0.2.1...v0.2.2
 [0.2.1]: https://github.com/tbounsiar/actix-security/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/tbounsiar/actix-security/compare/v0.1.0...v0.2.0

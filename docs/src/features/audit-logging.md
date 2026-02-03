@@ -243,6 +243,66 @@ tracing_subscriber::fmt()
     .init();
 ```
 
+## Integration with Log Aggregation
+
+### Sending to External Services
+
+Implement `SecurityEventHandler` for external log services:
+
+```rust
+use actix_security::http::security::{SecurityEventHandler, SecurityEvent};
+
+struct ElasticsearchHandler {
+    client: elasticsearch::Elasticsearch,
+}
+
+impl SecurityEventHandler for ElasticsearchHandler {
+    fn handle(&self, event: &SecurityEvent) {
+        // Convert to JSON and send to Elasticsearch
+        let doc = serde_json::json!({
+            "@timestamp": event.timestamp,
+            "event_type": format!("{:?}", event.event_type),
+            "severity": format!("{:?}", event.severity),
+            "user": event.username,
+            "ip": event.ip_address,
+            "resource": event.resource,
+            "details": event.details,
+        });
+
+        // Send async (you'd use a channel in practice)
+        let _ = self.client.index(/* ... */);
+    }
+}
+```
+
+### Multiple Handlers
+
+Combine handlers for different purposes:
+
+```rust
+let logger = AuditLogger::new()
+    .add_handler(TracingHandler::new())      // Local logging
+    .add_handler(ElasticsearchHandler::new()) // Centralized logs
+    .add_handler(AlertHandler::new());        // Alerts for critical events
+```
+
+### Structured Logging with JSON
+
+For log aggregation systems (ELK, Splunk, Datadog), use JSON output:
+
+```rust
+use tracing_subscriber::fmt::format::FmtSpan;
+
+tracing_subscriber::fmt()
+    .json()  // Output as JSON
+    .with_target(true)
+    .with_current_span(false)
+    .init();
+
+// Events will be emitted as JSON:
+// {"timestamp":"2024-01-15T10:30:00Z","level":"WARN","target":"actix_security::audit","message":"Access denied","event_type":"ACCESS_DENIED","user":"user1","path":"/admin"}
+```
+
 ## Spring Security Comparison
 
 | Spring Security | Actix Security |
@@ -251,3 +311,5 @@ tracing_subscriber::fmt()
 | `AbstractAuthenticationEvent` | `SecurityEvent` |
 | `@EventListener` | `SecurityEventHandler` trait |
 | Spring AOP logging | `tracing` integration |
+| `ApplicationEventPublisher` | `audit_log()` global function |
+| `AuditApplicationEvent` | `SecurityEvent` with severity |

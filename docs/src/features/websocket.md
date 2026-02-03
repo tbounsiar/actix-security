@@ -94,6 +94,46 @@ async fn ws_handler(
 }
 ```
 
+### WebSocketUpgradeResult
+
+The `validate_upgrade()` method returns a `WebSocketUpgradeResult` with useful information:
+
+```rust
+let upgrade = config.validate_upgrade(&req)?;
+
+// Check if user is authenticated
+if upgrade.is_authenticated() {
+    // Get username (returns Option<&str>)
+    let username = upgrade.username();
+    println!("User: {:?}", username);
+
+    // Get the full User object
+    let user = upgrade.user();
+
+    // Get the validated origin
+    let origin = upgrade.origin();
+    println!("Connecting from: {:?}", origin);
+}
+
+// Convert to owned User (consumes the result)
+let user = upgrade.into_user();
+```
+
+### Validation Order
+
+Validation happens in this order, stopping at the first failure:
+1. **Origin** - CSWSH prevention
+2. **Authentication** - Is user logged in?
+3. **Roles** - Does user have required roles?
+4. **Authorities** - Does user have required authorities?
+
+```rust
+// Example: Bad origin fails first, even if user is authenticated
+let err = config.validate_upgrade(&bad_origin_request);
+assert!(matches!(err, WebSocketSecurityError::InvalidOrigin { .. }));
+```
+```
+
 ## JWT Authentication for WebSocket
 
 Since browsers can't send custom headers with WebSocket, use JWT in the Authorization header:

@@ -62,16 +62,49 @@ let client = OAuth2Client::new_basic(config)?;
 
 ## Supported Providers
 
-| Provider | OIDC Support | PKCE Support |
-|----------|--------------|--------------|
-| Google | Yes | Yes |
-| GitHub | No | No |
-| Microsoft | Yes | Yes |
-| Facebook | No | No |
-| Apple | Yes | Yes |
-| Okta | Yes | Yes |
-| Auth0 | Yes | Yes |
-| Keycloak | Yes | Yes |
+| Provider | OIDC Support | PKCE Support | Default Scopes |
+|----------|--------------|--------------|----------------|
+| Google | Yes | Yes | `openid`, `email`, `profile` |
+| GitHub | No | No | `read:user`, `user:email` |
+| Microsoft | Yes | Yes | `openid`, `email`, `profile` |
+| Facebook | No | No | `email`, `public_profile` |
+| Apple | Yes | Yes | `openid`, `email`, `name` |
+| Okta | Yes | Yes | `openid`, `email`, `profile` |
+| Auth0 | Yes | Yes | `openid`, `email`, `profile` |
+| Keycloak | Yes | Yes | `openid`, `email`, `profile` |
+
+### Automatic PKCE Handling
+
+PKCE (Proof Key for Code Exchange) is automatically configured based on the provider:
+
+```rust
+// Google: PKCE is enabled by default (use_pkce = true)
+let google = OAuth2Config::new(id, secret, redirect)
+    .provider(OAuth2Provider::Google);
+assert!(google.use_pkce);  // true
+
+// GitHub: PKCE is automatically disabled (not supported)
+let github = OAuth2Config::new(id, secret, redirect)
+    .provider(OAuth2Provider::GitHub);
+assert!(!github.use_pkce);  // false
+```
+
+### Registration ID
+
+The `registration_id` identifies the provider in URLs and callbacks:
+
+```rust
+// Automatically set from provider name
+let config = OAuth2Config::new(id, secret, redirect)
+    .provider(OAuth2Provider::Google);
+assert_eq!(config.registration_id, "google");
+
+// Or set explicitly for custom naming
+let config = OAuth2Config::new(id, secret, redirect)
+    .registration_id("my-google-oauth")
+    .provider(OAuth2Provider::Google);
+assert_eq!(config.registration_id, "my-google-oauth");
+```
 
 ## Configuration Options
 

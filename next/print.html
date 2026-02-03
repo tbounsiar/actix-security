@@ -5646,8 +5646,29 @@ logger.log(
         .ip_address(&amp;ip)
 );</code></pre>
 <h2 id="event-handlers"><a class="header" href="#event-handlers">Event Handlers</a></h2>
+<h3 id="tracinghandler-recommended"><a class="header" href="#tracinghandler-recommended">TracingHandler (Recommended)</a></h3>
+<p>Emits events through the <code>tracing</code> crate, integrating with the Rust ecosystem's standard observability infrastructure:</p>
+<pre><code class="language-rust">use actix_security::http::security::{AuditLogger, TracingHandler};
+use tracing_subscriber;
+
+// Initialize tracing subscriber (console output)
+tracing_subscriber::fmt::init();
+
+// Create audit logger with tracing handler
+let logger = AuditLogger::new()
+    .add_handler(TracingHandler::new());
+
+// Events are emitted to target "actix_security::audit"
+logger.log_login_success("admin", "192.168.1.1");
+// Output: INFO actix_security::audit: Security event event_type="AUTHENTICATION_SUCCESS" user="admin" ip="192.168.1.1"</code></pre>
+<p>This handler automatically maps event severity to tracing levels:</p>
+<ul>
+<li><code>Info</code> → <code>tracing::info!</code></li>
+<li><code>Warning</code> → <code>tracing::warn!</code></li>
+<li><code>Error</code>/<code>Critical</code> → <code>tracing::error!</code></li>
+</ul>
 <h3 id="stdouthandler"><a class="header" href="#stdouthandler">StdoutHandler</a></h3>
-<p>Prints events to standard output:</p>
+<p>Prints events to standard output (simpler, no tracing dependency):</p>
 <pre><code class="language-rust">let handler = StdoutHandler::new();</code></pre>
 <h3 id="inmemoryeventstore"><a class="header" href="#inmemoryeventstore">InMemoryEventStore</a></h3>
 <p>Stores events in memory (useful for testing):</p>
@@ -5691,7 +5712,7 @@ if let Some(logger) = global_logger() {
     logger.log_login_success("admin", "127.0.0.1");
 }</code></pre>
 <h2 id="json-output"><a class="header" href="#json-output">JSON Output</a></h2>
-<p>Events can be serialized to JSON (enabled by default with the <code>audit</code> feature):</p>
+<p>Events can be serialized to JSON when serde is available (via <code>jwt</code>, <code>session</code>, or <code>oauth2</code> features):</p>
 <pre><code class="language-json">{
   "event_type": "AuthenticationFailure",
   "severity": "Warning",
@@ -5704,11 +5725,40 @@ if let Some(logger) = global_logger() {
   }
 }
 </code></pre>
+<h2 id="automatic-tracing-in-middleware"><a class="header" href="#automatic-tracing-in-middleware">Automatic Tracing in Middleware</a></h2>
+<p>When the <code>audit</code> feature is enabled, the security middleware automatically emits tracing events for:</p>
+<h3 id="authentication-events"><a class="header" href="#authentication-events">Authentication Events</a></h3>
+<ul>
+<li><code>AUTHENTICATION_SUCCESS</code> - User authenticated successfully</li>
+<li><code>AUTHENTICATION_ANONYMOUS</code> - Anonymous request (debug level)</li>
+</ul>
+<h3 id="authorization-events"><a class="header" href="#authorization-events">Authorization Events</a></h3>
+<ul>
+<li><code>ACCESS_GRANTED</code> - User has required permissions (debug level)</li>
+<li><code>ACCESS_DENIED</code> - User lacks required permissions (warning level)</li>
+<li><code>AUTHENTICATION_REQUIRED</code> - Redirecting to login or returning 401</li>
+</ul>
+<p>Example output with <code>tracing-subscriber</code>:</p>
+<pre><code>INFO actix_security::audit: User authenticated successfully event_type="AUTHENTICATION_SUCCESS" user="admin" ip="192.168.1.1" path="/api/users" method="GET"
+WARN actix_security::audit: Access denied: insufficient permissions event_type="ACCESS_DENIED" user="user1" path="/admin" required_roles=["ADMIN"]
+</code></pre>
+<h3 id="filtering-by-target"><a class="header" href="#filtering-by-target">Filtering by Target</a></h3>
+<p>Use tracing's target filtering to control output:</p>
+<pre><code class="language-rust">use tracing_subscriber::EnvFilter;
+
+tracing_subscriber::fmt()
+    .with_env_filter(
+        EnvFilter::from_default_env()
+            // Show all security audit events
+            .add_directive("actix_security::audit=info".parse().unwrap())
+    )
+    .init();</code></pre>
 <h2 id="spring-security-comparison-23"><a class="header" href="#spring-security-comparison-23">Spring Security Comparison</a></h2>
 <div class="table-wrapper"><table><thead><tr><th>Spring Security</th><th>Actix Security</th></tr></thead><tbody>
 <tr><td><code>AuthenticationEventPublisher</code></td><td><code>AuditLogger</code></td></tr>
 <tr><td><code>AbstractAuthenticationEvent</code></td><td><code>SecurityEvent</code></td></tr>
 <tr><td><code>@EventListener</code></td><td><code>SecurityEventHandler</code> trait</td></tr>
+<tr><td>Spring AOP logging</td><td><code>tracing</code> integration</td></tr>
 </tbody></table>
 </div><div style="break-before: page; page-break-before: always;"></div><h1 id="remember-me-authentication"><a class="header" href="#remember-me-authentication">Remember-Me Authentication</a></h1>
 <p>Remember-me authentication allows users to stay logged in across browser sessions using a persistent token stored in a cookie.</p>

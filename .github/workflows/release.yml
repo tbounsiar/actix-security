@@ -9,50 +9,60 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  # First, verify that CI passed for this commit
-  verify-ci:
-    name: Verify CI Passed
+  # First, wait for CI to pass for this commit
+  wait-for-ci:
+    name: Wait for CI
     runs-on: ubuntu-latest
     steps:
-      - name: Check CI workflow status
+      - name: Wait for CI workflow to complete
         uses: actions/github-script@v7
         with:
           script: |
             const sha = context.sha;
-            console.log(`Checking CI status for commit: ${sha}`);
+            const maxWaitMinutes = 30;
+            const pollIntervalSeconds = 60;
+            const maxAttempts = (maxWaitMinutes * 60) / pollIntervalSeconds;
 
-            // Get workflow runs for the CI workflow on this commit
-            const runs = await github.rest.actions.listWorkflowRuns({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              workflow_id: 'ci.yml',
-              head_sha: sha,
-            });
+            console.log(`Waiting for CI to complete for commit: ${sha}`);
+            console.log(`Will poll every ${pollIntervalSeconds}s for up to ${maxWaitMinutes} minutes`);
 
-            if (runs.data.workflow_runs.length === 0) {
-              core.setFailed(`No CI workflow run found for commit ${sha}. Please ensure CI has run before creating a release tag.`);
-              return;
+            for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+              const runs = await github.rest.actions.listWorkflowRuns({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                workflow_id: 'ci.yml',
+                head_sha: sha,
+              });
+
+              if (runs.data.workflow_runs.length === 0) {
+                console.log(`Attempt ${attempt}/${maxAttempts}: No CI workflow run found yet, waiting...`);
+                await new Promise(r => setTimeout(r, pollIntervalSeconds * 1000));
+                continue;
+              }
+
+              const latestRun = runs.data.workflow_runs[0];
+              console.log(`Attempt ${attempt}/${maxAttempts}: CI status = ${latestRun.status}, conclusion = ${latestRun.conclusion}`);
+              console.log(`CI run: ${latestRun.html_url}`);
+
+              if (latestRun.status === 'completed') {
+                if (latestRun.conclusion === 'success') {
+                  console.log('CI workflow passed! Proceeding with release.');
+                  return;
+                } else {
+                  core.setFailed(`CI workflow failed with conclusion: ${latestRun.conclusion}. Fix the issues before releasing.`);
+                  return;
+                }
+              }
+
+              console.log(`CI still running, waiting ${pollIntervalSeconds}s...`);
+              await new Promise(r => setTimeout(r, pollIntervalSeconds * 1000));
             }
 
-            const latestRun = runs.data.workflow_runs[0];
-            console.log(`Latest CI run: ${latestRun.html_url}`);
-            console.log(`Status: ${latestRun.status}, Conclusion: ${latestRun.conclusion}`);
-
-            if (latestRun.status !== 'completed') {
-              core.setFailed(`CI workflow is still running. Please wait for it to complete before releasing.`);
-              return;
-            }
-
-            if (latestRun.conclusion !== 'success') {
-              core.setFailed(`CI workflow failed with conclusion: ${latestRun.conclusion}. Fix the issues before releasing.`);
-              return;
-            }
-
-            console.log('CI workflow passed! Proceeding with release.');
+            core.setFailed(`Timeout: CI workflow did not complete within ${maxWaitMinutes} minutes.`);
 
   publish:
     name: Publish to crates.io
-    needs: verify-ci
+    needs: wait-for-ci
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

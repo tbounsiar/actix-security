@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["authenticator","authorizer","get_repository","main"],"static":["REPOSITORY"],"struct":["api_admin","api_data","api_me","health","public_endpoint"]};

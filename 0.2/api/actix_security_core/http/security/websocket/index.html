@@ -1,0 +1,90 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="WebSocket Security module for Actix Web."><title>actix_security_core::http::security::websocket - Rust</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2"href="../../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-ca0dd0c4.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="actix_security_core" data-themes="" data-resource-suffix="" data-rustdoc-version="1.93.0 (254b59607 2026-01-19)" data-channel="1.93.0" data-search-js="search-9e2438ea.js" data-stringdex-js="stringdex-a3946164.js" data-settings-js="settings-c38705f0.js" ><script src="../../../../static.files/storage-e2aeef58.js"></script><script defer src="../sidebar-items.js"></script><script defer src="../../../../static.files/main-a410ff4d.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-263c88ec.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-eab170b8.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-044be391.svg"></head><body class="rustdoc mod"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><rustdoc-topbar><h2><a href="#">Module websocket</a></h2></rustdoc-topbar><nav class="sidebar"><div class="sidebar-crate"><h2><a href="../../../../actix_security_core/index.html">actix_<wbr>security_<wbr>core</a><span class="version">0.2.3</span></h2></div><div class="sidebar-elems"><section id="rustdoc-toc"><h2 class="location"><a href="#">Module websocket</a></h2><h3><a href="#">Sections</a></h3><ul class="block top-toc"><li><a href="#overview" title="Overview">Overview</a></li><li><a href="#how-it-works" title="How It Works">How It Works</a></li><li><a href="#usage" title="Usage">Usage</a><ul><li><a href="#basic-websocket-authentication" title="Basic WebSocket Authentication">Basic WebSocket Authentication</a></li><li><a href="#using-websocket-security-config" title="Using WebSocket Security Config">Using WebSocket Security Config</a></li><li><a href="#security-context-in-websocket-actor" title="Security Context in WebSocket Actor">Security Context in WebSocket Actor</a></li></ul></li><li><a href="#spring-security-comparison" title="Spring Security Comparison">Spring Security Comparison</a></li><li><a href="#security-best-practices" title="Security Best Practices">Security Best Practices</a></li></ul><h3><a href="#structs">Module Items</a></h3><ul class="block"><li><a href="#structs" title="Structs">Structs</a></li><li><a href="#enums" title="Enums">Enums</a></li></ul></section><div id="rustdoc-modnav"><h2><a href="../index.html">In actix_<wbr>security_<wbr>core::<wbr>http::<wbr>security</a></h2></div></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><div class="width-limiter"><section id="main-content" class="content"><div class="main-heading"><div class="rustdoc-breadcrumbs"><a href="../../../index.html">actix_security_core</a>::<wbr><a href="../../index.html">http</a>::<wbr><a href="../index.html">security</a></div><h1>Module <span>websocket</span>&nbsp;<button id="copy-path" title="Copy item path to clipboard">Copy item path</button></h1><rustdoc-toolbar></rustdoc-toolbar><span class="sub-heading"><a class="src" href="../../../../src/actix_security_core/http/security/websocket/mod.rs.html#1-125">Source</a> </span></div><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>WebSocket Security module for Actix Web.</p>
+<h2 id="overview"><a class="doc-anchor" href="#overview">§</a>Overview</h2>
+<p>This module provides security features for WebSocket connections:</p>
+<ul>
+<li>Authentication during the WebSocket handshake</li>
+<li>Origin validation (CSWSH prevention)</li>
+<li>Security context propagation to WebSocket actors</li>
+</ul>
+<h2 id="how-it-works"><a class="doc-anchor" href="#how-it-works">§</a>How It Works</h2>
+<p>WebSocket security works by securing the HTTP upgrade request:</p>
+<div class="example-wrap"><pre class="language-text"><code>Client                    Server
+  |                          |
+  |--HTTP Upgrade Request---&gt;|
+  |  (with auth token)       | 1. SecurityTransform validates auth
+  |                          | 2. Origin validation (CSWSH check)
+  |                          | 3. Store user in extensions
+  |&lt;--101 Switching----------|
+  |                          |
+  |==WebSocket Connection====| User available via SecurityContext
+  |                          |</code></pre></div><h2 id="usage"><a class="doc-anchor" href="#usage">§</a>Usage</h2><h3 id="basic-websocket-authentication"><a class="doc-anchor" href="#basic-websocket-authentication">§</a>Basic WebSocket Authentication</h3>
+<div class="example-wrap ignore"><a href="#" class="tooltip" title="This example is not tested">ⓘ</a><pre class="rust rust-example-rendered"><code><span class="kw">use </span>actix_web::{get, web, HttpRequest, HttpResponse};
+<span class="kw">use </span>actix_security::http::security::{SecurityExt, websocket::OriginValidator};
+
+<span class="attr">#[get(<span class="string">"/ws"</span>)]
+</span><span class="kw">async fn </span>ws_handler(
+    req: HttpRequest,
+    stream: web::Payload,
+) -&gt; <span class="prelude-ty">Result</span>&lt;HttpResponse, actix_web::Error&gt; {
+    <span class="comment">// 1. Check authentication (user already set by SecurityTransform)
+    </span><span class="kw">let </span>user = req.get_user().ok_or(AuthError::Unauthorized)<span class="question-mark">?</span>;
+
+    <span class="comment">// 2. Validate origin (CSWSH prevention)
+    </span>OriginValidator::new(<span class="kw-2">&amp;</span>[<span class="string">"https://myapp.com"</span>])
+        .validate(<span class="kw-2">&amp;</span>req)<span class="question-mark">?</span>;
+
+    <span class="comment">// 3. Upgrade to WebSocket
+    </span><span class="kw">let </span>resp = actix_ws::start(MyWebSocketActor::new(user), <span class="kw-2">&amp;</span>req, stream)<span class="question-mark">?</span>;
+    <span class="prelude-val">Ok</span>(resp)
+}</code></pre></div><h3 id="using-websocket-security-config"><a class="doc-anchor" href="#using-websocket-security-config">§</a>Using WebSocket Security Config</h3>
+<div class="example-wrap ignore"><a href="#" class="tooltip" title="This example is not tested">ⓘ</a><pre class="rust rust-example-rendered"><code><span class="kw">use </span>actix_security::http::security::websocket::WebSocketSecurityConfig;
+
+<span class="kw">let </span>ws_config = WebSocketSecurityConfig::new()
+    .allowed_origins(<span class="macro">vec!</span>[<span class="string">"https://myapp.com"</span>.into()])
+    .require_authentication(<span class="bool-val">true</span>);
+
+<span class="attr">#[get(<span class="string">"/ws"</span>)]
+</span><span class="kw">async fn </span>ws_handler(
+    req: HttpRequest,
+    stream: web::Payload,
+    config: web::Data&lt;WebSocketSecurityConfig&gt;,
+) -&gt; <span class="prelude-ty">Result</span>&lt;HttpResponse, actix_web::Error&gt; {
+    <span class="comment">// Validate the upgrade request
+    </span><span class="kw">let </span>user = config.validate_upgrade(<span class="kw-2">&amp;</span>req)<span class="question-mark">?</span>;
+
+    <span class="comment">// Upgrade to WebSocket
+    </span><span class="kw">let </span>resp = actix_ws::start(MyWebSocketActor::new(user), <span class="kw-2">&amp;</span>req, stream)<span class="question-mark">?</span>;
+    <span class="prelude-val">Ok</span>(resp)
+}</code></pre></div><h3 id="security-context-in-websocket-actor"><a class="doc-anchor" href="#security-context-in-websocket-actor">§</a>Security Context in WebSocket Actor</h3>
+<div class="example-wrap ignore"><a href="#" class="tooltip" title="This example is not tested">ⓘ</a><pre class="rust rust-example-rendered"><code><span class="kw">use </span>actix_security::http::security::{User, SecurityContext};
+
+<span class="kw">struct </span>MyWebSocketActor {
+    user: User,
+}
+
+<span class="kw">impl </span>MyWebSocketActor {
+    <span class="kw">pub fn </span>new(user: User) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{ user }
+    }
+
+    <span class="kw">fn </span>handle_message(<span class="kw-2">&amp;</span><span class="self">self</span>, msg: <span class="kw-2">&amp;</span>str) {
+        <span class="comment">// Access user directly
+        </span><span class="kw">if </span><span class="self">self</span>.user.has_role(<span class="string">"ADMIN"</span>) {
+            <span class="comment">// Admin-only logic
+        </span>}
+    }
+}</code></pre></div><h2 id="spring-security-comparison"><a class="doc-anchor" href="#spring-security-comparison">§</a>Spring Security Comparison</h2><div><table><thead><tr><th>Spring Security</th><th>Actix Security</th></tr></thead><tbody>
+<tr><td><code>WebSocketSecurityConfigurer</code></td><td><code>WebSocketSecurityConfig</code></td></tr>
+<tr><td><code>AbstractSecurityWebSocketMessageBrokerConfigurer</code></td><td>Security middleware + OriginValidator</td></tr>
+<tr><td><code>@PreAuthorize</code> on message handlers</td><td>Manual checks in actor</td></tr>
+<tr><td>CORS/Origin checking</td><td><code>OriginValidator</code></td></tr>
+</tbody></table>
+</div><h2 id="security-best-practices"><a class="doc-anchor" href="#security-best-practices">§</a>Security Best Practices</h2>
+<ol>
+<li><strong>Always use TLS</strong> - Use <code>wss://</code> in production</li>
+<li><strong>Validate Origin</strong> - Prevent Cross-Site WebSocket Hijacking (CSWSH)</li>
+<li><strong>Authenticate during handshake</strong> - Before WebSocket upgrade</li>
+<li><strong>Set message size limits</strong> - Prevent DoS attacks</li>
+<li><strong>Implement timeouts</strong> - Close idle connections</li>
+</ol>
+</div></details><h2 id="structs" class="section-header">Structs<a href="#structs" class="anchor">§</a></h2><dl class="item-table"><dt><a class="struct" href="struct.OriginValidator.html" title="struct actix_security_core::http::security::websocket::OriginValidator">Origin<wbr>Validator</a></dt><dd>Validates the Origin header of WebSocket upgrade requests.</dd><dt><a class="struct" href="struct.OriginValidatorBuilder.html" title="struct actix_security_core::http::security::websocket::OriginValidatorBuilder">Origin<wbr>Validator<wbr>Builder</a></dt><dd>Builder for <code>OriginValidator</code>.</dd><dt><a class="struct" href="struct.WebSocketSecurityConfig.html" title="struct actix_security_core::http::security::websocket::WebSocketSecurityConfig">WebSocket<wbr>Security<wbr>Config</a></dt><dd>Configuration for WebSocket security.</dd><dt><a class="struct" href="struct.WebSocketSecurityConfigBuilder.html" title="struct actix_security_core::http::security::websocket::WebSocketSecurityConfigBuilder">WebSocket<wbr>Security<wbr>Config<wbr>Builder</a></dt><dd>Builder for more complex WebSocket security configurations.</dd><dt><a class="struct" href="struct.WebSocketUpgrade.html" title="struct actix_security_core::http::security::websocket::WebSocketUpgrade">WebSocket<wbr>Upgrade</a></dt><dd>Represents a validated WebSocket upgrade request.</dd><dt><a class="struct" href="struct.WebSocketUser.html" title="struct actix_security_core::http::security::websocket::WebSocketUser">WebSocket<wbr>User</a></dt><dd>Wrapper for extracting an authenticated user during WebSocket upgrade.</dd></dl><h2 id="enums" class="section-header">Enums<a href="#enums" class="anchor">§</a></h2><dl class="item-table"><dt><a class="enum" href="enum.WebSocketSecurityError.html" title="enum actix_security_core::http::security::websocket::WebSocketSecurityError">WebSocket<wbr>Security<wbr>Error</a></dt><dd>Errors that can occur during WebSocket security validation.</dd></dl></section></div></main></body></html>

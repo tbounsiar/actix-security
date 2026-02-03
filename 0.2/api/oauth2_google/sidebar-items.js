@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["generate_state","main"],"struct":["AppConfig","AppState","CallbackQuery","GoogleUser","TokenResponse","UserInfoResponse","callback","index","login","logout"]};

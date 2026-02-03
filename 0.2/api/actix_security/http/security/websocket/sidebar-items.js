@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["WebSocketSecurityError"],"struct":["OriginValidator","OriginValidatorBuilder","WebSocketSecurityConfig","WebSocketSecurityConfigBuilder","WebSocketUpgrade","WebSocketUser"]};

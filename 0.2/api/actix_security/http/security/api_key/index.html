@@ -1,0 +1,69 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="API Key Authentication for Actix Web."><title>actix_security::http::security::api_key - Rust</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2"href="../../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-ca0dd0c4.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="actix_security" data-themes="" data-resource-suffix="" data-rustdoc-version="1.93.0 (254b59607 2026-01-19)" data-channel="1.93.0" data-search-js="search-9e2438ea.js" data-stringdex-js="stringdex-a3946164.js" data-settings-js="settings-c38705f0.js" ><script src="../../../../static.files/storage-e2aeef58.js"></script><script defer src="../sidebar-items.js"></script><script defer src="../../../../static.files/main-a410ff4d.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-263c88ec.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-eab170b8.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-044be391.svg"></head><body class="rustdoc mod"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><rustdoc-topbar><h2><a href="#">Module api_key</a></h2></rustdoc-topbar><nav class="sidebar"><div class="sidebar-crate"><h2><a href="../../../../actix_security/index.html">actix_<wbr>security</a><span class="version">0.2.3</span></h2></div><div class="sidebar-elems"><section id="rustdoc-toc"><h2 class="location"><a href="#">Module api_key</a></h2><h3><a href="#">Sections</a></h3><ul class="block top-toc"><li><a href="#overview" title="Overview">Overview</a></li><li><a href="#key-locations" title="Key Locations">Key Locations</a></li><li><a href="#usage" title="Usage">Usage</a><ul><li><a href="#basic-setup" title="Basic Setup">Basic Setup</a></li><li><a href="#with-custom-header" title="With Custom Header">With Custom Header</a></li><li><a href="#multiple-locations" title="Multiple Locations">Multiple Locations</a></li></ul></li><li><a href="#spring-security-comparison" title="Spring Security Comparison">Spring Security Comparison</a></li><li><a href="#security-considerations" title="Security Considerations">Security Considerations</a></li><li><a href="#example-with-middleware" title="Example with Middleware">Example with Middleware</a></li></ul><h3><a href="#structs">Module Items</a></h3><ul class="block"><li><a href="#structs" title="Structs">Structs</a></li><li><a href="#enums" title="Enums">Enums</a></li><li><a href="#traits" title="Traits">Traits</a></li></ul></section><div id="rustdoc-modnav"><h2><a href="../index.html">In actix_<wbr>security::<wbr>http::<wbr>security</a></h2></div></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><div class="width-limiter"><section id="main-content" class="content"><div class="main-heading"><div class="rustdoc-breadcrumbs"><a href="../../../index.html">actix_security</a>::<wbr><a href="../../index.html">http</a>::<wbr><a href="../index.html">security</a></div><h1>Module <span>api_key</span>&nbsp;<button id="copy-path" title="Copy item path to clipboard">Copy item path</button></h1><rustdoc-toolbar></rustdoc-toolbar><span class="sub-heading"></span></div><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>API Key Authentication for Actix Web.</p>
+<h2 id="overview"><a class="doc-anchor" href="#overview">§</a>Overview</h2>
+<p>API Key authentication is a simple authentication method where clients
+include a pre-shared key in their requests. It’s commonly used for:</p>
+<ul>
+<li>Service-to-service communication</li>
+<li>Public APIs with usage tracking</li>
+<li>Simple authentication without user sessions</li>
+</ul>
+<h2 id="key-locations"><a class="doc-anchor" href="#key-locations">§</a>Key Locations</h2>
+<p>API keys can be extracted from:</p>
+<ul>
+<li><strong>Header</strong> (recommended): <code>X-API-Key: your-api-key</code></li>
+<li><strong>Authorization header</strong>: <code>Authorization: ApiKey your-api-key</code></li>
+<li><strong>Query parameter</strong>: <code>?api_key=your-api-key</code> (less secure)</li>
+</ul>
+<h2 id="usage"><a class="doc-anchor" href="#usage">§</a>Usage</h2><h3 id="basic-setup"><a class="doc-anchor" href="#basic-setup">§</a>Basic Setup</h3>
+<div class="example-wrap ignore"><a href="#" class="tooltip" title="This example is not tested">ⓘ</a><pre class="rust rust-example-rendered"><code><span class="kw">use </span>actix_security::http::security::api_key::{
+    ApiKeyAuthenticator, InMemoryApiKeyRepository, ApiKeyConfig, ApiKey,
+};
+
+<span class="comment">// Create API key repository
+</span><span class="kw">let </span><span class="kw-2">mut </span>repository = InMemoryApiKeyRepository::new();
+
+<span class="comment">// Add API keys
+</span>repository.add_key(ApiKey::new(<span class="string">"sk_live_abc123"</span>)
+    .name(<span class="string">"Production Key"</span>)
+    .roles(<span class="macro">vec!</span>[<span class="string">"API_USER"</span>.into()])
+    .authorities(<span class="macro">vec!</span>[<span class="string">"api:read"</span>.into(), <span class="string">"api:write"</span>.into()]));
+
+<span class="comment">// Create authenticator
+</span><span class="kw">let </span>authenticator = ApiKeyAuthenticator::new(repository);</code></pre></div><h3 id="with-custom-header"><a class="doc-anchor" href="#with-custom-header">§</a>With Custom Header</h3>
+<div class="example-wrap ignore"><a href="#" class="tooltip" title="This example is not tested">ⓘ</a><pre class="rust rust-example-rendered"><code><span class="kw">let </span>config = ApiKeyConfig::header(<span class="string">"Authorization"</span>)
+    .prefix(<span class="string">"ApiKey "</span>);  <span class="comment">// Expects: Authorization: ApiKey sk_xxx
+
+</span><span class="kw">let </span>authenticator = ApiKeyAuthenticator::with_config(repository, config);</code></pre></div><h3 id="multiple-locations"><a class="doc-anchor" href="#multiple-locations">§</a>Multiple Locations</h3>
+<div class="example-wrap ignore"><a href="#" class="tooltip" title="This example is not tested">ⓘ</a><pre class="rust rust-example-rendered"><code><span class="kw">let </span>config = ApiKeyConfig::new()
+    .header(<span class="string">"X-API-Key"</span>)
+    .query_param(<span class="string">"api_key"</span>)
+    .authorization_scheme(<span class="string">"ApiKey"</span>);
+
+<span class="kw">let </span>authenticator = ApiKeyAuthenticator::with_config(repository, config);</code></pre></div><h2 id="spring-security-comparison"><a class="doc-anchor" href="#spring-security-comparison">§</a>Spring Security Comparison</h2><div><table><thead><tr><th>Spring Security</th><th>Actix Security</th></tr></thead><tbody>
+<tr><td>Custom <code>AuthenticationFilter</code></td><td><code>ApiKeyAuthenticator</code></td></tr>
+<tr><td><code>AuthenticationProvider</code></td><td><code>ApiKeyRepository</code></td></tr>
+<tr><td><code>AbstractPreAuthenticatedProcessingFilter</code></td><td><code>ApiKeyConfig</code> locations</td></tr>
+</tbody></table>
+</div><h2 id="security-considerations"><a class="doc-anchor" href="#security-considerations">§</a>Security Considerations</h2>
+<ol>
+<li><strong>Use HTTPS</strong> - API keys are transmitted in plaintext</li>
+<li><strong>Rotate keys</strong> - Implement key rotation policies</li>
+<li><strong>Limit scope</strong> - Use authorities to restrict key capabilities</li>
+<li><strong>Rate limit</strong> - Prevent abuse with rate limiting per key</li>
+<li><strong>Audit</strong> - Log API key usage for security monitoring</li>
+</ol>
+<h2 id="example-with-middleware"><a class="doc-anchor" href="#example-with-middleware">§</a>Example with Middleware</h2>
+<div class="example-wrap ignore"><a href="#" class="tooltip" title="This example is not tested">ⓘ</a><pre class="rust rust-example-rendered"><code><span class="kw">use </span>actix_security::http::security::{
+    SecurityTransform, AuthenticationManager,
+    api_key::{ApiKeyAuthenticator, InMemoryApiKeyRepository, ApiKey},
+};
+
+<span class="kw">let </span><span class="kw-2">mut </span>repository = InMemoryApiKeyRepository::new();
+repository.add_key(ApiKey::new(<span class="string">"sk_test_123"</span>).roles(<span class="macro">vec!</span>[<span class="string">"USER"</span>.into()]));
+
+<span class="kw">let </span>authenticator = ApiKeyAuthenticator::new(repository);
+
+App::new()
+    .wrap(SecurityTransform::new()
+        .config_authenticator(<span class="kw">move </span>|| authenticator.clone()))
+    .service(my_api_endpoint)</code></pre></div></div></details><h2 id="structs" class="section-header">Structs<a href="#structs" class="anchor">§</a></h2><dl class="item-table"><dt><a class="struct" href="struct.ApiKey.html" title="struct actix_security::http::security::api_key::ApiKey">ApiKey</a></dt><dd>Represents an API key with associated metadata and permissions.</dd><dt><a class="struct" href="struct.ApiKeyAuthenticator.html" title="struct actix_security::http::security::api_key::ApiKeyAuthenticator">ApiKey<wbr>Authenticator</a></dt><dd>Authenticator that validates API keys from requests.</dd><dt><a class="struct" href="struct.ApiKeyBuilder.html" title="struct actix_security::http::security::api_key::ApiKeyBuilder">ApiKey<wbr>Builder</a></dt><dd>Builder for <code>ApiKey</code>.</dd><dt><a class="struct" href="struct.ApiKeyConfig.html" title="struct actix_security::http::security::api_key::ApiKeyConfig">ApiKey<wbr>Config</a></dt><dd>Configuration for API Key authentication.</dd><dt><a class="struct" href="struct.InMemoryApiKeyRepository.html" title="struct actix_security::http::security::api_key::InMemoryApiKeyRepository">InMemory<wbr>ApiKey<wbr>Repository</a></dt><dd>In-memory implementation of <code>ApiKeyRepository</code>.</dd></dl><h2 id="enums" class="section-header">Enums<a href="#enums" class="anchor">§</a></h2><dl class="item-table"><dt><a class="enum" href="enum.ApiKeyError.html" title="enum actix_security::http::security::api_key::ApiKeyError">ApiKey<wbr>Error</a></dt><dd>Errors that can occur during API key authentication.</dd><dt><a class="enum" href="enum.ApiKeyLocation.html" title="enum actix_security::http::security::api_key::ApiKeyLocation">ApiKey<wbr>Location</a></dt><dd>Where to look for the API key in requests.</dd></dl><h2 id="traits" class="section-header">Traits<a href="#traits" class="anchor">§</a></h2><dl class="item-table"><dt><a class="trait" href="trait.ApiKeyRepository.html" title="trait actix_security::http::security::api_key::ApiKeyRepository">ApiKey<wbr>Repository</a></dt><dd>Trait for loading API keys.</dd></dl></section></div></main></body></html>

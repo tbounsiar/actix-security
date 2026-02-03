@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":["SecurityEventSeverity","SecurityEventType"],"fn":["audit_log","global_logger","init_global_logger"],"struct":["AuditLogger","ClosureHandler","InMemoryEventStore","SecurityEvent","StdoutHandler"],"trait":["SecurityEventHandler"]};
+window.SIDEBAR_ITEMS = {"enum":["SecurityEventSeverity","SecurityEventType"],"fn":["audit_log","global_logger","init_global_logger"],"struct":["AuditLogger","ClosureHandler","InMemoryEventStore","SecurityEvent","StdoutHandler","TracingHandler"],"trait":["SecurityEventHandler"]};

@@ -9,15 +9,13 @@ use actix_web::{get, post, test, web, App, HttpResponse, Responder};
 use base64::prelude::*;
 use serde::Deserialize;
 
-use actix_security_codegen::{deny_all, permit_all, pre_authorize, roles_allowed, secured};
-use actix_security_core::http::security::manager::AuthorizationManager;
-use actix_security_core::http::security::middleware::SecurityTransform;
-use actix_security_core::http::security::web::{
-    Access, MemoryAuthenticator, RequestMatcherAuthorizer,
-};
-use actix_security_core::http::security::{
+use actix_security::http::security::manager::AuthorizationManager;
+use actix_security::http::security::middleware::SecurityTransform;
+use actix_security::http::security::web::{Access, MemoryAuthenticator, RequestMatcherAuthorizer};
+use actix_security::http::security::{
     Argon2PasswordEncoder, AuthenticatedUser, AuthenticationManager, PasswordEncoder, User,
 };
+use actix_security::{deny_all, permit_all, pre_authorize, roles_allowed, secured};
 
 // =============================================================================
 // Test Configuration

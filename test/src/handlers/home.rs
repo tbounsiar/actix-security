@@ -2,7 +2,7 @@
 
 use actix_web::{get, HttpResponse, Responder};
 
-use actix_security_core::http::security::{AuthenticatedUser, OptionalUser};
+use actix_security::http::security::{AuthenticatedUser, OptionalUser};
 
 /// Home page - shows current user info.
 /// Uses AuthenticatedUser extractor (returns 401 if not authenticated).

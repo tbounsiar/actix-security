@@ -227,12 +227,12 @@ pub trait PasswordEncoder: Send + Sync {
 ### Current (Builder Pattern)
 
 ```rust
-use actix_security_core::http::security::{
+use actix_security::http::security::{
     AuthenticationManager, AuthorizationManager,
     Argon2PasswordEncoder, PasswordEncoder, User,
 };
-use actix_security_core::http::security::web::Access;
-use actix_security_core::http::security::middleware::SecurityTransform;
+use actix_security::http::security::web::Access;
+use actix_security::http::security::middleware::SecurityTransform;
 
 // Create password encoder
 let encoder = Argon2PasswordEncoder::new();

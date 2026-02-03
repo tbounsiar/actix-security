@@ -5,8 +5,8 @@
 
 use actix_web::{get, HttpResponse, Responder};
 
-use actix_security_codegen::secured;
-use actix_security_core::http::security::AuthenticatedUser;
+use actix_security::http::security::AuthenticatedUser;
+use actix_security::secured;
 
 /// Reports page - protected by #[secured] macro (ADMIN role required).
 ///

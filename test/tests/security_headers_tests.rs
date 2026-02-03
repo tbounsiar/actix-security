@@ -5,7 +5,7 @@
 use actix_web::http::StatusCode;
 use actix_web::{get, test, App, HttpResponse, Responder};
 
-use actix_security_core::http::security::headers::{FrameOptions, ReferrerPolicy, SecurityHeaders};
+use actix_security::http::security::headers::{FrameOptions, ReferrerPolicy, SecurityHeaders};
 
 #[get("/test")]
 async fn test_endpoint() -> impl Responder {

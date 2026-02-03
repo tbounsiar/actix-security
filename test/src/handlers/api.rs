@@ -2,7 +2,7 @@
 
 use actix_web::{get, HttpResponse, Responder};
 
-use actix_security_core::http::security::AuthenticatedUser;
+use actix_security::http::security::AuthenticatedUser;
 
 /// API endpoint protected by authority (middleware level).
 #[get("/api/users")]

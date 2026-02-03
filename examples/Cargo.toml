@@ -49,7 +49,6 @@ path = "src/custom_expressions/main.rs"
 
 [dependencies]
 actix-security = { path = "../actix-security", features = ["full"] }
-actix-security-core = { path = "../core", features = ["full"] }
 actix-web = "4"
 actix-session = { version = "0.10", features = ["cookie-session"] }
 actix-rt = "2"

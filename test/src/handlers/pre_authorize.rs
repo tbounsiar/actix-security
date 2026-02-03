@@ -5,8 +5,8 @@
 
 use actix_web::{get, post, HttpResponse, Responder};
 
-use actix_security_codegen::pre_authorize;
-use actix_security_core::http::security::AuthenticatedUser;
+use actix_security::http::security::AuthenticatedUser;
+use actix_security::pre_authorize;
 
 /// Write endpoint - protected by #[pre_authorize] macro (authority-based).
 ///

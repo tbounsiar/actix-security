@@ -2,7 +2,7 @@
 //!
 //! Tests for Argon2 and other password encoders.
 
-use actix_security_core::http::security::{Argon2PasswordEncoder, PasswordEncoder};
+use actix_security::http::security::{Argon2PasswordEncoder, PasswordEncoder};
 
 #[actix_web::test]
 async fn test_argon2_password_encoder() {

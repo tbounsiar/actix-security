@@ -16,7 +16,7 @@
 //!
 //! ```ignore
 //! use actix_security_codegen::{secured, pre_authorize};
-//! use actix_security_core::http::security::AuthenticatedUser;
+//! use actix_security::http::security::AuthenticatedUser;
 //! use actix_web::{get, HttpResponse, Responder};
 //!
 //! // Role-based security (like @Secured)
@@ -62,7 +62,7 @@ mod simple;
 ///
 /// # Usage
 /// ```ignore
-/// use actix_security_core::http::security::AuthenticatedUser;
+/// use actix_security::http::security::AuthenticatedUser;
 /// use actix_security_codegen::secured;
 ///
 /// // Single role
@@ -105,7 +105,7 @@ pub fn secured(attrs: TokenStream, input: TokenStream) -> TokenStream {
 ///
 /// # Usage
 /// ```ignore
-/// use actix_security_core::http::security::AuthenticatedUser;
+/// use actix_security::http::security::AuthenticatedUser;
 /// use actix_security_codegen::pre_authorize;
 ///
 /// // Check authentication only
@@ -180,7 +180,7 @@ pub fn permit_all(attrs: TokenStream, input: TokenStream) -> TokenStream {
 /// # Usage
 /// ```ignore
 /// use actix_security_codegen::deny_all;
-/// use actix_security_core::http::security::AuthenticatedUser;
+/// use actix_security::http::security::AuthenticatedUser;
 ///
 /// #[deny_all]
 /// #[get("/disabled")]
@@ -207,7 +207,7 @@ pub fn deny_all(attrs: TokenStream, input: TokenStream) -> TokenStream {
 /// # Usage
 /// ```ignore
 /// use actix_security_codegen::roles_allowed;
-/// use actix_security_core::http::security::AuthenticatedUser;
+/// use actix_security::http::security::AuthenticatedUser;
 ///
 /// #[roles_allowed("ADMIN")]
 /// #[get("/admin")]

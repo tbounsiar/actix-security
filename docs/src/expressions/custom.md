@@ -11,7 +11,7 @@ The most powerful way to implement custom authorization is using async functions
 Create an async function that takes a user reference and any parameters you need:
 
 ```rust
-use actix_security_core::http::security::User;
+use actix_security::http::security::User;
 
 /// Check if user is admin of a specific tenant
 pub async fn is_tenant_admin(user: &User, tenant_id: i64) -> bool {
@@ -40,8 +40,8 @@ Use `#param_name` to reference handler parameters in your expressions:
 
 ```rust
 use actix_web::{get, web::Path, HttpResponse, Responder};
-use actix_security_codegen::pre_authorize;
-use actix_security_core::http::security::AuthenticatedUser;
+use actix_security::pre_authorize;
+use actix_security::http::security::AuthenticatedUser;
 
 // Reference the tenant_id path parameter
 #[pre_authorize("is_tenant_admin(#tenant_id)")]
@@ -90,8 +90,8 @@ Parameter references work with these Actix Web extractors:
 ```rust
 use serde::Deserialize;
 use actix_web::{get, post, web};
-use actix_security_codegen::pre_authorize;
-use actix_security_core::http::security::{AuthenticatedUser, User};
+use actix_security::pre_authorize;
+use actix_security::http::security::{AuthenticatedUser, User};
 
 // DTOs must implement Clone for parameter references
 #[derive(Debug, Clone, Deserialize)]

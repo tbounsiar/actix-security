@@ -21,6 +21,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Rust operators: `&&` (AND), `||` (OR), `!` (NOT)
   - Both Spring style (camelCase, AND/OR/NOT) and Rust style work interchangeably
 
+- **Simplified Dependency** - Users now only need `actix-security` as a dependency
+  - Macros automatically detect whether `actix-security` or `actix-security-core` is used
+  - No need to add `actix-security-core` as a separate dependency
+
 ### Examples
 ```rust
 // Define custom authorization function

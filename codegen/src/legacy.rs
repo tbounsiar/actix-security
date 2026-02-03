@@ -12,7 +12,7 @@ use quote::quote;
 use syn::{parse_macro_input, ItemFn, ReturnType};
 
 use crate::access::Access;
-use crate::helpers::{find_user_param, missing_user_param_error};
+use crate::helpers::{core_crate_path, find_user_param, missing_user_param_error};
 use crate::secured::secured_impl;
 
 /// **Deprecated**: Use `#[secured("ROLE")]` instead.
@@ -50,13 +50,15 @@ pub fn has_access_impl(attrs: TokenStream, input: TokenStream) -> TokenStream {
         ReturnType::Type(_, ty) => quote! { #ty },
     };
 
+    let core_path = core_crate_path();
+
     let expanded = quote! {
         #(#attrs)*
-        #vis #asyncness fn #fn_name #generics(#inputs) -> ::std::result::Result<#original_return, ::actix_security_core::http::error::AuthError> {
+        #vis #asyncness fn #fn_name #generics(#inputs) -> ::std::result::Result<#original_return, #core_path::http::error::AuthError> {
             {
                 let __required_authorities: &[&str] = &[#(#authorities),*];
                 if !#user_param.has_any_authority(__required_authorities) {
-                    return ::std::result::Result::Err(::actix_security_core::http::error::AuthError::Forbidden);
+                    return ::std::result::Result::Err(#core_path::http::error::AuthError::Forbidden);
                 }
             }
 

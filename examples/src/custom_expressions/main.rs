@@ -148,8 +148,7 @@ fn authenticator() -> MemoryAuthenticator {
                 .authorities(&["users:read".into(), "premium:access".into()]),
         )
         .with_user(
-            User::with_encoded_password("guest", encoder.encode("guest"))
-                .roles(&["GUEST".into()]),
+            User::with_encoded_password("guest", encoder.encode("guest")).roles(&["GUEST".into()]),
         )
 }
 
@@ -272,11 +271,15 @@ async fn main() -> std::io::Result<()> {
     println!();
     println!("Endpoints:");
     println!("  GET  /tenants/{{tenant_id}}          - is_tenant_admin(#tenant_id)");
-    println!("  GET  /tenants/{{tenant_id}}/settings - hasRole('ADMIN') OR is_tenant_admin(#tenant_id)");
+    println!(
+        "  GET  /tenants/{{tenant_id}}/settings - hasRole('ADMIN') OR is_tenant_admin(#tenant_id)"
+    );
     println!("  GET  /resources/{{resource_id}}      - can_access_resource(#resource_id)");
     println!("  GET  /products/search?min_price=N    - can_search_premium(#min_price)");
     println!("  POST /orders                         - can_create_order(#amount)");
-    println!("  POST /orders/bulk                    - hasRole('ADMIN') OR can_create_order(#amount)");
+    println!(
+        "  POST /orders/bulk                    - hasRole('ADMIN') OR can_create_order(#amount)"
+    );
     println!();
     println!("Try:");
     println!("  curl -u admin:admin http://localhost:8080/tenants/123");

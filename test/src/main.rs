@@ -6,12 +6,10 @@ mod handlers;
 
 use actix_web::{web, App, HttpServer};
 
-use actix_security_core::http::security::manager::AuthorizationManager;
-use actix_security_core::http::security::middleware::SecurityTransform;
-use actix_security_core::http::security::web::{
-    Access, MemoryAuthenticator, RequestMatcherAuthorizer,
-};
-use actix_security_core::http::security::{
+use actix_security::http::security::manager::AuthorizationManager;
+use actix_security::http::security::middleware::SecurityTransform;
+use actix_security::http::security::web::{Access, MemoryAuthenticator, RequestMatcherAuthorizer};
+use actix_security::http::security::{
     Argon2PasswordEncoder, AuthenticationManager, PasswordEncoder, User,
 };
 

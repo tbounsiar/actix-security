@@ -9,6 +9,8 @@ use proc_macro::TokenStream;
 use quote::quote;
 use syn::{parse_macro_input, ItemFn, ReturnType};
 
+use crate::helpers::core_crate_path;
+
 /// Marks a method as publicly accessible (no authentication required).
 ///
 /// # Spring Security / Java EE Equivalent
@@ -53,12 +55,14 @@ pub fn deny_all_impl(_attrs: TokenStream, input: TokenStream) -> TokenStream {
         ReturnType::Type(_, ty) => quote! { #ty },
     };
 
+    let core_path = core_crate_path();
+
     // We include the original block (unreachable) to help type inference
     let expanded = quote! {
         #(#attrs)*
-        #vis #asyncness fn #fn_name #generics(#inputs) -> ::std::result::Result<#original_return, ::actix_security_core::http::error::AuthError> {
+        #vis #asyncness fn #fn_name #generics(#inputs) -> ::std::result::Result<#original_return, #core_path::http::error::AuthError> {
             // denyAll() - always return Forbidden
-            return ::std::result::Result::Err(::actix_security_core::http::error::AuthError::Forbidden);
+            return ::std::result::Result::Err(#core_path::http::error::AuthError::Forbidden);
 
             // Unreachable - kept for type inference
             #[allow(unreachable_code)]

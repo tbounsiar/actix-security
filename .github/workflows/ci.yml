@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        rust: [stable, beta, 1.78.0]
+        rust: [stable, beta, 1.85.0]
     steps:
       - uses: actions/checkout@v4
 
@@ -127,7 +127,7 @@ jobs:
           key: ${{ runner.os }}-cargo-examples-${{ hashFiles('**/Cargo.lock') }}
 
       - name: Build examples
-        run: cargo build -p actix-security-examples --examples
+        run: cargo build -p actix-security-examples --bins
 
   coverage:
     name: Code Coverage

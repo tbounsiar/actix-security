@@ -3,7 +3,7 @@ name = "actix-security-core"
 version = "0.2.2"
 authors = ["tahar.bounsiar <tbounsiar@gmail.com>"]
 edition = "2021"
-rust-version = "1.78"
+rust-version = "1.85"
 description = "Spring Security-like authentication and authorization for Actix Web - Core library"
 license = "MIT OR Apache-2.0"
 keywords = ["actix", "security", "authentication", "authorization", "web"]
@@ -68,9 +68,9 @@ full = ["argon2", "bcrypt", "http-basic", "jwt", "session", "form-login", "csrf"
 actix-web = "4"
 actix-service = "2"
 
-# Pin crates to avoid edition2024 requirement (Rust 1.85+ required)
-time = ">=0.3, <0.3.46"       # time >= 0.3.46 requires edition2024
-base64ct = ">=1, <1.8.3"     # base64ct >= 1.8.3 requires edition2024 (used by argon2)
+# Pin time crate to support MSRV 1.85
+# time >= 0.3.46 requires rustc 1.88.0
+time = ">=0.3, <0.3.46"
 
 # Async
 futures-util = "0.3"

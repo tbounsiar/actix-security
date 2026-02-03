@@ -9,8 +9,50 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
+  # First, verify that CI passed for this commit
+  verify-ci:
+    name: Verify CI Passed
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check CI workflow status
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const sha = context.sha;
+            console.log(`Checking CI status for commit: ${sha}`);
+
+            // Get workflow runs for the CI workflow on this commit
+            const runs = await github.rest.actions.listWorkflowRuns({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'ci.yml',
+              head_sha: sha,
+            });
+
+            if (runs.data.workflow_runs.length === 0) {
+              core.setFailed(`No CI workflow run found for commit ${sha}. Please ensure CI has run before creating a release tag.`);
+              return;
+            }
+
+            const latestRun = runs.data.workflow_runs[0];
+            console.log(`Latest CI run: ${latestRun.html_url}`);
+            console.log(`Status: ${latestRun.status}, Conclusion: ${latestRun.conclusion}`);
+
+            if (latestRun.status !== 'completed') {
+              core.setFailed(`CI workflow is still running. Please wait for it to complete before releasing.`);
+              return;
+            }
+
+            if (latestRun.conclusion !== 'success') {
+              core.setFailed(`CI workflow failed with conclusion: ${latestRun.conclusion}. Fix the issues before releasing.`);
+              return;
+            }
+
+            console.log('CI workflow passed! Proceeding with release.');
+
   publish:
     name: Publish to crates.io
+    needs: verify-ci
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

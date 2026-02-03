@@ -20,13 +20,14 @@ use actix_web::{App, HttpServer};
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     let saml_config = SamlConfig::new()
-        .sp_entity_id("https://myapp.example.com")
-        .sp_acs_url("https://myapp.example.com/saml/acs")
+        .entity_id("https://myapp.example.com")
+        .acs_url("https://myapp.example.com/saml/acs")
         .idp_entity_id("https://idp.example.com")
         .idp_sso_url("https://idp.example.com/sso")
         .idp_certificate(include_str!("../idp_cert.pem"));
 
-    let authenticator = SamlAuthenticator::new(saml_config);
+    let authenticator = SamlAuthenticator::new(saml_config)
+        .expect("Failed to create SAML authenticator");
 
     HttpServer::new(move || {
         App::new()
@@ -92,9 +93,9 @@ let config = SamlConfig::adfs(
 ```rust
 SamlConfig::new()
     // Service Provider (your application) settings
-    .sp_entity_id("https://myapp.example.com")
-    .sp_acs_url("https://myapp.example.com/saml/acs")
-    .sp_slo_url("https://myapp.example.com/saml/slo")  // Single Logout
+    .entity_id("https://myapp.example.com")
+    .acs_url("https://myapp.example.com/saml/acs")
+    .sls_url("https://myapp.example.com/saml/slo")  // Single Logout Service
 
     // Identity Provider settings
     .idp_entity_id("https://idp.example.com")
@@ -103,13 +104,13 @@ SamlConfig::new()
     .idp_certificate("-----BEGIN CERTIFICATE-----...")
 
     // Request settings
-    .force_authn(false)                     // Force re-authentication
-    .allow_clock_skew(Duration::from_secs(300))  // 5 minutes tolerance
+    .name_id_format(NameIdFormat::EmailAddress)
+    .authn_context_class(AuthnContextClass::PasswordProtectedTransport)
+    .sign_authn_request(false)              // Sign outgoing AuthnRequest
+    .want_assertions_signed(true)           // Require signed assertions
 
     // Attribute mapping
-    .username_attribute("NameID")           // Which attribute is username
-    .email_attribute("email")
-    .roles_attribute("groups")
+    .role_attribute("groups")               // Attribute containing roles
 ```
 
 ## SAML Routes
@@ -117,13 +118,20 @@ SamlConfig::new()
 You need to set up routes to handle SAML flow:
 
 ```rust
-use actix_security::http::security::{SamlAuthenticator, AuthnRequest};
+use actix_security::http::security::SamlAuthenticator;
 use actix_web::{web, HttpResponse};
+use serde::Deserialize;
+
+#[derive(Deserialize)]
+struct SamlResponseForm {
+    #[serde(rename = "SAMLResponse")]
+    saml_response: String,
+}
 
 // Initiate SAML login
 async fn saml_login(saml: web::Data<SamlAuthenticator>) -> HttpResponse {
-    let authn_request = saml.create_authn_request();
-    let redirect_url = saml.get_redirect_url(&authn_request);
+    // initiate_login creates and stores the AuthnRequest, returns redirect URL
+    let redirect_url = saml.initiate_login(None);
 
     HttpResponse::Found()
         .insert_header(("Location", redirect_url))
@@ -135,8 +143,9 @@ async fn saml_acs(
     saml: web::Data<SamlAuthenticator>,
     form: web::Form<SamlResponseForm>,
 ) -> HttpResponse {
-    match saml.validate_response(&form.SAMLResponse) {
-        Ok(user) => {
+    match saml.process_response(&form.saml_response) {
+        Ok(auth_result) => {
+            // auth_result contains: user, session_index, name_id, attributes
             // Store user in session
             HttpResponse::Found()
                 .insert_header(("Location", "/"))
@@ -157,11 +166,9 @@ App::new()
 Generate SAML metadata for your IdP:
 
 ```rust
-let metadata = saml_config.generate_sp_metadata();
-
 // Serve at /saml/metadata
-async fn saml_metadata(saml: web::Data<SamlConfig>) -> HttpResponse {
-    let metadata = saml.generate_sp_metadata();
+async fn saml_metadata(saml: web::Data<SamlAuthenticator>) -> HttpResponse {
+    let metadata = saml.generate_metadata();
     HttpResponse::Ok()
         .content_type("application/xml")
         .body(metadata)

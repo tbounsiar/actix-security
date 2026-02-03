@@ -14,19 +14,21 @@ actix-security = { version = "0.2", features = ["ldap"] }
 ## Basic Usage
 
 ```rust
-use actix_security::http::security::{LdapAuthenticator, LdapConfig};
+use actix_security::http::security::{LdapAuthenticator, LdapConfig, MockLdapClient};
 use actix_web::{App, HttpServer};
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    let ldap_config = LdapConfig::new()
-        .url("ldap://ldap.example.com:389")
+    let ldap_config = LdapConfig::new("ldap://ldap.example.com:389")
         .base_dn("dc=example,dc=com")
         .user_search_filter("(uid={0})")
         .bind_dn("cn=admin,dc=example,dc=com")
         .bind_password("admin_password");
 
-    let authenticator = LdapAuthenticator::new(ldap_config);
+    // Create authenticator with a client that implements LdapOperations
+    // For testing, use MockLdapClient; for production, use a real LDAP client
+    let client = MockLdapClient::new();
+    let authenticator = LdapAuthenticator::new(ldap_config, client);
 
     HttpServer::new(move || {
         App::new()
@@ -42,14 +44,12 @@ async fn main() -> std::io::Result<()> {
 ## Configuration Options
 
 ```rust
-LdapConfig::new()
-    // LDAP server URL
-    .url("ldap://ldap.example.com:389")
-
+LdapConfig::new("ldap://ldap.example.com:389")
     // Base DN for user searches
     .base_dn("dc=example,dc=com")
 
-    // Filter to find users ({0} is replaced with username)
+    // User search configuration
+    .user_search_base("ou=users")
     .user_search_filter("(uid={0})")
 
     // Service account for binding
@@ -57,12 +57,16 @@ LdapConfig::new()
     .bind_password("admin_password")
 
     // Group configuration
-    .group_search_base("ou=groups,dc=example,dc=com")
+    .group_search_base("ou=groups")
     .group_search_filter("(member={0})")
 
-    // Map LDAP groups to roles
-    .group_role_mapping("cn=admins,ou=groups,dc=example,dc=com", "ADMIN")
-    .group_role_mapping("cn=users,ou=groups,dc=example,dc=com", "USER")
+    // Role configuration
+    .role_prefix("ROLE_")
+    .convert_to_uppercase(true)
+
+    // Timeouts
+    .connect_timeout(Duration::from_secs(5))
+    .operation_timeout(Duration::from_secs(10))
 ```
 
 ## Active Directory Configuration

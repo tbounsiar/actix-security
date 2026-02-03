@@ -1,7 +1,7 @@
 //! Integration tests for rate limiting.
 
 use actix_security::http::security::rate_limit::{
-    KeyExtractor, RateLimitAlgorithm, RateLimitConfig, RateLimiter, RateLimiterState,
+    KeyExtractor, RateLimitAlgorithm, RateLimitConfig, RateLimiterState,
 };
 use std::time::Duration;
 

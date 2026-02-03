@@ -226,8 +226,19 @@ async fn test_session_fixation_strategy_config() {
         .user_key("user")
         .fixation_strategy(SessionFixationStrategy::None);
 
-    // All configurations should be valid (no panic)
-    assert!(true);
+    // Verify configurations are correctly set
+    assert_eq!(
+        config_migrate.get_fixation_strategy(),
+        SessionFixationStrategy::MigrateSession
+    );
+    assert_eq!(
+        config_new.get_fixation_strategy(),
+        SessionFixationStrategy::NewSession
+    );
+    assert_eq!(
+        config_none.get_fixation_strategy(),
+        SessionFixationStrategy::None
+    );
 }
 
 #[actix_web::test]

@@ -228,17 +228,40 @@ let (auth_url, state, pkce_verifier, nonce) = client.authorization_url();
 // GitHub doesn't support OIDC, so no discovery needed
 let client = OAuth2Client::new_basic(config)?;</code></pre>
 <h2 id="supported-providers"><a class="header" href="#supported-providers">Supported Providers</a></h2>
-<div class="table-wrapper"><table><thead><tr><th>Provider</th><th>OIDC Support</th><th>PKCE Support</th></tr></thead><tbody>
-<tr><td>Google</td><td>Yes</td><td>Yes</td></tr>
-<tr><td>GitHub</td><td>No</td><td>No</td></tr>
-<tr><td>Microsoft</td><td>Yes</td><td>Yes</td></tr>
-<tr><td>Facebook</td><td>No</td><td>No</td></tr>
-<tr><td>Apple</td><td>Yes</td><td>Yes</td></tr>
-<tr><td>Okta</td><td>Yes</td><td>Yes</td></tr>
-<tr><td>Auth0</td><td>Yes</td><td>Yes</td></tr>
-<tr><td>Keycloak</td><td>Yes</td><td>Yes</td></tr>
+<div class="table-wrapper"><table><thead><tr><th>Provider</th><th>OIDC Support</th><th>PKCE Support</th><th>Default Scopes</th></tr></thead><tbody>
+<tr><td>Google</td><td>Yes</td><td>Yes</td><td><code>openid</code>, <code>email</code>, <code>profile</code></td></tr>
+<tr><td>GitHub</td><td>No</td><td>No</td><td><code>read:user</code>, <code>user:email</code></td></tr>
+<tr><td>Microsoft</td><td>Yes</td><td>Yes</td><td><code>openid</code>, <code>email</code>, <code>profile</code></td></tr>
+<tr><td>Facebook</td><td>No</td><td>No</td><td><code>email</code>, <code>public_profile</code></td></tr>
+<tr><td>Apple</td><td>Yes</td><td>Yes</td><td><code>openid</code>, <code>email</code>, <code>name</code></td></tr>
+<tr><td>Okta</td><td>Yes</td><td>Yes</td><td><code>openid</code>, <code>email</code>, <code>profile</code></td></tr>
+<tr><td>Auth0</td><td>Yes</td><td>Yes</td><td><code>openid</code>, <code>email</code>, <code>profile</code></td></tr>
+<tr><td>Keycloak</td><td>Yes</td><td>Yes</td><td><code>openid</code>, <code>email</code>, <code>profile</code></td></tr>
 </tbody></table>
 </div>
+<h3 id="automatic-pkce-handling"><a class="header" href="#automatic-pkce-handling">Automatic PKCE Handling</a></h3>
+<p>PKCE (Proof Key for Code Exchange) is automatically configured based on the provider:</p>
+<pre><code class="language-rust">// Google: PKCE is enabled by default (use_pkce = true)
+let google = OAuth2Config::new(id, secret, redirect)
+    .provider(OAuth2Provider::Google);
+assert!(google.use_pkce);  // true
+
+// GitHub: PKCE is automatically disabled (not supported)
+let github = OAuth2Config::new(id, secret, redirect)
+    .provider(OAuth2Provider::GitHub);
+assert!(!github.use_pkce);  // false</code></pre>
+<h3 id="registration-id"><a class="header" href="#registration-id">Registration ID</a></h3>
+<p>The <code>registration_id</code> identifies the provider in URLs and callbacks:</p>
+<pre><code class="language-rust">// Automatically set from provider name
+let config = OAuth2Config::new(id, secret, redirect)
+    .provider(OAuth2Provider::Google);
+assert_eq!(config.registration_id, "google");
+
+// Or set explicitly for custom naming
+let config = OAuth2Config::new(id, secret, redirect)
+    .registration_id("my-google-oauth")
+    .provider(OAuth2Provider::Google);
+assert_eq!(config.registration_id, "my-google-oauth");</code></pre>
 <h2 id="configuration-options"><a class="header" href="#configuration-options">Configuration Options</a></h2>
 <pre><code class="language-rust">let config = OAuth2Config::new("client-id", "client-secret", "redirect-uri")
     // Use a pre-configured provider

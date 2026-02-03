@@ -362,12 +362,58 @@ tracing_subscriber::fmt()
             .add_directive("actix_security::audit=info".parse().unwrap())
     )
     .init();</code></pre>
+<h2 id="integration-with-log-aggregation"><a class="header" href="#integration-with-log-aggregation">Integration with Log Aggregation</a></h2>
+<h3 id="sending-to-external-services"><a class="header" href="#sending-to-external-services">Sending to External Services</a></h3>
+<p>Implement <code>SecurityEventHandler</code> for external log services:</p>
+<pre><code class="language-rust">use actix_security::http::security::{SecurityEventHandler, SecurityEvent};
+
+struct ElasticsearchHandler {
+    client: elasticsearch::Elasticsearch,
+}
+
+impl SecurityEventHandler for ElasticsearchHandler {
+    fn handle(&amp;self, event: &amp;SecurityEvent) {
+        // Convert to JSON and send to Elasticsearch
+        let doc = serde_json::json!({
+            "@timestamp": event.timestamp,
+            "event_type": format!("{:?}", event.event_type),
+            "severity": format!("{:?}", event.severity),
+            "user": event.username,
+            "ip": event.ip_address,
+            "resource": event.resource,
+            "details": event.details,
+        });
+
+        // Send async (you'd use a channel in practice)
+        let _ = self.client.index(/* ... */);
+    }
+}</code></pre>
+<h3 id="multiple-handlers"><a class="header" href="#multiple-handlers">Multiple Handlers</a></h3>
+<p>Combine handlers for different purposes:</p>
+<pre><code class="language-rust">let logger = AuditLogger::new()
+    .add_handler(TracingHandler::new())      // Local logging
+    .add_handler(ElasticsearchHandler::new()) // Centralized logs
+    .add_handler(AlertHandler::new());        // Alerts for critical events</code></pre>
+<h3 id="structured-logging-with-json"><a class="header" href="#structured-logging-with-json">Structured Logging with JSON</a></h3>
+<p>For log aggregation systems (ELK, Splunk, Datadog), use JSON output:</p>
+<pre><code class="language-rust">use tracing_subscriber::fmt::format::FmtSpan;
+
+tracing_subscriber::fmt()
+    .json()  // Output as JSON
+    .with_target(true)
+    .with_current_span(false)
+    .init();
+
+// Events will be emitted as JSON:
+// {"timestamp":"2024-01-15T10:30:00Z","level":"WARN","target":"actix_security::audit","message":"Access denied","event_type":"ACCESS_DENIED","user":"user1","path":"/admin"}</code></pre>
 <h2 id="spring-security-comparison"><a class="header" href="#spring-security-comparison">Spring Security Comparison</a></h2>
 <div class="table-wrapper"><table><thead><tr><th>Spring Security</th><th>Actix Security</th></tr></thead><tbody>
 <tr><td><code>AuthenticationEventPublisher</code></td><td><code>AuditLogger</code></td></tr>
 <tr><td><code>AbstractAuthenticationEvent</code></td><td><code>SecurityEvent</code></td></tr>
 <tr><td><code>@EventListener</code></td><td><code>SecurityEventHandler</code> trait</td></tr>
 <tr><td>Spring AOP logging</td><td><code>tracing</code> integration</td></tr>
+<tr><td><code>ApplicationEventPublisher</code></td><td><code>audit_log()</code> global function</td></tr>
+<tr><td><code>AuditApplicationEvent</code></td><td><code>SecurityEvent</code> with severity</td></tr>
 </tbody></table>
 </div>
                     </main>

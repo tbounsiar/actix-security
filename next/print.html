@@ -1716,17 +1716,40 @@ let (auth_url, state, pkce_verifier, nonce) = client.authorization_url();
 // GitHub doesn't support OIDC, so no discovery needed
 let client = OAuth2Client::new_basic(config)?;</code></pre>
 <h2 id="supported-providers"><a class="header" href="#supported-providers">Supported Providers</a></h2>
-<div class="table-wrapper"><table><thead><tr><th>Provider</th><th>OIDC Support</th><th>PKCE Support</th></tr></thead><tbody>
-<tr><td>Google</td><td>Yes</td><td>Yes</td></tr>
-<tr><td>GitHub</td><td>No</td><td>No</td></tr>
-<tr><td>Microsoft</td><td>Yes</td><td>Yes</td></tr>
-<tr><td>Facebook</td><td>No</td><td>No</td></tr>
-<tr><td>Apple</td><td>Yes</td><td>Yes</td></tr>
-<tr><td>Okta</td><td>Yes</td><td>Yes</td></tr>
-<tr><td>Auth0</td><td>Yes</td><td>Yes</td></tr>
-<tr><td>Keycloak</td><td>Yes</td><td>Yes</td></tr>
+<div class="table-wrapper"><table><thead><tr><th>Provider</th><th>OIDC Support</th><th>PKCE Support</th><th>Default Scopes</th></tr></thead><tbody>
+<tr><td>Google</td><td>Yes</td><td>Yes</td><td><code>openid</code>, <code>email</code>, <code>profile</code></td></tr>
+<tr><td>GitHub</td><td>No</td><td>No</td><td><code>read:user</code>, <code>user:email</code></td></tr>
+<tr><td>Microsoft</td><td>Yes</td><td>Yes</td><td><code>openid</code>, <code>email</code>, <code>profile</code></td></tr>
+<tr><td>Facebook</td><td>No</td><td>No</td><td><code>email</code>, <code>public_profile</code></td></tr>
+<tr><td>Apple</td><td>Yes</td><td>Yes</td><td><code>openid</code>, <code>email</code>, <code>name</code></td></tr>
+<tr><td>Okta</td><td>Yes</td><td>Yes</td><td><code>openid</code>, <code>email</code>, <code>profile</code></td></tr>
+<tr><td>Auth0</td><td>Yes</td><td>Yes</td><td><code>openid</code>, <code>email</code>, <code>profile</code></td></tr>
+<tr><td>Keycloak</td><td>Yes</td><td>Yes</td><td><code>openid</code>, <code>email</code>, <code>profile</code></td></tr>
 </tbody></table>
 </div>
+<h3 id="automatic-pkce-handling"><a class="header" href="#automatic-pkce-handling">Automatic PKCE Handling</a></h3>
+<p>PKCE (Proof Key for Code Exchange) is automatically configured based on the provider:</p>
+<pre><code class="language-rust">// Google: PKCE is enabled by default (use_pkce = true)
+let google = OAuth2Config::new(id, secret, redirect)
+    .provider(OAuth2Provider::Google);
+assert!(google.use_pkce);  // true
+
+// GitHub: PKCE is automatically disabled (not supported)
+let github = OAuth2Config::new(id, secret, redirect)
+    .provider(OAuth2Provider::GitHub);
+assert!(!github.use_pkce);  // false</code></pre>
+<h3 id="registration-id"><a class="header" href="#registration-id">Registration ID</a></h3>
+<p>The <code>registration_id</code> identifies the provider in URLs and callbacks:</p>
+<pre><code class="language-rust">// Automatically set from provider name
+let config = OAuth2Config::new(id, secret, redirect)
+    .provider(OAuth2Provider::Google);
+assert_eq!(config.registration_id, "google");
+
+// Or set explicitly for custom naming
+let config = OAuth2Config::new(id, secret, redirect)
+    .registration_id("my-google-oauth")
+    .provider(OAuth2Provider::Google);
+assert_eq!(config.registration_id, "my-google-oauth");</code></pre>
 <h2 id="configuration-options-1"><a class="header" href="#configuration-options-1">Configuration Options</a></h2>
 <pre><code class="language-rust">let config = OAuth2Config::new("client-id", "client-secret", "redirect-uri")
     // Use a pre-configured provider
@@ -5753,12 +5776,58 @@ tracing_subscriber::fmt()
             .add_directive("actix_security::audit=info".parse().unwrap())
     )
     .init();</code></pre>
+<h2 id="integration-with-log-aggregation"><a class="header" href="#integration-with-log-aggregation">Integration with Log Aggregation</a></h2>
+<h3 id="sending-to-external-services"><a class="header" href="#sending-to-external-services">Sending to External Services</a></h3>
+<p>Implement <code>SecurityEventHandler</code> for external log services:</p>
+<pre><code class="language-rust">use actix_security::http::security::{SecurityEventHandler, SecurityEvent};
+
+struct ElasticsearchHandler {
+    client: elasticsearch::Elasticsearch,
+}
+
+impl SecurityEventHandler for ElasticsearchHandler {
+    fn handle(&amp;self, event: &amp;SecurityEvent) {
+        // Convert to JSON and send to Elasticsearch
+        let doc = serde_json::json!({
+            "@timestamp": event.timestamp,
+            "event_type": format!("{:?}", event.event_type),
+            "severity": format!("{:?}", event.severity),
+            "user": event.username,
+            "ip": event.ip_address,
+            "resource": event.resource,
+            "details": event.details,
+        });
+
+        // Send async (you'd use a channel in practice)
+        let _ = self.client.index(/* ... */);
+    }
+}</code></pre>
+<h3 id="multiple-handlers"><a class="header" href="#multiple-handlers">Multiple Handlers</a></h3>
+<p>Combine handlers for different purposes:</p>
+<pre><code class="language-rust">let logger = AuditLogger::new()
+    .add_handler(TracingHandler::new())      // Local logging
+    .add_handler(ElasticsearchHandler::new()) // Centralized logs
+    .add_handler(AlertHandler::new());        // Alerts for critical events</code></pre>
+<h3 id="structured-logging-with-json"><a class="header" href="#structured-logging-with-json">Structured Logging with JSON</a></h3>
+<p>For log aggregation systems (ELK, Splunk, Datadog), use JSON output:</p>
+<pre><code class="language-rust">use tracing_subscriber::fmt::format::FmtSpan;
+
+tracing_subscriber::fmt()
+    .json()  // Output as JSON
+    .with_target(true)
+    .with_current_span(false)
+    .init();
+
+// Events will be emitted as JSON:
+// {"timestamp":"2024-01-15T10:30:00Z","level":"WARN","target":"actix_security::audit","message":"Access denied","event_type":"ACCESS_DENIED","user":"user1","path":"/admin"}</code></pre>
 <h2 id="spring-security-comparison-23"><a class="header" href="#spring-security-comparison-23">Spring Security Comparison</a></h2>
 <div class="table-wrapper"><table><thead><tr><th>Spring Security</th><th>Actix Security</th></tr></thead><tbody>
 <tr><td><code>AuthenticationEventPublisher</code></td><td><code>AuditLogger</code></td></tr>
 <tr><td><code>AbstractAuthenticationEvent</code></td><td><code>SecurityEvent</code></td></tr>
 <tr><td><code>@EventListener</code></td><td><code>SecurityEventHandler</code> trait</td></tr>
 <tr><td>Spring AOP logging</td><td><code>tracing</code> integration</td></tr>
+<tr><td><code>ApplicationEventPublisher</code></td><td><code>audit_log()</code> global function</td></tr>
+<tr><td><code>AuditApplicationEvent</code></td><td><code>SecurityEvent</code> with severity</td></tr>
 </tbody></table>
 </div><div style="break-before: page; page-break-before: always;"></div><h1 id="remember-me-authentication"><a class="header" href="#remember-me-authentication">Remember-Me Authentication</a></h1>
 <p>Remember-me authentication allows users to stay logged in across browser sessions using a persistent token stored in a cookie.</p>
@@ -6206,9 +6275,44 @@ async fn ws_handler(
     // ... spawn handler with user
     Ok(response)
 }</code></pre>
-<h2 id="jwt-authentication-for-websocket"><a class="header" href="#jwt-authentication-for-websocket">JWT Authentication for WebSocket</a></h2>
-<p>Since browsers can't send custom headers with WebSocket, use JWT in the Authorization header:</p>
-<pre><code class="language-rust">use actix_security::http::security::{
+<h3 id="websocketupgraderesult"><a class="header" href="#websocketupgraderesult">WebSocketUpgradeResult</a></h3>
+<p>The <code>validate_upgrade()</code> method returns a <code>WebSocketUpgradeResult</code> with useful information:</p>
+<pre><code class="language-rust">let upgrade = config.validate_upgrade(&amp;req)?;
+
+// Check if user is authenticated
+if upgrade.is_authenticated() {
+    // Get username (returns Option&lt;&amp;str&gt;)
+    let username = upgrade.username();
+    println!("User: {:?}", username);
+
+    // Get the full User object
+    let user = upgrade.user();
+
+    // Get the validated origin
+    let origin = upgrade.origin();
+    println!("Connecting from: {:?}", origin);
+}
+
+// Convert to owned User (consumes the result)
+let user = upgrade.into_user();</code></pre>
+<h3 id="validation-order"><a class="header" href="#validation-order">Validation Order</a></h3>
+<p>Validation happens in this order, stopping at the first failure:</p>
+<ol>
+<li><strong>Origin</strong> - CSWSH prevention</li>
+<li><strong>Authentication</strong> - Is user logged in?</li>
+<li><strong>Roles</strong> - Does user have required roles?</li>
+<li><strong>Authorities</strong> - Does user have required authorities?</li>
+</ol>
+<pre><code class="language-rust">// Example: Bad origin fails first, even if user is authenticated
+let err = config.validate_upgrade(&amp;bad_origin_request);
+assert!(matches!(err, WebSocketSecurityError::InvalidOrigin { .. }));</code></pre>
+<pre><code>
+## JWT Authentication for WebSocket
+
+Since browsers can't send custom headers with WebSocket, use JWT in the Authorization header:
+
+```rust
+use actix_security::http::security::{
     JwtAuthenticator, JwtConfig,
     websocket::OriginValidator,
 };
@@ -6273,7 +6377,8 @@ async fn ws_handler(
     });
 
     Ok(response)
-}</code></pre>
+}
+</code></pre>
 <h2 id="websocketuser-extractor"><a class="header" href="#websocketuser-extractor">WebSocketUser Extractor</a></h2>
 <p>For simpler extraction with role/authority checks:</p>
 <pre><code class="language-rust">use actix_security::http::security::websocket::WebSocketUser;
@@ -6409,6 +6514,42 @@ let config = ApiKeyConfig::new()
     .authority("api:write")      // Add another authority
     .metadata("tier", "premium") // Add metadata
     .build();</code></pre>
+<h3 id="metadata"><a class="header" href="#metadata">Metadata</a></h3>
+<p>Store additional information with API keys for business logic:</p>
+<pre><code class="language-rust">let key = ApiKey::new("sk_live_abc123")
+    .with_metadata("environment", "production")
+    .with_metadata("tier", "premium")
+    .with_metadata("rate_limit", "1000");
+
+// Access metadata in handlers
+fn handle_request(user: AuthenticatedUser, key_repo: &amp;impl ApiKeyRepository) {
+    if let Some(key) = key_repo.find_by_key(/* key value */) {
+        let metadata = key.get_metadata();
+
+        // Use metadata for business logic
+        if metadata.get("tier") == Some(&amp;"premium".to_string()) {
+            // Premium features
+        }
+
+        // Rate limiting based on tier
+        let limit: u32 = metadata
+            .get("rate_limit")
+            .and_then(|s| s.parse().ok())
+            .unwrap_or(100);
+    }
+}</code></pre>
+<h3 id="key-validation-state"><a class="header" href="#key-validation-state">Key Validation State</a></h3>
+<p>Keys track multiple states for comprehensive validation:</p>
+<pre><code class="language-rust">let key = ApiKey::new("sk_test")
+    .enabled(true)
+    .expires_in(Duration::from_secs(3600));
+
+// Individual checks
+assert!(key.is_enabled());   // Check if key is active
+assert!(!key.is_expired());  // Check if key hasn't expired
+
+// Combined validation (enabled AND not expired)
+assert!(key.is_valid());</code></pre>
 <h2 id="custom-repository"><a class="header" href="#custom-repository">Custom Repository</a></h2>
 <p>Implement <code>ApiKeyRepository</code> for custom storage backends:</p>
 <pre><code class="language-rust">use actix_security::http::security::api_key::{ApiKey, ApiKeyRepository};

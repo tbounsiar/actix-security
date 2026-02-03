@@ -253,9 +253,44 @@ async fn ws_handler(
     // ... spawn handler with user
     Ok(response)
 }</code></pre>
-<h2 id="jwt-authentication-for-websocket"><a class="header" href="#jwt-authentication-for-websocket">JWT Authentication for WebSocket</a></h2>
-<p>Since browsers can't send custom headers with WebSocket, use JWT in the Authorization header:</p>
-<pre><code class="language-rust">use actix_security::http::security::{
+<h3 id="websocketupgraderesult"><a class="header" href="#websocketupgraderesult">WebSocketUpgradeResult</a></h3>
+<p>The <code>validate_upgrade()</code> method returns a <code>WebSocketUpgradeResult</code> with useful information:</p>
+<pre><code class="language-rust">let upgrade = config.validate_upgrade(&amp;req)?;
+
+// Check if user is authenticated
+if upgrade.is_authenticated() {
+    // Get username (returns Option&lt;&amp;str&gt;)
+    let username = upgrade.username();
+    println!("User: {:?}", username);
+
+    // Get the full User object
+    let user = upgrade.user();
+
+    // Get the validated origin
+    let origin = upgrade.origin();
+    println!("Connecting from: {:?}", origin);
+}
+
+// Convert to owned User (consumes the result)
+let user = upgrade.into_user();</code></pre>
+<h3 id="validation-order"><a class="header" href="#validation-order">Validation Order</a></h3>
+<p>Validation happens in this order, stopping at the first failure:</p>
+<ol>
+<li><strong>Origin</strong> - CSWSH prevention</li>
+<li><strong>Authentication</strong> - Is user logged in?</li>
+<li><strong>Roles</strong> - Does user have required roles?</li>
+<li><strong>Authorities</strong> - Does user have required authorities?</li>
+</ol>
+<pre><code class="language-rust">// Example: Bad origin fails first, even if user is authenticated
+let err = config.validate_upgrade(&amp;bad_origin_request);
+assert!(matches!(err, WebSocketSecurityError::InvalidOrigin { .. }));</code></pre>
+<pre><code>
+## JWT Authentication for WebSocket
+
+Since browsers can't send custom headers with WebSocket, use JWT in the Authorization header:
+
+```rust
+use actix_security::http::security::{
     JwtAuthenticator, JwtConfig,
     websocket::OriginValidator,
 };
@@ -320,7 +355,8 @@ async fn ws_handler(
     });
 
     Ok(response)
-}</code></pre>
+}
+</code></pre>
 <h2 id="websocketuser-extractor"><a class="header" href="#websocketuser-extractor">WebSocketUser Extractor</a></h2>
 <p>For simpler extraction with role/authority checks:</p>
 <pre><code class="language-rust">use actix_security::http::security::websocket::WebSocketUser;

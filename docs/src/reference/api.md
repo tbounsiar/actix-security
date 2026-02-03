@@ -244,17 +244,17 @@ SecurityContext::is_authenticated()     // bool
 
 ```toml
 # Default features (argon2, http-basic)
-actix-security = "0.1"
+actix-security = "0.2"
 
 # Minimal
-actix-security = { version = "0.1", default-features = false }
+actix-security = { version = "0.2", default-features = false }
 
 # With JWT
-actix-security = { version = "0.1", features = ["jwt"] }
+actix-security = { version = "0.2", features = ["jwt"] }
 
 # With Session
-actix-security = { version = "0.1", features = ["session"] }
+actix-security = { version = "0.2", features = ["session"] }
 
 # All features
-actix-security = { version = "0.1", features = ["full"] }
+actix-security = { version = "0.2", features = ["full"] }
 ```

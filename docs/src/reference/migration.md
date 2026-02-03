@@ -17,8 +17,8 @@ This guide helps Spring Security developers transition to Actix Security.
 **After (Cargo.toml):**
 ```toml
 [dependencies]
-actix-security = { version = "0.1", features = ["argon2", "http-basic"] }
-actix-security = "0.1"
+actix-security = { version = "0.2", features = ["argon2", "http-basic"] }
+actix-security = "0.2"
 ```
 
 ### Step 2: Update Annotations
@@ -116,12 +116,14 @@ fn configure_security(encoder: Argon2PasswordEncoder) -> SecurityTransform<...> 
 
 | Spring Security | Actix Security |
 |-----------------|----------------|
-| `hasRole("ADMIN")` | `hasRole('ADMIN')` |
-| `hasRole('ADMIN')` | `hasRole('ADMIN')` |
-| `expr1 and expr2` | `expr1 AND expr2` |
-| `expr1 or expr2` | `expr1 OR expr2` |
-| `!expr` | `NOT expr` |
-| `not expr` | `NOT expr` |
+| `hasRole("ADMIN")` | `hasRole('ADMIN')` or `has_role('ADMIN')` |
+| `hasRole('ADMIN')` | `hasRole('ADMIN')` or `has_role('ADMIN')` |
+| `expr1 and expr2` | `expr1 AND expr2` or `expr1 && expr2` |
+| `expr1 or expr2` | `expr1 OR expr2` or `expr1 \|\| expr2` |
+| `!expr` | `NOT expr` or `!expr` |
+| `not expr` | `NOT expr` or `!expr` |
+
+> **Note:** Since v0.2.2, both Spring-style (camelCase, AND/OR/NOT) and Rust-style (snake_case, &&/||/!) are supported.
 
 ### Step 5: Update Custom Expressions
 
@@ -207,7 +209,7 @@ if let Some(user) = SecurityContext::get_user() {
 
 **Problem:** `#[pre_authorize("hasRole('ADMIN') && hasAuthority('write')")]` fails.
 
-**Solution:** Use `AND`/`OR`/`NOT` instead of `&&`/`||`/`!`.
+**Solution:** Since v0.2.2, both Rust-style (`&&`/`||`/`!`) and Spring-style (`AND`/`OR`/`NOT`) operators are supported. If you're using an older version, upgrade to 0.2.2+ or use `AND`/`OR`/`NOT`.
 
 ### Issue: Double quotes in expressions
 

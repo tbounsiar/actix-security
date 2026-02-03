@@ -43,6 +43,7 @@ actix-security = { version = "0.2", features = ["full"] }
 
 | Actix Security | Actix Web | Rust |
 |----------------|-----------|------|
+| 0.2.x | 4.x | 1.78+ |
 | 0.1.x | 4.x | 1.70+ |
 
 ## Crate Overview

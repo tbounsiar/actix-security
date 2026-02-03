@@ -68,8 +68,9 @@ full = ["argon2", "bcrypt", "http-basic", "jwt", "session", "form-login", "csrf"
 actix-web = "4"
 actix-service = "2"
 
-# Pin time to avoid edition2024 requirement (time >= 0.3.46 requires Rust 1.85+)
-time = ">=0.3, <0.3.46"
+# Pin crates to avoid edition2024 requirement (Rust 1.85+ required)
+time = ">=0.3, <0.3.46"       # time >= 0.3.46 requires edition2024
+base64ct = ">=1, <1.8.3"     # base64ct >= 1.8.3 requires edition2024 (used by argon2)
 
 # Async
 futures-util = "0.3"

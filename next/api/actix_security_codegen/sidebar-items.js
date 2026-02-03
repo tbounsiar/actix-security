@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"attr":["authenticated","deny_all","has_access","has_role","permit_all","pre_authorize","roles_allowed","secured"]};

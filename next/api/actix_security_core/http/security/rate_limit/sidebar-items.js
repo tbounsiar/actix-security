@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["KeyExtractor","RateLimitAlgorithm"],"struct":["RateLimitBuilder","RateLimitConfig","RateLimitExceeded","RateLimitInfo","RateLimiter","RateLimiterMiddleware","RateLimiterState"],"type":["KeyExtractorFn"]};

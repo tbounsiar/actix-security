@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"mod":["admin","api","home","pre_authorize","public","secured"]};

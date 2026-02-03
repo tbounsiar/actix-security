@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":["LoginForm","login","post_login"]};

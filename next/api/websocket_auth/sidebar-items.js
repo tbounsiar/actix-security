@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["extract_user_from_jwt","main"],"struct":["AppState","LoginRequest","TokenResponse","index","login","test_page","ws_config_handler","ws_handler","ws_public_handler"]};

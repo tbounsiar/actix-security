@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["SessionError","SessionFixationStrategy"],"struct":["SessionAuthenticator","SessionConfig","SessionLoginService","SessionUser"],"trait":["CredentialAuthenticator"]};

@@ -192,8 +192,8 @@
 </code></pre>
 <p><strong>After (Cargo.toml):</strong></p>
 <pre><code class="language-toml">[dependencies]
-actix-security = { version = "0.1", features = ["argon2", "http-basic"] }
-actix-security = "0.1"
+actix-security = { version = "0.2", features = ["argon2", "http-basic"] }
+actix-security = "0.2"
 </code></pre>
 <h3 id="step-2-update-annotations"><a class="header" href="#step-2-update-annotations">Step 2: Update Annotations</a></h3>
 <p><strong>Before (Java):</strong></p>
@@ -276,14 +276,17 @@ fn configure_security(encoder: Argon2PasswordEncoder) -&gt; SecurityTransform&lt
 }</code></pre>
 <h3 id="step-4-update-expression-syntax"><a class="header" href="#step-4-update-expression-syntax">Step 4: Update Expression Syntax</a></h3>
 <div class="table-wrapper"><table><thead><tr><th>Spring Security</th><th>Actix Security</th></tr></thead><tbody>
-<tr><td><code>hasRole("ADMIN")</code></td><td><code>hasRole('ADMIN')</code></td></tr>
-<tr><td><code>hasRole('ADMIN')</code></td><td><code>hasRole('ADMIN')</code></td></tr>
-<tr><td><code>expr1 and expr2</code></td><td><code>expr1 AND expr2</code></td></tr>
-<tr><td><code>expr1 or expr2</code></td><td><code>expr1 OR expr2</code></td></tr>
-<tr><td><code>!expr</code></td><td><code>NOT expr</code></td></tr>
-<tr><td><code>not expr</code></td><td><code>NOT expr</code></td></tr>
+<tr><td><code>hasRole("ADMIN")</code></td><td><code>hasRole('ADMIN')</code> or <code>has_role('ADMIN')</code></td></tr>
+<tr><td><code>hasRole('ADMIN')</code></td><td><code>hasRole('ADMIN')</code> or <code>has_role('ADMIN')</code></td></tr>
+<tr><td><code>expr1 and expr2</code></td><td><code>expr1 AND expr2</code> or <code>expr1 &amp;&amp; expr2</code></td></tr>
+<tr><td><code>expr1 or expr2</code></td><td><code>expr1 OR expr2</code> or <code>expr1 || expr2</code></td></tr>
+<tr><td><code>!expr</code></td><td><code>NOT expr</code> or <code>!expr</code></td></tr>
+<tr><td><code>not expr</code></td><td><code>NOT expr</code> or <code>!expr</code></td></tr>
 </tbody></table>
 </div>
+<blockquote>
+<p><strong>Note:</strong> Since v0.2.2, both Spring-style (camelCase, AND/OR/NOT) and Rust-style (snake_case, &amp;&amp;/||/!) are supported.</p>
+</blockquote>
 <h3 id="step-5-update-custom-expressions"><a class="header" href="#step-5-update-custom-expressions">Step 5: Update Custom Expressions</a></h3>
 <p><strong>Before (Java):</strong></p>
 <pre><code class="language-java">public class CustomSecurityExpressionRoot extends SecurityExpressionRoot
@@ -344,7 +347,7 @@ if (auth.getAuthorities().stream()
 <p><strong>Solution:</strong> Actix Security doesn't use the ROLE_ prefix. Use <code>#[secured("ADMIN")]</code> instead.</p>
 <h3 id="issue-expression-operators-not-recognized"><a class="header" href="#issue-expression-operators-not-recognized">Issue: Expression operators not recognized</a></h3>
 <p><strong>Problem:</strong> <code>#[pre_authorize("hasRole('ADMIN') &amp;&amp; hasAuthority('write')")]</code> fails.</p>
-<p><strong>Solution:</strong> Use <code>AND</code>/<code>OR</code>/<code>NOT</code> instead of <code>&amp;&amp;</code>/<code>||</code>/<code>!</code>.</p>
+<p><strong>Solution:</strong> Since v0.2.2, both Rust-style (<code>&amp;&amp;</code>/<code>||</code>/<code>!</code>) and Spring-style (<code>AND</code>/<code>OR</code>/<code>NOT</code>) operators are supported. If you're using an older version, upgrade to 0.2.2+ or use <code>AND</code>/<code>OR</code>/<code>NOT</code>.</p>
 <h3 id="issue-double-quotes-in-expressions"><a class="header" href="#issue-double-quotes-in-expressions">Issue: Double quotes in expressions</a></h3>
 <p><strong>Problem:</strong> <code>#[pre_authorize("hasRole(\"ADMIN\")")]</code> fails.</p>
 <p><strong>Solution:</strong> Use single quotes: <code>#[pre_authorize("hasRole('ADMIN')")]</code>.</p>

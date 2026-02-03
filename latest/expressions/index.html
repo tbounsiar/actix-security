@@ -189,74 +189,92 @@
 <ul>
 <li><strong>Compile-time parsing</strong> - Expressions are validated at compile time</li>
 <li><strong>Zero runtime overhead</strong> - Expressions are compiled to Rust code</li>
-<li><strong>Extensible</strong> - Add custom functions via <code>ExpressionRoot</code> trait</li>
-<li><strong>Familiar syntax</strong> - Similar to Spring Security SpEL</li>
+<li><strong>Parameter references</strong> - Reference handler parameters with <code>#param_name</code> syntax</li>
+<li><strong>Custom functions</strong> - Define async authorization functions with any logic</li>
+<li><strong>Dual syntax support</strong> - Both Spring Security style (camelCase) and Rust style (snake_case)</li>
 </ul>
 <h2 id="expression-syntax"><a class="header" href="#expression-syntax">Expression Syntax</a></h2>
 <h3 id="functions"><a class="header" href="#functions">Functions</a></h3>
-<div class="table-wrapper"><table><thead><tr><th>Function</th><th>Description</th><th>Example</th></tr></thead><tbody>
-<tr><td><code>hasRole('R')</code></td><td>User has role R</td><td><code>hasRole('ADMIN')</code></td></tr>
-<tr><td><code>hasAnyRole('R1', 'R2')</code></td><td>User has any of the roles</td><td><code>hasAnyRole('ADMIN', 'MANAGER')</code></td></tr>
-<tr><td><code>hasAuthority('A')</code></td><td>User has authority A</td><td><code>hasAuthority('users:read')</code></td></tr>
-<tr><td><code>hasAnyAuthority('A1', 'A2')</code></td><td>User has any of the authorities</td><td><code>hasAnyAuthority('read', 'write')</code></td></tr>
-<tr><td><code>isAuthenticated()</code></td><td>User is authenticated</td><td><code>isAuthenticated()</code></td></tr>
-<tr><td><code>permitAll()</code></td><td>Always true</td><td><code>permitAll()</code></td></tr>
-<tr><td><code>denyAll()</code></td><td>Always false</td><td><code>denyAll()</code></td></tr>
+<p>Both camelCase (Spring Security style) and snake_case (Rust style) are supported:</p>
+<div class="table-wrapper"><table><thead><tr><th>Spring Style</th><th>Rust Style</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>hasRole('R')</code></td><td><code>has_role('R')</code></td><td>User has role R</td></tr>
+<tr><td><code>hasAnyRole('R1', 'R2')</code></td><td><code>has_any_role('R1', 'R2')</code></td><td>User has any of the roles</td></tr>
+<tr><td><code>hasAuthority('A')</code></td><td><code>has_authority('A')</code></td><td>User has authority A</td></tr>
+<tr><td><code>hasAnyAuthority('A1', 'A2')</code></td><td><code>has_any_authority('A1', 'A2')</code></td><td>User has any of the authorities</td></tr>
+<tr><td><code>isAuthenticated()</code></td><td><code>is_authenticated()</code></td><td>User is authenticated</td></tr>
+<tr><td><code>permitAll()</code></td><td><code>permit_all()</code></td><td>Always true</td></tr>
+<tr><td><code>denyAll()</code></td><td><code>deny_all()</code></td><td>Always false</td></tr>
 </tbody></table>
 </div>
 <h3 id="operators"><a class="header" href="#operators">Operators</a></h3>
-<div class="table-wrapper"><table><thead><tr><th>Operator</th><th>Description</th><th>Example</th></tr></thead><tbody>
-<tr><td><code>AND</code></td><td>Both must be true</td><td><code>hasRole('A') AND hasRole('B')</code></td></tr>
-<tr><td><code>OR</code></td><td>Either can be true</td><td><code>hasRole('A') OR hasRole('B')</code></td></tr>
-<tr><td><code>NOT</code></td><td>Negation</td><td><code>NOT hasRole('GUEST')</code></td></tr>
-<tr><td><code>( )</code></td><td>Grouping</td><td><code>(hasRole('A') OR hasRole('B')) AND hasAuthority('x')</code></td></tr>
+<p>Both Spring Security style and Rust style operators are supported:</p>
+<div class="table-wrapper"><table><thead><tr><th>Spring Style</th><th>Rust Style</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>AND</code></td><td><code>&amp;&amp;</code></td><td>Both must be true</td></tr>
+<tr><td><code>OR</code></td><td><code>||</code></td><td>Either can be true</td></tr>
+<tr><td><code>NOT</code></td><td><code>!</code></td><td>Negation</td></tr>
+<tr><td><code>( )</code></td><td><code>( )</code></td><td>Grouping</td></tr>
 </tbody></table>
 </div>
+<p><strong>Note:</strong> Operators are case-insensitive (<code>AND</code>, <code>and</code>, <code>And</code> all work).</p>
 <h2 id="examples"><a class="header" href="#examples">Examples</a></h2>
 <h3 id="basic-expressions"><a class="header" href="#basic-expressions">Basic Expressions</a></h3>
-<pre><code class="language-rust">// Single role check
+<pre><code class="language-rust">// Single role check (both styles work)
 #[pre_authorize("hasRole('ADMIN')")]
+#[pre_authorize("has_role('ADMIN')")]
 
 // Single authority check
 #[pre_authorize("hasAuthority('posts:write')")]
+#[pre_authorize("has_authority('posts:write')")]
 
 // Any of multiple roles
 #[pre_authorize("hasAnyRole('ADMIN', 'MANAGER', 'SUPERVISOR')")]
+#[pre_authorize("has_any_role('ADMIN', 'MANAGER', 'SUPERVISOR')")]
 
 // Any of multiple authorities
 #[pre_authorize("hasAnyAuthority('read', 'write', 'delete')")]
+#[pre_authorize("has_any_authority('read', 'write', 'delete')")]
 
 // Authenticated user
 #[pre_authorize("isAuthenticated()")]</code></pre>
 <h3 id="combining-conditions"><a class="header" href="#combining-conditions">Combining Conditions</a></h3>
-<pre><code class="language-rust">// AND - both must be true
+<pre><code class="language-rust">// AND - both must be true (Spring style)
 #[pre_authorize("hasRole('USER') AND hasAuthority('premium')")]
+// Rust style
+#[pre_authorize("has_role('USER') &amp;&amp; has_authority('premium')")]
 
-// OR - either can be true
+// OR - either can be true (Spring style)
 #[pre_authorize("hasRole('ADMIN') OR hasAuthority('users:manage')")]
+// Rust style
+#[pre_authorize("has_role('ADMIN') || has_authority('users:manage')")]
 
-// NOT - negation
+// NOT - negation (Spring style)
 #[pre_authorize("NOT hasRole('GUEST')")]
-#[pre_authorize("isAuthenticated() AND NOT hasRole('SUSPENDED')")]</code></pre>
+// Rust style
+#[pre_authorize("!has_role('GUEST')")]</code></pre>
 <h3 id="complex-expressions"><a class="header" href="#complex-expressions">Complex Expressions</a></h3>
-<pre><code class="language-rust">// Admin OR (User with write permission)
+<pre><code class="language-rust">// Admin OR (User with write permission) - Spring style
 #[pre_authorize("hasRole('ADMIN') OR (hasRole('USER') AND hasAuthority('posts:write'))")]
+// Rust style
+#[pre_authorize("has_role('ADMIN') || (has_role('USER') &amp;&amp; has_authority('posts:write'))")]
 
-// Multiple groups
-#[pre_authorize("(hasRole('ADMIN') OR hasRole('MANAGER')) AND hasAuthority('reports:view')")]
+// Mixed styles also work!
+#[pre_authorize("hasRole('ADMIN') || has_role('USER') &amp;&amp; has_authority('write')")]
 
-// Nested conditions
-#[pre_authorize("hasRole('ADMIN') OR (hasRole('USER') AND (hasAuthority('a') OR hasAuthority('b')))")]</code></pre>
+// Complex nested conditions
+#[pre_authorize("has_role('ADMIN') || (has_role('USER') &amp;&amp; (has_authority('a') || has_authority('b')))")]</code></pre>
 <h2 id="compile-time-validation"><a class="header" href="#compile-time-validation">Compile-Time Validation</a></h2>
 <p>Expressions are parsed and validated at compile time:</p>
-<pre><code class="language-rust">// ✓ Valid
+<pre><code class="language-rust">// ✓ Valid - built-in function
 #[pre_authorize("hasRole('ADMIN') AND hasAuthority('write')")]
 
-// ✗ Compile error: Use 'AND' not '&amp;&amp;'
-#[pre_authorize("hasRole('ADMIN') &amp;&amp; hasAuthority('write')")]
+// ✓ Valid - custom function with parameter reference (v0.2.2+)
+#[pre_authorize("is_tenant_admin(#tenant_id)")]
 
-// ✗ Compile error: Unknown function
-#[pre_authorize("hasPermission('admin')")]
+// ✓ Valid - combining built-in and custom functions
+#[pre_authorize("hasRole('ADMIN') OR my_custom_check(#resource_id)")]
+
+// ✗ Compile error: Unknown parameter reference
+#[pre_authorize("my_check(#nonexistent_param)")]
 
 // ✗ Compile error: Syntax error
 #[pre_authorize("hasRole('ADMIN'")]</code></pre>
@@ -288,7 +306,7 @@ public void viewReports() {}
 @PreAuthorize("isAuthenticated() and !hasRole('GUEST')")
 public void premiumContent() {}
 </code></pre>
-<p><strong>Actix Security (Rust):</strong></p>
+<p><strong>Actix Security (Rust) - Spring style:</strong></p>
 <pre><code class="language-rust">#[pre_authorize("hasRole('ADMIN') OR hasAuthority('users:write')")]
 async fn update_user() {}
 
@@ -297,9 +315,20 @@ async fn view_reports() {}
 
 #[pre_authorize("isAuthenticated() AND NOT hasRole('GUEST')")]
 async fn premium_content() {}</code></pre>
-<p>Key differences:</p>
+<p><strong>Actix Security (Rust) - Rust style:</strong></p>
+<pre><code class="language-rust">#[pre_authorize("has_role('ADMIN') || has_authority('users:write')")]
+async fn update_user() {}
+
+#[pre_authorize("has_any_role('ADMIN', 'MANAGER') &amp;&amp; has_authority('reports:view')")]
+async fn view_reports() {}
+
+#[pre_authorize("is_authenticated() &amp;&amp; !has_role('GUEST')")]
+async fn premium_content() {}</code></pre>
+<p><strong>Syntax flexibility:</strong></p>
 <ul>
-<li>Use <code>AND</code>/<code>OR</code>/<code>NOT</code> instead of <code>and</code>/<code>or</code>/<code>!</code> (case-insensitive)</li>
+<li>Both camelCase and snake_case function names work</li>
+<li>Both <code>AND</code>/<code>OR</code>/<code>NOT</code> and <code>&amp;&amp;</code>/<code>||</code>/<code>!</code> operators work</li>
+<li>Operators are case-insensitive (<code>AND</code>, <code>and</code>, <code>And</code> all work)</li>
 <li>Use single quotes for strings: <code>'ADMIN'</code> not <code>"ADMIN"</code></li>
 </ul>
 <h2 id="sections"><a class="header" href="#sections">Sections</a></h2>

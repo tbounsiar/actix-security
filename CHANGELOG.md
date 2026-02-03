@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **API Key Authentication** (`api-key` feature)
+  - Support for header, query parameter, and Authorization header extraction
+  - `ApiKeyAuthenticator` implementing the `Authenticator` trait
+  - `ApiKeyRepository` trait for custom storage backends
+  - `InMemoryApiKeyRepository` for development and testing
+  - `ApiKey` model with roles, authorities, expiration, and metadata
+  - Multiple extraction locations with configurable priority
+  - Key validation (enabled status, expiration)
+  - Example application demonstrating API key authentication
+
+- **WebSocket Security** (`websocket` feature)
+  - Origin validation for Cross-Site WebSocket Hijacking (CSWSH) prevention
+  - `OriginValidator` with pattern matching and wildcard support
+  - `WebSocketSecurityConfig` for unified security configuration
+  - `WebSocketUser` and `WebSocketUpgrade` extractors
+  - JWT authentication during WebSocket handshake
+  - Role and authority checks for WebSocket connections
+  - Example application demonstrating WebSocket security patterns
+
 ## [0.2.2] - 2026-02-02
 
 ### Added

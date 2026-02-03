@@ -43,6 +43,8 @@ session = ["dep:actix-session", "dep:serde", "dep:serde_json"]  # Session-based 
 form-login = ["session", "csrf"]  # Form-based login (requires session + CSRF)
 remember-me = ["session", "dep:base64"]  # Remember-me authentication
 oauth2 = ["dep:oauth2", "dep:openidconnect", "dep:reqwest", "dep:serde", "dep:serde_json", "dep:url"]  # OAuth2/OIDC
+api-key = ["dep:urlencoding"]  # API Key authentication
+websocket = []  # WebSocket security (origin validation, auth during handshake)
 
 # Security Features
 csrf = ["session"]  # CSRF protection
@@ -59,12 +61,15 @@ ldap = ["dep:async-trait"]  # LDAP/Active Directory Authentication
 saml = ["dep:base64", "dep:urlencoding"]  # SAML 2.0 Single Sign-On
 
 # Full feature set (includes all available features)
-full = ["argon2", "bcrypt", "http-basic", "jwt", "session", "form-login", "csrf", "remember-me", "oauth2", "user-details", "rate-limit", "audit", "account-lock", "ldap", "saml"]
+full = ["argon2", "bcrypt", "http-basic", "jwt", "session", "form-login", "csrf", "remember-me", "oauth2", "api-key", "user-details", "rate-limit", "audit", "account-lock", "ldap", "saml", "websocket"]
 
 [dependencies]
 # Actix Web 4.x
 actix-web = "4"
 actix-service = "2"
+
+# Pin time to avoid edition2024 requirement (time >= 0.3.46 requires Rust 1.85+)
+time = ">=0.3, <0.3.46"
 
 # Async
 futures-util = "0.3"

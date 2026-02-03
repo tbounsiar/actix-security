@@ -43,6 +43,8 @@ session = ["actix-security-core/session"]
 form-login = ["actix-security-core/form-login"]
 remember-me = ["actix-security-core/remember-me"]
 oauth2 = ["actix-security-core/oauth2"]
+api-key = ["actix-security-core/api-key"]
+websocket = ["actix-security-core/websocket"]
 
 # Security Features
 csrf = ["actix-security-core/csrf"]
@@ -59,7 +61,7 @@ ldap = ["actix-security-core/ldap"]
 saml = ["actix-security-core/saml"]
 
 # Full feature set (includes all available features)
-full = ["argon2", "bcrypt", "http-basic", "jwt", "session", "form-login", "csrf", "remember-me", "oauth2", "user-details", "rate-limit", "audit", "account-lock", "ldap", "saml", "macros"]
+full = ["argon2", "bcrypt", "http-basic", "jwt", "session", "form-login", "csrf", "remember-me", "oauth2", "api-key", "websocket", "user-details", "rate-limit", "audit", "account-lock", "ldap", "saml", "macros"]
 
 [dependencies]
 # Core library (always included)

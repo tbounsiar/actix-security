@@ -50,6 +50,8 @@
 - [Audit Logging](./features/audit-logging.md)
 - [Remember-Me](./features/remember-me.md)
 - [Channel Security](./features/channel-security.md)
+- [WebSocket Security](./features/websocket.md)
+- [API Key Authentication](./features/api-key.md)
 - [LDAP Authentication](./features/ldap.md)
 - [SAML 2.0 Authentication](./features/saml.md)
 

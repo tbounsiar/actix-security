@@ -40,6 +40,8 @@
 //! - `account-lock`: Enables Account Locking
 //! - `ldap`: Enables LDAP/Active Directory Authentication
 //! - `saml`: Enables SAML 2.0 Single Sign-On
+//! - `api-key`: Enables API Key Authentication
+//! - `websocket`: Enables WebSocket security (origin validation, auth during handshake)
 
 // Re-exports for convenience
 #[cfg(feature = "account-lock")]
@@ -47,6 +49,11 @@ pub use account::{
     check_login, AccountLockManager, AccountStats, LockConfig, LockStatus, LoginCheckResult,
 };
 pub use ant_matcher::{AntMatcher, AntMatcherBuilder, AntMatchers, IntoAntMatcher};
+#[cfg(feature = "api-key")]
+pub use api_key::{
+    ApiKey, ApiKeyAuthenticator, ApiKeyBuilder, ApiKeyConfig, ApiKeyError, ApiKeyLocation,
+    ApiKeyRepository, InMemoryApiKeyRepository,
+};
 #[cfg(feature = "audit")]
 pub use audit::{
     audit_log, global_logger, init_global_logger, AuditLogger, InMemoryEventStore, SecurityEvent,
@@ -108,6 +115,11 @@ pub use user_details::{
     CachingUserDetailsService, InMemoryUserDetailsService, UserDetailsAuthenticator,
     UserDetailsError, UserDetailsManager, UserDetailsService,
 };
+#[cfg(feature = "websocket")]
+pub use websocket::{
+    OriginValidator, OriginValidatorBuilder, WebSocketSecurityConfig,
+    WebSocketSecurityConfigBuilder, WebSocketSecurityError, WebSocketUpgrade, WebSocketUser,
+};
 
 // Internal modules (private implementation details)
 mod config;
@@ -118,6 +130,8 @@ mod user;
 #[cfg(feature = "account-lock")]
 pub mod account;
 pub mod ant_matcher;
+#[cfg(feature = "api-key")]
+pub mod api_key;
 #[cfg(feature = "audit")]
 pub mod audit;
 pub mod authenticator;
@@ -150,6 +164,8 @@ pub mod saml;
 pub mod session;
 #[cfg(feature = "user-details")]
 pub mod user_details;
+#[cfg(feature = "websocket")]
+pub mod websocket;
 
 // Backward compatibility module
 pub mod web;

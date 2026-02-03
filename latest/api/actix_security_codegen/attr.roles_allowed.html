@@ -5,7 +5,7 @@
 <p><code>@Secured({"ROLE_ADMIN", "ROLE_USER"})</code></p>
 <h2 id="usage"><a class="doc-anchor" href="#usage">§</a>Usage</h2>
 <div class="example-wrap ignore"><a href="#" class="tooltip" title="This example is not tested">ⓘ</a><pre class="rust rust-example-rendered"><code><span class="kw">use </span>actix_security_codegen::roles_allowed;
-<span class="kw">use </span>actix_security_core::http::security::AuthenticatedUser;
+<span class="kw">use </span>actix_security::http::security::AuthenticatedUser;
 
 <span class="attr">#[roles_allowed(<span class="string">"ADMIN"</span>)]
 #[get(<span class="string">"/admin"</span>)]

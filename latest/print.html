@@ -4382,7 +4382,7 @@ async fn disabled(_user: AuthenticatedUser) -&gt; impl Responder {
 <p>The most powerful way to implement custom authorization is using async functions with parameter references. This approach allows you to reference handler parameters directly in your expressions, similar to Spring Security's SpEL:</p>
 <h3 id="defining-custom-authorization-functions"><a class="header" href="#defining-custom-authorization-functions">Defining Custom Authorization Functions</a></h3>
 <p>Create an async function that takes a user reference and any parameters you need:</p>
-<pre><code class="language-rust">use actix_security_core::http::security::User;
+<pre><code class="language-rust">use actix_security::http::security::User;
 
 /// Check if user is admin of a specific tenant
 pub async fn is_tenant_admin(user: &amp;User, tenant_id: i64) -&gt; bool {
@@ -4406,8 +4406,8 @@ pub async fn can_access_resource(user: &amp;User, resource_id: String) -&gt; boo
 <h3 id="using-parameter-references"><a class="header" href="#using-parameter-references">Using Parameter References</a></h3>
 <p>Use <code>#param_name</code> to reference handler parameters in your expressions:</p>
 <pre><code class="language-rust">use actix_web::{get, web::Path, HttpResponse, Responder};
-use actix_security_codegen::pre_authorize;
-use actix_security_core::http::security::AuthenticatedUser;
+use actix_security::pre_authorize;
+use actix_security::http::security::AuthenticatedUser;
 
 // Reference the tenant_id path parameter
 #[pre_authorize("is_tenant_admin(#tenant_id)")]
@@ -4450,8 +4450,8 @@ async fn get_tenant_settings(
 <p><strong>Important:</strong> For <code>Query&lt;T&gt;</code>, <code>Json&lt;T&gt;</code>, and <code>Form&lt;T&gt;</code>, the parameter reference must be the extractor parameter name, not individual fields within the struct. Your custom function should accept the full struct type:</p>
 <pre><code class="language-rust">use serde::Deserialize;
 use actix_web::{get, post, web};
-use actix_security_codegen::pre_authorize;
-use actix_security_core::http::security::{AuthenticatedUser, User};
+use actix_security::pre_authorize;
+use actix_security::http::security::{AuthenticatedUser, User};
 
 // DTOs must implement Clone for parameter references
 #[derive(Debug, Clone, Deserialize)]

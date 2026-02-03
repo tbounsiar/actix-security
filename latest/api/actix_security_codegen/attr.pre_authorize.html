@@ -9,7 +9,7 @@
 <tr><td><code>#[pre_authorize(authorities = ["r", "w"])]</code></td><td><code>@PreAuthorize("hasAnyAuthority('r', 'w')")</code></td></tr>
 </tbody></table>
 </div><h2 id="usage"><a class="doc-anchor" href="#usage">§</a>Usage</h2>
-<div class="example-wrap ignore"><a href="#" class="tooltip" title="This example is not tested">ⓘ</a><pre class="rust rust-example-rendered"><code><span class="kw">use </span>actix_security_core::http::security::AuthenticatedUser;
+<div class="example-wrap ignore"><a href="#" class="tooltip" title="This example is not tested">ⓘ</a><pre class="rust rust-example-rendered"><code><span class="kw">use </span>actix_security::http::security::AuthenticatedUser;
 <span class="kw">use </span>actix_security_codegen::pre_authorize;
 
 <span class="comment">// Check authentication only

@@ -16,7 +16,7 @@
 <a href=#16 id=16 data-nosnippet>16</a>//!
 <a href=#17 id=17 data-nosnippet>17</a>//! ```ignore
 <a href=#18 id=18 data-nosnippet>18</a>//! use actix_security_codegen::{secured, pre_authorize};
-<a href=#19 id=19 data-nosnippet>19</a>//! use actix_security_core::http::security::AuthenticatedUser;
+<a href=#19 id=19 data-nosnippet>19</a>//! use actix_security::http::security::AuthenticatedUser;
 <a href=#20 id=20 data-nosnippet>20</a>//! use actix_web::{get, HttpResponse, Responder};
 <a href=#21 id=21 data-nosnippet>21</a>//!
 <a href=#22 id=22 data-nosnippet>22</a>//! // Role-based security (like @Secured)
@@ -62,7 +62,7 @@
 <a href=#62 id=62 data-nosnippet>62</a>///
 <a href=#63 id=63 data-nosnippet>63</a>/// # Usage
 <a href=#64 id=64 data-nosnippet>64</a>/// ```ignore
-<a href=#65 id=65 data-nosnippet>65</a>/// use actix_security_core::http::security::AuthenticatedUser;
+<a href=#65 id=65 data-nosnippet>65</a>/// use actix_security::http::security::AuthenticatedUser;
 <a href=#66 id=66 data-nosnippet>66</a>/// use actix_security_codegen::secured;
 <a href=#67 id=67 data-nosnippet>67</a>///
 <a href=#68 id=68 data-nosnippet>68</a>/// // Single role
@@ -105,7 +105,7 @@
 <a href=#105 id=105 data-nosnippet>105</a>///
 <a href=#106 id=106 data-nosnippet>106</a>/// # Usage
 <a href=#107 id=107 data-nosnippet>107</a>/// ```ignore
-<a href=#108 id=108 data-nosnippet>108</a>/// use actix_security_core::http::security::AuthenticatedUser;
+<a href=#108 id=108 data-nosnippet>108</a>/// use actix_security::http::security::AuthenticatedUser;
 <a href=#109 id=109 data-nosnippet>109</a>/// use actix_security_codegen::pre_authorize;
 <a href=#110 id=110 data-nosnippet>110</a>///
 <a href=#111 id=111 data-nosnippet>111</a>/// // Check authentication only
@@ -180,7 +180,7 @@
 <a href=#180 id=180 data-nosnippet>180</a>/// # Usage
 <a href=#181 id=181 data-nosnippet>181</a>/// ```ignore
 <a href=#182 id=182 data-nosnippet>182</a>/// use actix_security_codegen::deny_all;
-<a href=#183 id=183 data-nosnippet>183</a>/// use actix_security_core::http::security::AuthenticatedUser;
+<a href=#183 id=183 data-nosnippet>183</a>/// use actix_security::http::security::AuthenticatedUser;
 <a href=#184 id=184 data-nosnippet>184</a>///
 <a href=#185 id=185 data-nosnippet>185</a>/// #[deny_all]
 <a href=#186 id=186 data-nosnippet>186</a>/// #[get("/disabled")]
@@ -207,7 +207,7 @@
 <a href=#207 id=207 data-nosnippet>207</a>/// # Usage
 <a href=#208 id=208 data-nosnippet>208</a>/// ```ignore
 <a href=#209 id=209 data-nosnippet>209</a>/// use actix_security_codegen::roles_allowed;
-<a href=#210 id=210 data-nosnippet>210</a>/// use actix_security_core::http::security::AuthenticatedUser;
+<a href=#210 id=210 data-nosnippet>210</a>/// use actix_security::http::security::AuthenticatedUser;
 <a href=#211 id=211 data-nosnippet>211</a>///
 <a href=#212 id=212 data-nosnippet>212</a>/// #[roles_allowed("ADMIN")]
 <a href=#213 id=213 data-nosnippet>213</a>/// #[get("/admin")]

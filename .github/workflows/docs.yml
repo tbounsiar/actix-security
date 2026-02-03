@@ -56,7 +56,8 @@ jobs:
             echo "version=$VERSION" >> $GITHUB_OUTPUT
             echo "is_release=true" >> $GITHUB_OUTPUT
           else
-            echo "version=latest" >> $GITHUB_OUTPUT
+            # Development version from master branch
+            echo "version=next" >> $GITHUB_OUTPUT
             echo "is_release=false" >> $GITHUB_OUTPUT
           fi
           echo "Building docs for version: $VERSION"
@@ -84,6 +85,7 @@ jobs:
       - name: Prepare versioned deployment
         run: |
           VERSION="${{ steps.version.outputs.version }}"
+          IS_RELEASE="${{ steps.version.outputs.is_release }}"
 
           # Create gh-pages directory if it doesn't exist
           mkdir -p gh-pages
@@ -92,14 +94,9 @@ jobs:
           rm -rf "gh-pages/$VERSION"
           cp -r docs/book "gh-pages/$VERSION"
 
-          # If this is latest, also update the symlink target
-          if [ "$VERSION" = "latest" ]; then
-            echo "Updating latest documentation"
-          fi
-
-          # Generate versions.json
+          # Generate versions.json (include next and all semver versions)
           cd gh-pages
-          VERSIONS=$(ls -d */ 2>/dev/null | grep -E '^[0-9]+\.[0-9]+/$|^latest/$' | sed 's/\///' | sort -rV)
+          VERSIONS=$(ls -d */ 2>/dev/null | grep -E '^[0-9]+\.[0-9]+/$|^next/$' | sed 's/\///' | sort -rV)
           echo "[" > versions.json
           FIRST=true
           for v in $VERSIONS; do
@@ -113,18 +110,34 @@ jobs:
           echo "]" >> versions.json
           cat versions.json
 
-          # Create root index.html that redirects to latest
-          cat > index.html << 'EOF'
+          # Determine the latest stable version (highest semver, excluding "next")
+          LATEST_STABLE=$(ls -d */ 2>/dev/null | grep -E '^[0-9]+\.[0-9]+/$' | sed 's/\///' | sort -rV | head -n1)
+
+          # If this is a release, update the root redirect to point to this version
+          # Otherwise, only create/update root index.html if it doesn't exist or if there's a new stable version
+          if [ "$IS_RELEASE" = "true" ]; then
+            REDIRECT_TARGET="$VERSION"
+            echo "Release build: redirecting to $REDIRECT_TARGET"
+          elif [ -n "$LATEST_STABLE" ]; then
+            REDIRECT_TARGET="$LATEST_STABLE"
+            echo "Development build: redirecting to latest stable $REDIRECT_TARGET"
+          else
+            REDIRECT_TARGET="next"
+            echo "No stable release yet: redirecting to next"
+          fi
+
+          # Create root index.html that redirects to the appropriate version
+          cat > index.html << EOF
           <!DOCTYPE html>
           <html>
           <head>
             <meta charset="utf-8">
             <title>Actix Security Documentation</title>
-            <meta http-equiv="refresh" content="0; url=latest/">
-            <link rel="canonical" href="latest/">
+            <meta http-equiv="refresh" content="0; url=$REDIRECT_TARGET/">
+            <link rel="canonical" href="$REDIRECT_TARGET/">
           </head>
           <body>
-            <p>Redirecting to <a href="latest/">latest documentation</a>...</p>
+            <p>Redirecting to <a href="$REDIRECT_TARGET/">$REDIRECT_TARGET documentation</a>...</p>
           </body>
           </html>
           EOF

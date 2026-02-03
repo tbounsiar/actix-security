@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["assert_forbidden","assert_ok","assert_redirect","assert_status","assert_unauthorized"]};

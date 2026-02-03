@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["authenticator","authorizer","can_access_resource","can_create_order","can_search_premium","is_tenant_admin","main"],"struct":["CreateOrderRequest","SearchQuery","create_bulk_orders","create_order","get_resource","get_tenant","get_tenant_settings","search_products"]};

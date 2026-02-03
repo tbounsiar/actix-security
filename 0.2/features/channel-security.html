@@ -1,0 +1,406 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Channel Security - Actix Security</title>
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="Spring Security-inspired authentication and authorization for Actix Web">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="../theme/pagetoc.css">
+
+    </head>
+    <body class="sidebar-visible no-js">
+    <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "ayu" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('light')
+            html.classList.add(theme);
+            var body = document.querySelector('body');
+            body.classList.remove('no-js')
+            body.classList.add('js');
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var body = document.querySelector('body');
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            body.classList.remove('sidebar-visible');
+            body.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item affix "><a href="../introduction.html">Introduction</a></li><li class="chapter-item affix "><li class="part-title">Getting Started</li><li class="chapter-item "><a href="../getting-started/quick-start.html"><strong aria-hidden="true">1.</strong> Quick Start</a></li><li class="chapter-item "><a href="../getting-started/installation.html"><strong aria-hidden="true">2.</strong> Installation</a></li><li class="chapter-item "><a href="../getting-started/first-app.html"><strong aria-hidden="true">3.</strong> Your First Secured App</a></li><li class="chapter-item affix "><li class="part-title">Core Concepts</li><li class="chapter-item "><a href="../authentication/index.html"><strong aria-hidden="true">4.</strong> Authentication</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../authentication/memory.html"><strong aria-hidden="true">4.1.</strong> In-Memory Authentication</a></li><li class="chapter-item "><a href="../authentication/password-encoding.html"><strong aria-hidden="true">4.2.</strong> Password Encoding</a></li><li class="chapter-item "><a href="../authentication/http-basic.html"><strong aria-hidden="true">4.3.</strong> HTTP Basic</a></li><li class="chapter-item "><a href="../authentication/jwt.html"><strong aria-hidden="true">4.4.</strong> JWT Authentication</a></li><li class="chapter-item "><a href="../authentication/session-auth.html"><strong aria-hidden="true">4.5.</strong> Session Authentication</a></li><li class="chapter-item "><a href="../authentication/oauth2.html"><strong aria-hidden="true">4.6.</strong> OAuth2 / OIDC</a></li><li class="chapter-item "><a href="../authentication/custom.html"><strong aria-hidden="true">4.7.</strong> Custom Authenticators</a></li></ol></li><li class="chapter-item "><a href="../authorization/index.html"><strong aria-hidden="true">5.</strong> Authorization</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../authorization/url-based.html"><strong aria-hidden="true">5.1.</strong> URL-Based Authorization</a></li><li class="chapter-item "><a href="../authorization/method-security.html"><strong aria-hidden="true">5.2.</strong> Method Security</a></li><li class="chapter-item "><a href="../authorization/roles-authorities.html"><strong aria-hidden="true">5.3.</strong> Roles vs Authorities</a></li><li class="chapter-item "><a href="../authorization/custom.html"><strong aria-hidden="true">5.4.</strong> Custom Authorizers</a></li></ol></li><li class="chapter-item "><li class="part-title">Macros & Annotations</li><li class="chapter-item "><a href="../macros/index.html"><strong aria-hidden="true">6.</strong> Overview</a></li><li class="chapter-item "><a href="../macros/secured.html"><strong aria-hidden="true">7.</strong> @secured</a></li><li class="chapter-item "><a href="../macros/pre-authorize.html"><strong aria-hidden="true">8.</strong> @pre_authorize</a></li><li class="chapter-item "><a href="../macros/permit-all.html"><strong aria-hidden="true">9.</strong> @permit_all</a></li><li class="chapter-item "><a href="../macros/deny-all.html"><strong aria-hidden="true">10.</strong> @deny_all</a></li><li class="chapter-item "><a href="../macros/roles-allowed.html"><strong aria-hidden="true">11.</strong> @roles_allowed</a></li><li class="chapter-item affix "><li class="part-title">Security Expressions</li><li class="chapter-item "><a href="../expressions/index.html"><strong aria-hidden="true">12.</strong> Expression Language</a></li><li class="chapter-item "><a href="../expressions/builtin.html"><strong aria-hidden="true">13.</strong> Built-in Functions</a></li><li class="chapter-item "><a href="../expressions/custom.html"><strong aria-hidden="true">14.</strong> Custom Expressions</a></li><li class="chapter-item affix "><li class="part-title">Additional Features</li><li class="chapter-item "><a href="../features/security-headers.html"><strong aria-hidden="true">15.</strong> Security Headers</a></li><li class="chapter-item "><a href="../features/security-context.html"><strong aria-hidden="true">16.</strong> Security Context</a></li><li class="chapter-item "><a href="../features/csrf-protection.html"><strong aria-hidden="true">17.</strong> CSRF Protection</a></li><li class="chapter-item "><a href="../features/rate-limiting.html"><strong aria-hidden="true">18.</strong> Rate Limiting</a></li><li class="chapter-item "><a href="../features/account-locking.html"><strong aria-hidden="true">19.</strong> Account Locking</a></li><li class="chapter-item "><a href="../features/audit-logging.html"><strong aria-hidden="true">20.</strong> Audit Logging</a></li><li class="chapter-item "><a href="../features/remember-me.html"><strong aria-hidden="true">21.</strong> Remember-Me</a></li><li class="chapter-item expanded "><a href="../features/channel-security.html" class="active"><strong aria-hidden="true">22.</strong> Channel Security</a></li><li class="chapter-item "><a href="../features/ldap.html"><strong aria-hidden="true">23.</strong> LDAP Authentication</a></li><li class="chapter-item "><a href="../features/saml.html"><strong aria-hidden="true">24.</strong> SAML 2.0 Authentication</a></li><li class="chapter-item affix "><li class="part-title">Advanced Topics</li><li class="chapter-item "><a href="../advanced/architecture.html"><strong aria-hidden="true">25.</strong> Architecture</a></li><li class="chapter-item "><a href="../advanced/extending.html"><strong aria-hidden="true">26.</strong> Extending the Framework</a></li><li class="chapter-item "><a href="../advanced/testing.html"><strong aria-hidden="true">27.</strong> Testing</a></li><li class="chapter-item affix "><li class="part-title">Reference</li><li class="chapter-item "><a href="../reference/api.html"><strong aria-hidden="true">28.</strong> API Documentation</a></li><li class="chapter-item "><a href="../reference/spring-comparison.html"><strong aria-hidden="true">29.</strong> Spring Security Comparison</a></li><li class="chapter-item "><a href="../reference/migration.html"><strong aria-hidden="true">30.</strong> Migration Guide</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <!-- Track and set sidebar scroll position -->
+        <script>
+            var sidebarScrollbox = document.querySelector('#sidebar .sidebar-scrollbox');
+            sidebarScrollbox.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    sessionStorage.setItem('sidebar-scroll', sidebarScrollbox.scrollTop);
+                }
+            }, { passive: true });
+            var sidebarScrollTop = sessionStorage.getItem('sidebar-scroll');
+            sessionStorage.removeItem('sidebar-scroll');
+            if (sidebarScrollTop) {
+                // preserve sidebar scroll position when navigating via links within sidebar
+                sidebarScrollbox.scrollTop = sidebarScrollTop;
+            } else {
+                // scroll sidebar to current active section when navigating via "next/previous chapter" buttons
+                var activeSection = document.querySelector('#sidebar .active');
+                if (activeSection) {
+                    activeSection.scrollIntoView({ block: 'center' });
+                }
+            }
+        </script>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Actix Security</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/tbounsiar/actix-security" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+                        <a href="https://github.com/tbounsiar/actix-security/edit/main/docs/src/features/channel-security.md" title="Suggest an edit" aria-label="Suggest an edit">
+                            <i id="git-edit-button" class="fa fa-edit"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="channel-security"><a class="header" href="#channel-security">Channel Security</a></h1>
+<p>Channel security ensures that certain URLs are only accessible over secure (HTTPS) connections, automatically redirecting HTTP requests to HTTPS when needed.</p>
+<h2 id="basic-usage"><a class="header" href="#basic-usage">Basic Usage</a></h2>
+<p>Channel security is always available (no feature flag needed):</p>
+<pre><code class="language-rust">use actix_security::http::security::{ChannelSecurity, ChannelSecurityConfig};
+use actix_web::{App, HttpServer};
+
+#[actix_web::main]
+async fn main() -&gt; std::io::Result&lt;()&gt; {
+    let channel_security = ChannelSecurity::new(
+        ChannelSecurityConfig::new()
+            .require_secure("/login")
+            .require_secure("/admin/**")
+            .require_secure("/api/payments/**")
+    );
+
+    HttpServer::new(move || {
+        App::new()
+            .wrap(channel_security.clone())
+            // ... routes
+    })
+    .bind("127.0.0.1:8080")?
+    .run()
+    .await
+}</code></pre>
+<h2 id="configuration-options"><a class="header" href="#configuration-options">Configuration Options</a></h2>
+<pre><code class="language-rust">ChannelSecurityConfig::new()
+    // Require HTTPS for specific paths (supports ant-style patterns)
+    .require_secure("/login")
+    .require_secure("/admin/**")
+    .require_secure("/api/*/sensitive")
+
+    // Require HTTP for specific paths (optional, for debugging)
+    .require_insecure("/health")
+    .require_insecure("/metrics")
+
+    // Allow both HTTP and HTTPS
+    .any_channel("/public/**")
+
+    // Configure port mapping for redirects
+    .port_mapper(PortMapper::new()
+        .map(80, 443)
+        .map(8080, 8443))
+
+    // Redirect status code (default: 302)
+    .redirect_status(StatusCode::MOVED_PERMANENTLY)  // 301</code></pre>
+<h2 id="channel-requirements"><a class="header" href="#channel-requirements">Channel Requirements</a></h2>
+<p>Three types of channel requirements:</p>
+<pre><code class="language-rust">use actix_security::http::security::ChannelRequirement;
+
+// Require HTTPS
+ChannelRequirement::Secure
+
+// Require HTTP (rarely used)
+ChannelRequirement::Insecure
+
+// Allow both
+ChannelRequirement::Any</code></pre>
+<h2 id="https-for-all-routes"><a class="header" href="#https-for-all-routes">HTTPS for All Routes</a></h2>
+<p>To require HTTPS for the entire application:</p>
+<pre><code class="language-rust">let channel_security = ChannelSecurity::new(
+    ChannelSecurityConfig::new()
+        .require_secure("/**")
+        .except("/health")  // Except health checks
+);</code></pre>
+<h2 id="port-mapping"><a class="header" href="#port-mapping">Port Mapping</a></h2>
+<p>Configure port mapping for proper redirects:</p>
+<pre><code class="language-rust">use actix_security::http::security::PortMapper;
+
+// Standard ports
+let mapper = PortMapper::default();  // 80 -&gt; 443
+
+// Custom ports (e.g., development)
+let mapper = PortMapper::new()
+    .map(8080, 8443)
+    .map(3000, 3443);
+
+ChannelSecurityConfig::new()
+    .port_mapper(mapper)</code></pre>
+<h2 id="behind-a-reverse-proxy"><a class="header" href="#behind-a-reverse-proxy">Behind a Reverse Proxy</a></h2>
+<p>When behind a reverse proxy (nginx, load balancer), use the <code>X-Forwarded-Proto</code> header:</p>
+<pre><code class="language-rust">ChannelSecurityConfig::new()
+    .trust_proxy_headers(true)  // Trust X-Forwarded-Proto
+    .require_secure("/api/**")</code></pre>
+<p>This checks the <code>X-Forwarded-Proto</code> header instead of the actual connection protocol.</p>
+<h2 id="redirect-behavior"><a class="header" href="#redirect-behavior">Redirect Behavior</a></h2>
+<p>When an HTTP request is made to a secure-only path:</p>
+<ol>
+<li>The middleware intercepts the request</li>
+<li>Constructs an HTTPS URL with the same path and query string</li>
+<li>Returns a redirect response (302 by default)</li>
+</ol>
+<p>Example:</p>
+<ul>
+<li>Request: <code>http://example.com/login?next=/dashboard</code></li>
+<li>Redirect: <code>https://example.com/login?next=/dashboard</code></li>
+</ul>
+<h2 id="conditional-channel-security"><a class="header" href="#conditional-channel-security">Conditional Channel Security</a></h2>
+<p>Apply channel security based on environment:</p>
+<pre><code class="language-rust">let config = if std::env::var("PRODUCTION").is_ok() {
+    ChannelSecurityConfig::new()
+        .require_secure("/**")
+} else {
+    // Development: no HTTPS requirement
+    ChannelSecurityConfig::new()
+        .any_channel("/**")
+};</code></pre>
+<h2 id="combining-with-security-headers"><a class="header" href="#combining-with-security-headers">Combining with Security Headers</a></h2>
+<p>Often used together with HSTS:</p>
+<pre><code class="language-rust">use actix_security::http::security::{ChannelSecurity, SecurityHeaders};
+
+App::new()
+    .wrap(channel_security)
+    .wrap(SecurityHeaders::default())  // Includes HSTS</code></pre>
+<h2 id="error-responses"><a class="header" href="#error-responses">Error Responses</a></h2>
+<p>When redirect is not possible (e.g., POST request):</p>
+<pre><code class="language-rust">ChannelSecurityConfig::new()
+    .require_secure("/api/**")
+    .on_insecure_request(|req| {
+        // Return 403 instead of redirect for API calls
+        HttpResponse::Forbidden()
+            .body("HTTPS required for API access")
+    })</code></pre>
+<h2 id="spring-security-comparison"><a class="header" href="#spring-security-comparison">Spring Security Comparison</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Spring Security</th><th>Actix Security</th></tr></thead><tbody>
+<tr><td><code>requiresChannel()</code></td><td><code>ChannelSecurityConfig</code></td></tr>
+<tr><td><code>.requiresSecure()</code></td><td><code>.require_secure()</code></td></tr>
+<tr><td><code>.requiresInsecure()</code></td><td><code>.require_insecure()</code></td></tr>
+<tr><td><code>.anyRequest().requiresSecure()</code></td><td><code>.require_secure("/**")</code></td></tr>
+<tr><td><code>PortMapper</code></td><td><code>PortMapper</code></td></tr>
+<tr><td><code>ChannelDecisionManager</code></td><td><code>ChannelSecurity</code> middleware</td></tr>
+</tbody></table>
+</div>
+<h2 id="example-e-commerce-security"><a class="header" href="#example-e-commerce-security">Example: E-Commerce Security</a></h2>
+<pre><code class="language-rust">ChannelSecurityConfig::new()
+    // All authentication must be secure
+    .require_secure("/login")
+    .require_secure("/register")
+    .require_secure("/forgot-password")
+
+    // All account pages must be secure
+    .require_secure("/account/**")
+
+    // All payment processing must be secure
+    .require_secure("/checkout/**")
+    .require_secure("/api/payments/**")
+
+    // Admin area must be secure
+    .require_secure("/admin/**")
+
+    // Public pages can use either
+    .any_channel("/products/**")
+    .any_channel("/search")</code></pre>
+<h2 id="best-practices"><a class="header" href="#best-practices">Best Practices</a></h2>
+<ol>
+<li><strong>Production</strong>: Require HTTPS for all routes (<code>/**</code>)</li>
+<li><strong>Sensitive Data</strong>: Always require HTTPS for login, payments, personal data</li>
+<li><strong>HSTS</strong>: Combine with HSTS header for additional security</li>
+<li><strong>Monitoring</strong>: Exclude health check endpoints from HTTPS requirement</li>
+<li><strong>API</strong>: Return 403 instead of redirect for API endpoints</li>
+<li><strong>Development</strong>: Use self-signed certificates or disable in development only</li>
+</ol>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../features/remember-me.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../features/ldap.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../features/remember-me.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../features/ldap.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+        <script>
+            window.playground_line_numbers = true;
+        </script>
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+        <script src="../ace.js"></script>
+        <script src="../editor.js"></script>
+        <script src="../mode-rust.js"></script>
+        <script src="../theme-dawn.js"></script>
+        <script src="../theme-tomorrow_night.js"></script>
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+        <script src="../theme/pagetoc.js"></script>
+        <script src="../theme/version-selector.js"></script>
+
+
+    </div>
+    </body>
+</html>

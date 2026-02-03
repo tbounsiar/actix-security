@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["base64_url_decode","extract_roles_from_token","main","uuid_simple"],"struct":["AppConfig","AppState","CallbackQuery","SessionUser","TokenResponse","UserInfoResponse","callback","index","login","logout"]};

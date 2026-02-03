@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["main"],"struct":["AppState","LoginForm","index","login_error","login_page","login_submit","logout"]};

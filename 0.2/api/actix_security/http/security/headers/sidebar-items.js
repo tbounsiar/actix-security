@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["FrameOptions","ReferrerPolicy"],"struct":["SecurityHeaders","SecurityHeadersMiddleware"]};

@@ -62,7 +62,8 @@ use actix_web::{get, post, App, HttpServer, HttpResponse, Responder};
 use actix_security::{secured, pre_authorize};
 use actix_security::http::security::{
     AuthenticatedUser, AuthenticationManager, AuthorizationManager,
-    Argon2PasswordEncoder, PasswordEncoder, User,
+    Argon2PasswordEncoder, MemoryAuthenticator, PasswordEncoder,
+    RequestMatcherAuthorizer, User,
 };
 use actix_security::http::security::middleware::SecurityTransform;
 
@@ -78,28 +79,30 @@ async fn create_post(user: AuthenticatedUser) -> impl Responder {
     HttpResponse::Created().body("Post created")
 }
 
+fn authenticator() -> MemoryAuthenticator {
+    let encoder = Argon2PasswordEncoder::new();
+    AuthenticationManager::in_memory_authentication()
+        .password_encoder(encoder.clone())
+        .with_user(
+            User::with_encoded_password("admin", encoder.encode("admin"))
+                .roles(&["ADMIN".into(), "USER".into()])
+                .authorities(&["posts:write".into()])
+        )
+}
+
+fn authorizer() -> RequestMatcherAuthorizer {
+    AuthorizationManager::request_matcher()
+        .http_basic()
+}
+
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    let encoder = Argon2PasswordEncoder::new();
-
-    HttpServer::new(move || {
-        let enc = encoder.clone();
+    HttpServer::new(|| {
         App::new()
             .wrap(
                 SecurityTransform::new()
-                    .config_authenticator(move || {
-                        AuthenticationManager::in_memory_authentication()
-                            .password_encoder(enc.clone())
-                            .with_user(
-                                User::with_encoded_password("admin", enc.encode("admin"))
-                                    .roles(&["ADMIN".into(), "USER".into()])
-                                    .authorities(&["posts:write".into()])
-                            )
-                    })
-                    .config_authorizer(|| {
-                        AuthorizationManager::request_matcher()
-                            .http_basic()
-                    })
+                    .config_authenticator(authenticator)
+                    .config_authorizer(authorizer)
             )
             .service(admin)
             .service(create_post)

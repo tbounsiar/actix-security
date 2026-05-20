@@ -68,9 +68,7 @@ full = ["argon2", "bcrypt", "http-basic", "jwt", "session", "form-login", "csrf"
 actix-web = "4"
 actix-service = "2"
 
-# Pin time crate to support MSRV 1.85
-# time >= 0.3.46 requires rustc 1.88.0
-time = ">=0.3, <0.3.46"
+time = "0.3"
 
 # Async
 futures-util = "0.3"

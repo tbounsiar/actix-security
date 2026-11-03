@@ -1,8 +1,5 @@
 /target
 Cargo.lock
 .idea
-.claude
 .vscode
-.mcp.json
 docs/book
-CLAUDE.md

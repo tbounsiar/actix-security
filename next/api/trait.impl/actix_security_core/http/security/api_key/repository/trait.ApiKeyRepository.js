@@ -1,9 +1,9 @@
 (function() {
-    var implementors = Object.fromEntries([["actix_security",[]],["actix_security_core",[]]]);
+    const implementors = Object.fromEntries([["actix_security",[]],["actix_security_core",[]]]);
     if (window.register_implementors) {
         window.register_implementors(implementors);
     } else {
         window.pending_implementors = implementors;
     }
 })()
-//{"start":57,"fragment_lengths":[21,27]}
+//{"start":59,"fragment_lengths":[21,27]}

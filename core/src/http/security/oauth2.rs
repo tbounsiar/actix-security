@@ -244,6 +244,7 @@ pub struct OAuth2Config {
     pub userinfo_uri: Option<String>,
     /// OIDC issuer URL (for discovery)
     pub issuer_uri: Option<String>,
+    pub public_issuer_uri: Option<String>,
     /// JWK Set URI (for ID token validation)
     pub jwk_set_uri: Option<String>,
     /// OAuth2 scopes
@@ -279,6 +280,7 @@ impl OAuth2Config {
             token_uri: None,
             userinfo_uri: None,
             issuer_uri: None,
+            public_issuer_uri: None,
             jwk_set_uri: None,
             scopes: vec!["openid".to_string()],
             use_pkce: true,
@@ -351,6 +353,12 @@ impl OAuth2Config {
     /// Set the OIDC issuer URL for auto-discovery
     pub fn issuer_uri(mut self, uri: impl Into<String>) -> Self {
         self.issuer_uri = Some(uri.into());
+        self
+    }
+
+    /// Set the OIDC issuer URL for auto-discovery
+    pub fn public_issuer_uri(mut self, uri: impl Into<String>) -> Self {
+        self.public_issuer_uri = Some(uri.into());
         self
     }
 
@@ -565,7 +573,8 @@ impl OAuth2Client {
         // For OIDC providers, try to create an OIDC client
         let oidc_client = if config.provider.supports_oidc() {
             if let Some(issuer_uri) = &config.issuer_uri {
-                match Self::create_oidc_client(&config, issuer_uri).await {
+                let public_issuer_uri = config.public_issuer_uri.as_ref().unwrap_or(issuer_uri);
+                match Self::create_oidc_client(&config, issuer_uri, public_issuer_uri).await {
                     Ok(client) => Some(Arc::new(client)),
                     Err(e) => {
                         // Log warning but continue without OIDC
@@ -576,7 +585,7 @@ impl OAuth2Client {
             } else if let Some(discovery_url) = config.provider.discovery_url() {
                 // Extract issuer from discovery URL
                 let issuer = discovery_url.trim_end_matches("/.well-known/openid-configuration");
-                match Self::create_oidc_client(&config, issuer).await {
+                match Self::create_oidc_client(&config, issuer, issuer).await {
                     Ok(client) => Some(Arc::new(client)),
                     Err(e) => {
                         eprintln!("Warning: OIDC discovery failed: {}", e);
@@ -637,8 +646,11 @@ impl OAuth2Client {
     async fn create_oidc_client(
         config: &OAuth2Config,
         issuer_uri: &str,
+        public_issuer_uri: &str,
     ) -> Result<CoreClient, OAuth2Error> {
         let issuer_url = IssuerUrl::new(issuer_uri.to_string())
+            .map_err(|e| OAuth2Error::Configuration(e.to_string()))?;
+        let public_issuer_url = IssuerUrl::new(public_issuer_uri.to_string())
             .map_err(|e| OAuth2Error::Configuration(e.to_string()))?;
 
         // Discover provider metadata using openidconnect's async http client
@@ -647,8 +659,9 @@ impl OAuth2Client {
             openidconnect::reqwest::async_http_client,
         )
         .await
-        .map_err(|e| OAuth2Error::Discovery(format!("{:?}", e)))?;
-
+        .map_err(|e| OAuth2Error::Discovery(format!("{:?}", e)))?
+        .set_issuer(public_issuer_url);
+        
         // Build OIDC client
         let client = CoreClient::from_provider_metadata(
             provider_metadata,
